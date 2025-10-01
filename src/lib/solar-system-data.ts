@@ -8,7 +8,7 @@ export type MeteorData = {
 export type CelestialObject = {
   id: string;
   name: string;
-  type: 'star' | 'planet';
+  type: 'star' | 'planet' | 'asteroid-belt';
   size: number; // radius in arbitrary units
   distance: number; // distance from sun in arbitrary units
   color: string; // hex color
@@ -71,6 +71,28 @@ export const initialSolarSystemData: CelestialObject[] = [
     color: '#FF4500',
     orbitalSpeed: 0.8,
     rotationSpeed: 0.45,
+    meteors: [],
+  },
+  {
+    id: 'asteroid-belt',
+    name: 'Asteroid Belt',
+    type: 'asteroid-belt',
+    size: 0.1, 
+    distance: 220, // Average distance
+    color: '#FFFFFF',
+    orbitalSpeed: 0.5,
+    rotationSpeed: 0,
+    meteors: [], 
+  },
+  {
+    id: 'jupiter',
+    name: 'Jupiter',
+    type: 'planet',
+    size: 10,
+    distance: 320,
+    color: '#D2B48C',
+    orbitalSpeed: 0.4,
+    rotationSpeed: 0.8,
     meteors: [],
   },
 ];
