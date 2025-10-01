@@ -95,7 +95,7 @@ const createAsteroidBelt = (scene: THREE.Scene) => {
 
 // Function to create the stardust background
 const createStardust = (scene: THREE.Scene) => {
-  const starCount = 20000;
+  const starCount = 5000;
   const particles = new THREE.BufferGeometry();
   const positions = new Float32Array(starCount * 3);
 
