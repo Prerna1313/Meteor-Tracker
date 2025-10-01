@@ -279,7 +279,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
             }
             
             if (rotationSpeed > 0) {
-              obj.rotation.y += rotationSpeed / 50;
+              planetBody.rotation.y += rotationSpeed / 50;
             }
         }
         
@@ -423,10 +423,10 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         const eccentricity = objData.eccentricity ?? 0;
         const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
         const ellipse = new THREE.EllipseCurve(
-            0, 0,
-            semiMajorAxis, semiMinorAxis,
-            0, 2 * Math.PI,
-            false, 0
+            -eccentricity * semiMajorAxis, 0, // ax, aY
+            semiMajorAxis, semiMinorAxis,     // xRadius, yRadius
+            0, 2 * Math.PI,                   // aStartAngle, aEndAngle
+            false, 0                          // aClockwise, aRotation
         );
 
         const points = ellipse.getPoints(200);
@@ -438,7 +438,6 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         });
         const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
         orbit.rotation.x = Math.PI / 2;
-        orbit.position.x = - eccentricity * semiMajorAxis; // Center the ellipse
         
         const orbitGroup = new THREE.Group();
         orbitGroup.add(orbit);
@@ -548,3 +547,5 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     </div>
   );
 }
+
+    
