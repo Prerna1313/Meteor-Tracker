@@ -524,5 +524,3 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     </div>
   );
 }
-
-    
