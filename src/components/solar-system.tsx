@@ -86,17 +86,18 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     const animate = () => {
       if (!rendererRef.current) return; // Stop animation if cleaned up
       requestAnimationFrame(animate);
-      const delta = clock.getDelta();
+      const elapsedTime = clock.getElapsedTime();
 
       scene.children.forEach(obj => {
-        if (obj.userData.type === 'planet-system') {
-          obj.rotation.y += (obj.userData.orbitalSpeed / 100) * delta;
-          const planet = obj.children.find(c => c.userData.type === 'planet');
-          if (planet) {
-            planet.rotation.y += (planet.userData.rotationSpeed) * delta;
-          }
-        } else if (obj.userData.type === 'star') {
-             obj.rotation.y += (obj.userData.rotationSpeed) * delta;
+        if (obj instanceof THREE.Mesh) {
+            if (obj.userData.type === 'planet') {
+                const angle = elapsedTime * (obj.userData.orbitalSpeed / 20);
+                obj.position.x = Math.cos(angle) * obj.userData.distance;
+                obj.position.z = Math.sin(angle) * obj.userData.distance;
+                obj.rotation.y += obj.userData.rotationSpeed / 20;
+            } else if (obj.userData.type === 'star') {
+                obj.rotation.y += (obj.userData.rotationSpeed / 20);
+            }
         }
       });
       
@@ -112,12 +113,16 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       controlsRef.current?.dispose();
       if (rendererRef.current) {
         rendererRef.current.domElement.removeEventListener('click', handleClick);
-        mountRef.current?.removeChild(rendererRef.current.domElement);
+        if (mountRef.current && rendererRef.current.domElement) {
+          mountRef.current.removeChild(rendererRef.current.domElement);
+        }
         rendererRef.current.dispose();
         rendererRef.current = null;
       }
        if (labelRendererRef.current) {
-        mountRef.current?.removeChild(labelRendererRef.current.domElement);
+        if (mountRef.current && labelRendererRef.current.domElement){
+           mountRef.current.removeChild(labelRendererRef.current.domElement);
+        }
         labelRendererRef.current = null;
       }
       scene.traverse(object => {
@@ -144,29 +149,35 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
     objectsToRemove.forEach(child => {
         scene.remove(child);
-        // If the child has its own children (like labels), we need to handle them too
-        if (child instanceof THREE.Group || child instanceof THREE.Mesh) {
-            child.traverse(object => {
-                if (object instanceof CSS2DObject) {
-                    object.removeFromParent();
-                }
-            });
+        // Clean up geometries, materials, and labels
+        if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
+            child.geometry?.dispose();
+            if (Array.isArray(child.material)) {
+                child.material.forEach(m => m.dispose());
+            } else if(child.material) {
+                child.material.dispose();
+            }
         }
+        child.traverse(object => {
+            if (object instanceof CSS2DObject) {
+                object.removeFromParent();
+            }
+        });
     });
     
     clickableObjectsRef.current = [];
-    if(lights.length === 0) scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+    if(lights.length === 0) scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
     data.forEach(objData => {
       if (objData.type === 'star') {
         const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ color: objData.color, wireframe: true });
+        const material = new THREE.MeshBasicMaterial({ color: objData.color });
         const star = new THREE.Mesh(geometry, material);
         star.userData = { id: objData.id, type: 'star', rotationSpeed: objData.rotationSpeed, originalColor: objData.color };
         scene.add(star);
         clickableObjectsRef.current.push(star);
         
-        const pointLight = new THREE.PointLight(0xFFFFFF, 3, 2000);
+        const pointLight = new THREE.PointLight(0xFFFFFF, 3, 3000);
         star.add(pointLight);
 
         const labelDiv = document.createElement('div');
@@ -177,16 +188,12 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         star.add(label);
 
       } else if (objData.type === 'planet') {
-        const planetSystem = new THREE.Group();
-        planetSystem.userData = { id: `${objData.id}-system`, type: 'planet-system', orbitalSpeed: objData.orbitalSpeed };
-        scene.add(planetSystem);
-
         const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
         const material = new THREE.MeshStandardMaterial({ color: objData.color, roughness: 0.8 });
         const planet = new THREE.Mesh(geometry, material);
-        planet.position.x = objData.distance;
-        planet.userData = { id: objData.id, type: 'planet', rotationSpeed: objData.rotationSpeed, originalColor: objData.color };
-        planetSystem.add(planet);
+        
+        planet.userData = { ...objData, originalColor: objData.color };
+        scene.add(planet);
         clickableObjectsRef.current.push(planet);
 
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(
@@ -195,7 +202,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         const orbitMaterial = new THREE.LineBasicMaterial({ color: 0xEEEEEE, transparent: true, opacity: 0.2 });
         const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
         orbit.rotation.x = Math.PI / 2;
-        planetSystem.add(orbit);
+        scene.add(orbit); // Add orbit directly to the scene
 
         const labelDiv = document.createElement('div');
         labelDiv.className = 'text-foreground p-1 rounded-md bg-background/30 text-xs whitespace-nowrap';
@@ -234,15 +241,9 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       const isSelected = obj.userData.id === selectedObjectId;
       if (obj.material instanceof THREE.MeshStandardMaterial || obj.material instanceof THREE.MeshBasicMaterial) {
          if (isSelected) {
-            obj.material.color.set(0x7DF9FF);
-            if (obj.material instanceof THREE.MeshBasicMaterial) {
-                obj.material.wireframe = false;
-            }
+            obj.material.color.set(0x7DF9FF); // accent color
          } else {
             obj.material.color.set(obj.userData.originalColor);
-            if (obj.material instanceof THREE.MeshBasicMaterial && obj.userData.type === 'star') {
-                obj.material.wireframe = true;
-            }
          }
       }
     });
