@@ -45,33 +45,30 @@ export default function Home() {
     return solarSystemData.find(obj => obj.id === selectedObjectId) || null;
   }, [selectedObjectId, solarSystemData]);
 
-  if (!isMounted) {
-    return (
-      <main className="relative w-screen h-screen overflow-hidden bg-background">
-        <Header />
-        <div className="w-full h-full flex items-center justify-center">
-          <Skeleton className="w-full h-full" />
-        </div>
-      </main>
-    )
-  }
-
   return (
     <main className="relative w-screen h-screen overflow-hidden bg-background">
       <Header />
-      <div className="w-full h-full">
-        <SolarSystem
-          data={solarSystemData}
-          onSelectObject={handleSelectObject}
-          selectedObjectId={selectedObjectId}
-        />
-      </div>
-      <InfoPanel
-        isOpen={isPanelOpen}
-        onOpenChange={setIsPanelOpen}
-        selectedObject={selectedObject}
-        onUpdateMeteors={handleUpdateMeteors}
-      />
+      {isMounted ? (
+        <>
+          <div className="w-full h-full">
+            <SolarSystem
+              data={solarSystemData}
+              onSelectObject={handleSelectObject}
+              selectedObjectId={selectedObjectId}
+            />
+          </div>
+          <InfoPanel
+            isOpen={isPanelOpen}
+            onOpenChange={setIsPanelOpen}
+            selectedObject={selectedObject}
+            onUpdateMeteors={handleUpdateMeteors}
+          />
+        </>
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          <Skeleton className="w-full h-full" />
+        </div>
+      )}
     </main>
   );
 }
