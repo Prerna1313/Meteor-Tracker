@@ -93,15 +93,15 @@ const createAsteroidBelt = (scene: THREE.Scene, asteroids: any[]) => {
   
   const innerRadius = 180;
   const outerRadius = 260;
-  const hazardousColor = new THREE.Color(0xff4500);
-  const normalColor = new THREE.Color(0x666666);
+  const hazardousColor = new THREE.Color(0xffaa00);
+  const normalColor = new THREE.Color(0xaaaaaa);
 
   for (let i = 0; i < asteroidCount; i++) {
     const angle = Math.random() * Math.PI * 2;
     const radius = THREE.MathUtils.randFloat(innerRadius, outerRadius);
     const x = Math.cos(angle) * radius;
     const z = Math.sin(angle) * radius;
-    const y = THREE.MathUtils.randFloat(-2, 2);
+    const y = THREE.MathUtils.randFloat(-10, 10);
 
     positions[i * 3] = x;
     positions[i * 3 + 1] = y;
