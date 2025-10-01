@@ -264,18 +264,17 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
               
               const y = Math.sin(angle) * semiMajorAxis * Math.sin(THREE.MathUtils.degToRad(inclination));
 
-              planetBody.position.set(x, y, z);
+              obj.position.set(x, y, z);
             }
             
             if (rotationSpeed > 0) {
-              planetBody.rotation.y += rotationSpeed / 50;
+              obj.rotation.y += rotationSpeed / 50;
             }
         }
         
         if (type === 'planet' || type === 'star' || type === 'comet') {
           const vector = new THREE.Vector3();
-          const bodyToTrack = planetBody || obj;
-          bodyToTrack.getWorldPosition(vector);
+          obj.getWorldPosition(vector);
           vector.project(camera);
           newLabels.push({ id: obj.userData.id, name: obj.userData.name, position: vector });
         }
@@ -387,26 +386,26 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         celestialObj = star;
       } else if (objData.type === 'planet' || objData.type === 'comet') {
         const objectGroup = new THREE.Group();
-        let planetBody: THREE.Mesh;
+        let body: THREE.Mesh;
 
         if (objData.type === 'planet') {
             const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
             const material = new THREE.MeshStandardMaterial({ color: objData.color, roughness: 0.8 });
-            planetBody = new THREE.Mesh(geometry, material);
-            planetBody.userData.isPlanetBody = true;
+            body = new THREE.Mesh(geometry, material);
+            body.userData.isPlanetBody = true;
 
             if (objData.rings) {
                 const rings = createSaturnRings(objData.rings.innerRadius, objData.rings.outerRadius);
-                planetBody.add(rings);
+                body.add(rings);
             }
         } else { // comet
             const geometry = new THREE.SphereGeometry(objData.size, 16, 16);
             const material = new THREE.MeshBasicMaterial({ color: objData.color });
-            planetBody = new THREE.Mesh(geometry, material);
-            planetBody.userData.isCometBody = true;
+            body = new THREE.Mesh(geometry, material);
+            body.userData.isCometBody = true;
         }
 
-        objectGroup.add(planetBody);
+        objectGroup.add(body);
         
         // Orbit line
         const semiMajorAxis = objData.distance;
@@ -428,9 +427,13 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         });
         const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
         orbit.rotation.x = Math.PI / 2;
-        orbit.rotation.z = THREE.MathUtils.degToRad(objData.inclination ?? 0);
+        orbit.position.x = - eccentricity * semiMajorAxis; // Center the ellipse
         
-        objectGroup.add(orbit);
+        const orbitGroup = new THREE.Group();
+        orbitGroup.add(orbit);
+        orbitGroup.rotation.z = THREE.MathUtils.degToRad(objData.inclination ?? 0);
+
+        scene.add(orbitGroup);
         celestialObj = objectGroup;
 
       } else if (objData.type === 'asteroid-belt') {
@@ -521,3 +524,5 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     </div>
   );
 }
+
+    

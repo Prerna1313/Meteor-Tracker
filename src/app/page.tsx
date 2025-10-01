@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { SolarSystem, type LabelData } from '@/components/solar-system';
+import { SolarSystem } from '@/components/solar-system';
 import { InfoPanel } from '@/components/info-panel';
 import { Header } from '@/components/header';
 import {
@@ -97,3 +97,5 @@ export default function Home() {
     </main>
   );
 }
+
+    
