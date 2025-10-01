@@ -365,3 +365,5 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
   return <div ref={mountRef} className="absolute top-0 left-0 w-full h-full" />;
 }
+
+    
