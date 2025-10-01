@@ -200,7 +200,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
     const clock = new THREE.Clock();
     const animate = () => {
-      if (!stateRef.renderer) return;
+      if (!stateRef.renderer || !stateRef.controls) return;
       requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
 
@@ -229,7 +229,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         positions.needsUpdate = true;
       }
       
-      controls.update();
+      stateRef.controls.update();
       renderer.render(scene, camera);
       labelRenderer.render(scene, camera);
     };
