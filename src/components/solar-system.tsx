@@ -145,7 +145,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
     const { scene, camera } = stateRef;
 
-    camera.position.set(0, 150, 400);
+    camera.position.set(0, 500, 800);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -165,7 +165,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.minDistance = 10;
-    controls.maxDistance = 3000;
+    controls.maxDistance = 5000;
     stateRef.controls = controls;
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
@@ -365,5 +365,3 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
   return <div ref={mountRef} className="absolute top-0 left-0 w-full h-full" />;
 }
-
-    
