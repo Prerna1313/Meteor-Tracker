@@ -93,11 +93,41 @@ const createAsteroidBelt = (scene: THREE.Scene) => {
   return asteroidBelt;
 };
 
+// Function to create the stardust background
+const createStardust = (scene: THREE.Scene) => {
+  const starCount = 20000;
+  const particles = new THREE.BufferGeometry();
+  const positions = new Float32Array(starCount * 3);
+
+  for (let i = 0; i < starCount; i++) {
+    const x = THREE.MathUtils.randFloatSpread(4000);
+    const y = THREE.MathUtils.randFloatSpread(4000);
+    const z = THREE.MathUtils.randFloatSpread(4000);
+    positions[i * 3] = x;
+    positions[i * 3 + 1] = y;
+    positions[i * 3 + 2] = z;
+  }
+
+  particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  
+  const particleMaterial = new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: 0.5,
+    transparent: true,
+    opacity: 0.8,
+  });
+
+  const stardust = new THREE.Points(particles, particleMaterial);
+  scene.add(stardust);
+  return stardust;
+};
+
+
 export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSystemProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const stateRef = useRef({
     scene: new THREE.Scene(),
-    camera: new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000),
+    camera: new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000),
     renderer: null as THREE.WebGLRenderer | null,
     labelRenderer: null as CSS2DRenderer | null,
     controls: null as OrbitControls | null,
@@ -105,6 +135,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     celestialObjects: new Map<string, THREE.Object3D>(),
     orbitLines: new Map<string, THREE.Line>(),
     asteroidBelt: null as THREE.Points | null,
+    stardust: null as THREE.Points | null,
   }).current;
   
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
@@ -133,11 +164,13 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.minDistance = 50;
-    controls.maxDistance = 1500;
+    controls.minDistance = 10;
+    controls.maxDistance = 3000;
     stateRef.controls = controls;
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+    stateRef.stardust = createStardust(scene);
+
 
     const handleClick = (event: MouseEvent) => {
         if (!mountRef.current) return;
@@ -220,7 +253,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     const { scene, celestialObjects, orbitLines, clickableObjects } = stateRef;
 
     // --- Cleanup previous objects ---
-    clickableObjects.forEach(obj => {
+    celestialObjects.forEach(obj => {
         obj.traverse(child => {
             if (child instanceof THREE.Mesh) {
                 child.geometry.dispose();
@@ -299,7 +332,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         const labelDiv = document.createElement('div');
         labelDiv.className = objData.type === 'star' 
           ? 'text-accent font-bold p-2 rounded-md bg-background/30 text-sm whitespace-nowrap' 
-          : 'text-foreground p-1 rounded-md bg-background/30 text-xs whitespace-nowrap';
+          : 'text-foreground p-1 rounded-md bg-background/30 text-xs whitespace-nowrap backdrop-blur-sm';
         labelDiv.textContent = objData.name;
         const label = new CSS2DObject(labelDiv);
         const labelOffset = objData.type === 'star' ? objData.size + 5 : objData.size + 2;
