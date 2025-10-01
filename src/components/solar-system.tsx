@@ -200,7 +200,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
     const clock = new THREE.Clock();
     const animate = () => {
-      if (!stateRef.renderer || !stateRef.controls) return;
+      if (!stateRef.renderer) return;
       requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
 
@@ -229,9 +229,9 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         positions.needsUpdate = true;
       }
       
-      stateRef.controls.update();
+      if(stateRef.controls) stateRef.controls.update();
       renderer.render(scene, camera);
-      labelRenderer.render(scene, camera);
+      if(stateRef.labelRenderer) stateRef.labelRenderer.render(scene, camera);
     };
     animate();
 
@@ -241,7 +241,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       renderer.domElement.removeEventListener('click', handleClick);
       if (mountRef.current) {
         if(renderer.domElement) mountRef.current.removeChild(renderer.domElement);
-        if(labelRenderer.domElement) mountRef.current.removeChild(labelRenderer.domElement);
+        if(stateRef.labelRenderer?.domElement) mountRef.current.removeChild(stateRef.labelRenderer.domElement);
       }
       renderer.dispose();
       stateRef.renderer = null;
@@ -365,5 +365,3 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
   return <div ref={mountRef} className="absolute top-0 left-0 w-full h-full" />;
 }
-
-    
