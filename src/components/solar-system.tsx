@@ -221,7 +221,6 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
     // --- Cleanup previous objects ---
     clickableObjects.forEach(obj => {
-        scene.remove(obj);
         obj.traverse(child => {
             if (child instanceof THREE.Mesh) {
                 child.geometry.dispose();
@@ -235,6 +234,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
                 child.element.remove();
              }
         });
+        scene.remove(obj);
     });
     celestialObjects.clear();
     stateRef.clickableObjects = [];
@@ -314,15 +314,18 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
   useEffect(() => {
     stateRef.celestialObjects.forEach((obj, id) => {
       const isSelected = id === selectedObjectId;
-       const mesh = obj as THREE.Mesh;
+      const mesh = obj as THREE.Mesh;
 
-      if (mesh && (mesh.material instanceof THREE.MeshStandardMaterial || mesh.material instanceof THREE.MeshBasicMaterial)) {
-         if (isSelected) {
-            (mesh.material as THREE.MeshStandardMaterial).emissive.setHex(0x7DF9FF);
-            (mesh.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.5;
-         } else {
-            (mesh.material as THREE.MeshStandardMaterial).emissive.setHex(0x000000);
-         }
+      if (mesh && mesh.material) {
+        // Only apply emissive to MeshStandardMaterial (planets)
+        if (mesh.material instanceof THREE.MeshStandardMaterial) {
+          if (isSelected) {
+            mesh.material.emissive.setHex(0x7DF9FF); // Accent color
+            mesh.material.emissiveIntensity = 0.5;
+          } else {
+            mesh.material.emissive.setHex(0x000000);
+          }
+        }
       }
     });
   }, [selectedObjectId, stateRef.celestialObjects]);
