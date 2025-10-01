@@ -162,7 +162,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
   const [labels, setLabels] = useState<LabelData[]>([]);
   const stateRef = useRef({
     scene: new THREE.Scene(),
-    camera: new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000),
+    camera: new THREE.PerspectiveCamera(75, 1, 0.1, 5000),
     renderer: null as THREE.WebGLRenderer | null,
     controls: null as OrbitControls | null,
     clickableObjects: [] as THREE.Object3D[],
@@ -179,20 +179,22 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
     const { scene, camera } = stateRef;
 
-    camera.position.set(0, 400, 700);
-    camera.lookAt(0,0,0);
-
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setClearColor(0x000000, 0);
     mountRef.current.appendChild(renderer.domElement);
     stateRef.renderer = renderer;
 
+    camera.aspect = mountRef.current.clientWidth / mountRef.current.clientHeight;
+    camera.position.set(0, 400, 700);
+    camera.lookAt(0,0,0);
+    camera.updateProjectionMatrix();
+
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.minDistance = 10;
-    controls.maxDistance = 5000;
+    controls.maxDistance = 3000;
     stateRef.controls = controls;
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
@@ -233,9 +235,10 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     renderer.domElement.addEventListener('click', handleClick);
 
     const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
+      if (!mountRef.current || !stateRef.renderer) return;
+      camera.aspect = mountRef.current.clientWidth / mountRef.current.clientHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      stateRef.renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
     };
     window.addEventListener('resize', handleResize);
 
@@ -426,12 +429,13 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       {/* Labels are rendered here as HTML elements on top of the canvas */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         {labels.map(label => {
+          if (!mountRef.current) return null;
           // Hide labels that are behind the camera (or too far to the side)
           if (label.position.z > 1 || Math.abs(label.position.x) > 1.1 || Math.abs(label.position.y) > 1.1) return null;
 
           // Convert normalized device coordinates to screen coordinates
-          const screenX = (label.position.x + 1) / 2 * window.innerWidth;
-          const screenY = (-label.position.y + 1) / 2 * window.innerHeight;
+          const screenX = (label.position.x + 1) / 2 * mountRef.current.clientWidth;
+          const screenY = (-label.position.y + 1) / 2 * mountRef.current.clientHeight;
 
           return (
             <div
