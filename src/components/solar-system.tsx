@@ -180,6 +180,8 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     celestialObjects: new Map<string, THREE.Object3D>(),
     asteroidBelt: null as THREE.Points | null,
     stardust: null as THREE.Points | null,
+    textureLoader: new THREE.TextureLoader(),
+    textures: new Map<string, THREE.Texture>(),
   }).current;
   
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
@@ -197,7 +199,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     stateRef.renderer = renderer;
 
     camera.aspect = mountRef.current.clientWidth / mountRef.current.clientHeight;
-    camera.position.set(0, 400, 700);
+    camera.position.set(0, 150, 350);
     camera.lookAt(0,0,0);
     camera.updateProjectionMatrix();
 
@@ -263,8 +265,8 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         const { type, orbitalSpeed, rotationSpeed } = obj.userData;
         const planetBody = obj.children.find(c => c.userData.isPlanetBody || c.userData.isCometBody);
 
-        if (planetBody) {
-            const { distance, eccentricity = 0, inclination = 0 } = obj.userData;
+        if (obj.userData.id !== 'sun') {
+             const { distance, eccentricity = 0, inclination = 0 } = obj.userData;
              if ((type === 'planet' || type === 'comet') && orbitalSpeed > 0) {
               const semiMajorAxis = distance;
               const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
@@ -277,10 +279,10 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
               obj.position.set(x, y, z);
             }
+        }
             
-            if (rotationSpeed > 0) {
-              planetBody.rotation.y += rotationSpeed / 50;
-            }
+        if (rotationSpeed > 0 && planetBody) {
+          planetBody.rotation.y += rotationSpeed / 50;
         }
         
         if (type === 'planet' || type === 'star' || type === 'comet') {
@@ -301,11 +303,15 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         const speeds = stateRef.asteroidBelt.geometry.getAttribute('speed');
 
         for (let i = 0; i < positions.count; i++) {
-          const newAngle = (angles.getX(i) + elapsedTime * speeds.getX(i)) % (Math.PI * 2);
-          positions.setX(i, Math.cos(newAngle) * radii.getX(i));
-          positions.setZ(i, Math.sin(newAngle) * radii.getX(i));
+          let currentAngle = angles.getX(i);
+          currentAngle += speeds.getX(i) * 0.1; // Adjust speed multiplier as needed
+          const radius = radii.getX(i);
+          positions.setX(i, Math.cos(currentAngle) * radius);
+          positions.setZ(i, Math.sin(currentAngle) * radius);
+          angles.setX(i, currentAngle);
         }
         positions.needsUpdate = true;
+        angles.needsUpdate = true;
       }
       
       if (stateRef.controls) stateRef.controls.update();
@@ -327,7 +333,26 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
   // Update scene when data changes
   useEffect(() => {
-    const { scene, celestialObjects } = stateRef;
+    const { scene, celestialObjects, textureLoader, textures } = stateRef;
+
+    const textureUrls: { [key: string]: string } = {
+        sun: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/sun.jpg',
+        mercury: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/mercury.jpg',
+        venus: 'https://raw.githubusercontent.com/mrdoob/three.js_old/master/examples/textures/planets/venus_surface.jpg',
+        earth: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
+        mars: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/mars_1k_color.jpg',
+        jupiter: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/jupiter.jpg',
+        saturn: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/saturn.jpg',
+        uranus: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/uranus.jpg',
+        neptune: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/neptune.jpg',
+        saturn_ring: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/saturn_ring.png',
+    };
+
+    Object.entries(textureUrls).forEach(([key, url]) => {
+        if (!textures.has(key)) {
+            textures.set(key, textureLoader.load(url));
+        }
+    });
     
     // --- Combine all objects to render ---
     const allObjects = [...data];
@@ -385,7 +410,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       
       if (objData.type === 'star') {
         const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ color: objData.color });
+        const material = new THREE.MeshBasicMaterial({ map: textures.get(objData.id) });
         const star = new THREE.Mesh(geometry, material);
         
         const glow = createSunGlow();
@@ -401,12 +426,26 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
         if (objData.type === 'planet') {
             const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
-            const material = new THREE.MeshStandardMaterial({ color: objData.color, roughness: 0.8 });
+            const material = new THREE.MeshStandardMaterial({ map: textures.get(objData.id), roughness: 0.8 });
             body = new THREE.Mesh(geometry, material);
             body.userData.isPlanetBody = true;
 
             if (objData.rings) {
-                const rings = createSaturnRings(objData.rings.innerRadius, objData.rings.outerRadius);
+                const ringGeometry = new THREE.RingGeometry(objData.rings.innerRadius, objData.rings.outerRadius, 64);
+                const pos = ringGeometry.attributes.position;
+                const v3 = new THREE.Vector3();
+                for (let i = 0; i < pos.count; i++){
+                    v3.fromBufferAttribute(pos, i);
+                    (ringGeometry.attributes.uv as THREE.BufferAttribute).setXY(i, v3.length() < objData.rings.innerRadius + 1 ? 0 : 1, 1);
+                }
+                const ringMaterial = new THREE.MeshBasicMaterial({
+                    map: textures.get('saturn_ring'),
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const rings = new THREE.Mesh(ringGeometry, ringMaterial);
+                rings.rotation.x = Math.PI / 2;
                 body.add(rings);
             }
         } else { // comet
@@ -418,6 +457,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
         objectGroup.add(body);
         
+        const orbitGroup = new THREE.Group();
         // Orbit line
         const semiMajorAxis = objData.distance;
         const eccentricity = objData.eccentricity ?? 0;
@@ -438,11 +478,9 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         });
         const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
         orbit.rotation.x = Math.PI / 2;
-        
-        const orbitGroup = new THREE.Group();
         orbitGroup.add(orbit);
         orbitGroup.rotation.z = THREE.MathUtils.degToRad(objData.inclination ?? 0);
-
+        
         scene.add(orbitGroup);
         celestialObj = objectGroup;
 
@@ -455,7 +493,6 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         scene.add(celestialObj);
         celestialObjects.set(objData.id, celestialObj);
         
-        // Make all non-belt objects clickable
         if (objData.type !== 'asteroid-belt') {
           celestialObj.traverse(child => {
             stateRef.clickableObjects.push(child);
@@ -464,7 +501,6 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       }
     });
     
-    // Add asteroid belt itself to clickable objects
     if (stateRef.asteroidBelt) {
         stateRef.clickableObjects.push(stateRef.asteroidBelt);
     }
@@ -476,37 +512,43 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
   useEffect(() => {
     stateRef.celestialObjects.forEach((obj, id) => {
         const isSelected = id === selectedObjectId;
+        
         const body = obj.children.find(c => (c as THREE.Mesh).isMesh) as THREE.Mesh | undefined;
-        const mesh = obj.userData.type === 'star' ? (obj as THREE.Mesh) : body;
+        let meshToHighlight = obj.userData.type === 'star' ? (obj as THREE.Mesh) : body;
 
-        if (mesh && mesh.material) {
-             const material = mesh.material as THREE.MeshStandardMaterial | THREE.MeshBasicMaterial;
-             
-             if (material instanceof THREE.MeshStandardMaterial || (material instanceof THREE.MeshBasicMaterial && obj.userData.type === 'comet')) {
-                 if (isSelected) {
+        if (meshToHighlight && meshToHighlight.material) {
+            const material = meshToHighlight.material as THREE.MeshStandardMaterial | THREE.MeshBasicMaterial;
+
+            // Handle emissive for selectable planets/comets
+            if (material instanceof THREE.MeshStandardMaterial || (material instanceof THREE.MeshBasicMaterial && obj.userData.type === 'comet')) {
+                if (isSelected) {
                     material.emissive?.setHex(0x7DF9FF); // Accent color
                     if (material instanceof THREE.MeshStandardMaterial) {
-                        material.emissiveIntensity = 0.7;
+                        material.emissiveIntensity = 0.5;
                     }
                 } else {
                     material.emissive?.setHex(0x000000);
                 }
-             } else if (material instanceof THREE.MeshBasicMaterial && obj.userData.type === 'star') {
+            }
+
+            // Handle sun glow
+            if (obj.userData.type === 'star') {
                 const glow = obj.children.find(c => c instanceof THREE.Sprite);
-                if(glow) {
+                if (glow) {
                     (glow as THREE.Sprite).material.opacity = isSelected ? 1 : 0.5;
                 }
-             }
+            }
         }
     });
 
+    // Handle asteroid belt selection
     if (stateRef.asteroidBelt) {
         const isSelected = selectedObjectId === 'asteroid-belt';
         const material = stateRef.asteroidBelt.material as THREE.PointsMaterial;
         material.opacity = isSelected ? 1.0 : 0.6;
     }
 
-  }, [selectedObjectId, stateRef.celestialObjects]);
+  }, [selectedObjectId, stateRef.celestialObjects, stateRef.asteroidBelt]);
 
   return (
     <div ref={mountRef} className="absolute top-0 left-0 w-full h-full">
@@ -547,5 +589,3 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     </div>
   );
 }
-
-    
