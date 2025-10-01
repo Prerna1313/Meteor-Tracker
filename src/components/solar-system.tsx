@@ -1,16 +1,20 @@
 'use client';
 
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { CelestialObject } from '@/lib/solar-system-data';
-import type { LabelData } from '@/app/page';
+
+export type LabelData = {
+  id: string;
+  name: string;
+  position: THREE.Vector3;
+};
 
 type SolarSystemProps = {
   data: CelestialObject[];
   onSelectObject: (id: string | null) => void;
   selectedObjectId: string | null;
-  onUpdateLabels: (labels: LabelData[]) => void;
 };
 
 // Helper function to create a glowing sprite for the Sun
@@ -153,8 +157,9 @@ const createStardust = (scene: THREE.Scene) => {
 };
 
 
-export function SolarSystem({ data, onSelectObject, selectedObjectId, onUpdateLabels }: SolarSystemProps) {
+export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSystemProps) {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [labels, setLabels] = useState<LabelData[]>([]);
   const stateRef = useRef({
     scene: new THREE.Scene(),
     camera: new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000),
@@ -202,7 +207,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId, onUpdateLa
         mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
         
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(stateRef.clickableObjects);
+        const intersects = raycaster.intersectObjects(stateRef.clickableObjects, true);
 
         if (intersects.length > 0) {
             const firstIntersect = intersects[0].object;
@@ -236,7 +241,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId, onUpdateLa
 
     const clock = new THREE.Clock();
     const animate = () => {
-      if (!stateRef.renderer) return;
+      if (!stateRef.renderer || !stateRef.controls) return;
       requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
       const newLabels: LabelData[] = [];
@@ -259,7 +264,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId, onUpdateLa
         }
       });
 
-      onUpdateLabels(newLabels);
+      setLabels(newLabels);
 
 
       if (stateRef.asteroidBelt) {
@@ -276,22 +281,22 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId, onUpdateLa
         positions.needsUpdate = true;
       }
       
-      if(stateRef.controls) stateRef.controls.update();
+      stateRef.controls.update();
       renderer.render(scene, camera);
     };
     animate();
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      controls.dispose();
-      renderer.domElement.removeEventListener('click', handleClick);
-      if (mountRef.current && renderer.domElement) {
-        mountRef.current.removeChild(renderer.domElement);
+      if (stateRef.controls) stateRef.controls.dispose();
+      if (stateRef.renderer) renderer.domElement.removeEventListener('click', handleClick);
+      if (mountRef.current && stateRef.renderer?.domElement) {
+        mountRef.current.removeChild(stateRef.renderer.domElement);
       }
-      renderer.dispose();
+      if (stateRef.renderer) stateRef.renderer.dispose();
       stateRef.renderer = null;
     };
-  }, [onSelectObject, raycaster, stateRef, onUpdateLabels]);
+  }, [onSelectObject, raycaster, stateRef]);
 
   // Update scene when data changes
   useEffect(() => {
@@ -379,7 +384,10 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId, onUpdateLa
         celestialObjects.set(objData.id, celestialObj);
         // Only make stars and planets clickable, not belts.
         if (objData.type === 'star' || objData.type === 'planet') {
-          stateRef.clickableObjects.push(celestialObj);
+          // Add the main celestial object and its children (like rings) to clickable objects
+          celestialObj.traverse(child => {
+            stateRef.clickableObjects.push(child);
+          });
         }
       }
     });
@@ -393,6 +401,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId, onUpdateLa
       const mesh = obj as THREE.Mesh;
 
       if (mesh && mesh.material) {
+        // Planets
         if (mesh.material instanceof THREE.MeshStandardMaterial) {
           if (isSelected) {
             mesh.material.emissive.setHex(0x7DF9FF); // Accent color
@@ -401,7 +410,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId, onUpdateLa
             mesh.material.emissive.setHex(0x000000);
           }
         }
-         // Highlight sun
+         // Sun
         else if (mesh.material instanceof THREE.MeshBasicMaterial && obj.userData.type === 'star') {
            const glow = obj.children.find(c => c instanceof THREE.Sprite);
             if(glow) {
@@ -412,5 +421,41 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId, onUpdateLa
     });
   }, [selectedObjectId, stateRef.celestialObjects]);
 
-  return <div ref={mountRef} className="absolute top-0 left-0 w-full h-full" />;
+  return (
+    <div ref={mountRef} className="absolute top-0 left-0 w-full h-full">
+      {/* Labels are rendered here as HTML elements on top of the canvas */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+        {labels.map(label => {
+          // Hide labels that are behind the camera (or too far to the side)
+          if (label.position.z > 1 || Math.abs(label.position.x) > 1.1 || Math.abs(label.position.y) > 1.1) return null;
+
+          // Convert normalized device coordinates to screen coordinates
+          const screenX = (label.position.x + 1) / 2 * window.innerWidth;
+          const screenY = (-label.position.y + 1) / 2 * window.innerHeight;
+
+          return (
+            <div
+              key={label.id}
+              className={`absolute text-xs p-1 rounded-sm transition-colors duration-300 pointer-events-auto cursor-pointer ${
+                selectedObjectId === label.id
+                  ? 'text-primary bg-background/50'
+                  : 'text-white/80'
+              }`}
+              style={{
+                transform: `translate(-50%, -50%) translate(${screenX}px, ${screenY}px)`,
+                left: 0,
+                top: 0,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectObject(label.id)
+              }}
+            >
+              {label.name}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
