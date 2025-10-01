@@ -250,16 +250,27 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       const newLabels: LabelData[] = [];
 
       stateRef.celestialObjects.forEach(obj => {
-        if (obj.userData.type === 'planet' && obj.userData.orbitalSpeed > 0) {
-            const angle = elapsedTime * (obj.userData.orbitalSpeed / 10);
-            obj.position.x = Math.cos(angle) * obj.userData.distance;
-            obj.position.z = Math.sin(angle) * obj.userData.distance;
-        }
-        if (obj.userData.rotationSpeed > 0) {
-          obj.rotation.y += obj.userData.rotationSpeed / 50;
+        const { type, orbitalSpeed, rotationSpeed, distance, eccentricity = 0, orbitalPeriod = 1, inclination = 0 } = obj.userData;
+        
+        if ((type === 'planet' || type === 'comet') && orbitalSpeed > 0) {
+          const semiMajorAxis = distance;
+          const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
+          const angle = elapsedTime * (orbitalSpeed / 10);
+          
+          const x = Math.cos(angle) * semiMajorAxis;
+          const z = Math.sin(angle) * semiMinorAxis;
+          
+          // Apply inclination
+          const y = Math.sin(angle) * semiMajorAxis * Math.sin(THREE.MathUtils.degToRad(inclination));
+
+          obj.position.set(x, y, z);
         }
         
-        if (obj.userData.type === 'planet' || obj.userData.type === 'star') {
+        if (rotationSpeed > 0) {
+          obj.rotation.y += rotationSpeed / 50;
+        }
+        
+        if (type === 'planet' || type === 'star' || type === 'comet') {
           const vector = new THREE.Vector3();
           obj.getWorldPosition(vector);
           vector.project(camera);
@@ -304,6 +315,28 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
   // Update scene when data changes
   useEffect(() => {
     const { scene, celestialObjects, orbitLines } = stateRef;
+    
+    // --- Combine all objects to render ---
+    const allObjects = [...data];
+    const sun = data.find(d => d.type === 'star');
+    if (sun && sun.comets) {
+      sun.comets.forEach(comet => {
+        allObjects.push({
+          ...comet,
+          id: comet.id,
+          name: comet.name,
+          type: 'comet',
+          size: comet.size / 100, // Scale down for visualization
+          distance: (comet.orbitalPeriod / 2) + 100, // Approximate distance
+          color: '#FFFFFF',
+          orbitalSpeed: 10 / Math.sqrt(comet.orbitalPeriod),
+          rotationSpeed: 0,
+          meteors: [],
+          eccentricity: Math.random() * 0.5 + 0.2, // Random eccentricity
+          inclination: Math.random() * 30, // Random inclination
+        });
+      });
+    }
 
     // --- Cleanup previous objects ---
     celestialObjects.forEach(obj => {
@@ -341,7 +374,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     }
     // --- End Cleanup ---
 
-    data.forEach(objData => {
+    allObjects.forEach(objData => {
       let celestialObj: THREE.Object3D | null = null;
       
       if (objData.type === 'star') {
@@ -379,15 +412,40 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         orbitLines.set(objData.id, orbit);
       } else if (objData.type === 'asteroid-belt') {
         stateRef.asteroidBelt = createAsteroidBelt(scene);
+      } else if (objData.type === 'comet') {
+        const geometry = new THREE.SphereGeometry(objData.size, 16, 16);
+        const material = new THREE.MeshBasicMaterial({ color: objData.color });
+        const comet = new THREE.Mesh(geometry, material);
+        celestialObj = comet;
+
+        const semiMajorAxis = objData.distance;
+        const eccentricity = objData.eccentricity ?? 0;
+        const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
+        const ellipse = new THREE.EllipseCurve(
+            0,  0,            // ax, aY
+            semiMajorAxis, semiMinorAxis, // xRadius, yRadius
+            0,  2 * Math.PI,  // aStartAngle, aEndAngle
+            false,            // aClockwise
+            0                 // aRotation
+        );
+
+        const points = ellipse.getPoints( 200 );
+        const orbitGeometry = new THREE.BufferGeometry().setFromPoints( points );
+        const orbitMaterial = new THREE.LineBasicMaterial( { color: 0x888888, transparent: true, opacity: 0.4 } );
+        const orbit = new THREE.Line( orbitGeometry, orbitMaterial );
+        orbit.rotation.x = Math.PI / 2;
+        orbit.rotation.z = THREE.MathUtils.degToRad(objData.inclination ?? 0);
+        scene.add(orbit);
+        orbitLines.set(objData.id, orbit);
       }
 
       if (celestialObj) {
         celestialObj.userData = { ...objData, originalColor: new THREE.Color(objData.color) };
         scene.add(celestialObj);
         celestialObjects.set(objData.id, celestialObj);
-        // Only make stars and planets clickable, not belts.
-        if (objData.type === 'star' || objData.type === 'planet') {
-          // Add the main celestial object and its children (like rings) to clickable objects
+        
+        // Make all non-belt objects clickable
+        if (objData.type !== 'asteroid-belt') {
           celestialObj.traverse(child => {
             stateRef.clickableObjects.push(child);
           });
@@ -404,13 +462,16 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       const mesh = obj as THREE.Mesh;
 
       if (mesh && mesh.material) {
-        // Planets
-        if (mesh.material instanceof THREE.MeshStandardMaterial) {
+        // Planets or Comets
+        if (mesh.material instanceof THREE.MeshStandardMaterial || (mesh.material instanceof THREE.MeshBasicMaterial && obj.userData.type === 'comet')) {
+          const material = mesh.material as THREE.MeshStandardMaterial | THREE.MeshBasicMaterial;
           if (isSelected) {
-            mesh.material.emissive.setHex(0x7DF9FF); // Accent color
-            mesh.material.emissiveIntensity = 0.7;
+            material.emissive?.setHex(0x7DF9FF); // Accent color
+            if (material instanceof THREE.MeshStandardMaterial) {
+              material.emissiveIntensity = 0.7;
+            }
           } else {
-            mesh.material.emissive.setHex(0x000000);
+            material.emissive?.setHex(0x000000);
           }
         }
          // Sun

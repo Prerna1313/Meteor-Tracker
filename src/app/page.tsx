@@ -8,6 +8,7 @@ import {
   initialSolarSystemData,
   type CelestialObject,
   type MeteorData,
+  type CometData,
 } from '@/lib/solar-system-data';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -41,9 +42,31 @@ export default function Home() {
       })
     );
   };
+  
+  const handleUpdateComets = (newComets: CometData[]) => {
+    setSolarSystemData(prevData =>
+      prevData.map(obj => {
+        if (obj.type === 'star') {
+          const existingCometIds = new Set(obj.comets?.map(c => c.id) || []);
+          const uniqueNewComets = newComets.filter(c => !existingCometIds.has(c.id));
+          return { ...obj, comets: [...(obj.comets || []), ...uniqueNewComets] };
+        }
+        return obj;
+      })
+    );
+  };
 
   const selectedObject = useMemo(() => {
-    return solarSystemData.find(obj => obj.id === selectedObjectId) || null;
+    const directMatch = solarSystemData.find(obj => obj.id === selectedObjectId);
+    if (directMatch) return directMatch;
+    
+    // Check if the selected object is a comet, which is nested under the sun
+    if (selectedObjectId?.includes('-comet-')) {
+        const sun = solarSystemData.find(obj => obj.type === 'star');
+        return sun?.comets?.find(c => c.id === selectedObjectId) as CelestialObject | undefined;
+    }
+
+    return null;
   }, [selectedObjectId, solarSystemData]);
 
   return (
@@ -63,6 +86,7 @@ export default function Home() {
             onOpenChange={setIsPanelOpen}
             selectedObject={selectedObject}
             onUpdateMeteors={handleUpdateMeteors}
+            onUpdateComets={handleUpdateComets}
           />
         </>
       ) : (

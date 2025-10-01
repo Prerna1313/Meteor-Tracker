@@ -10,16 +10,18 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { DataGenerator } from './data-generator';
-import type { CelestialObject, MeteorData } from '@/lib/solar-system-data';
+import type { CelestialObject, CometData, MeteorData } from '@/lib/solar-system-data';
+import { CometGenerator } from './comet-generator';
 
 type InfoPanelProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   selectedObject: CelestialObject | null;
   onUpdateMeteors: (planetId: string, newMeteors: MeteorData[]) => void;
+  onUpdateComets: (newComets: CometData[]) => void;
 };
 
-export function InfoPanel({ isOpen, onOpenChange, selectedObject, onUpdateMeteors }: InfoPanelProps) {
+export function InfoPanel({ isOpen, onOpenChange, selectedObject, onUpdateMeteors, onUpdateComets }: InfoPanelProps) {
   if (!selectedObject) return null;
 
   return (
@@ -46,7 +48,7 @@ export function InfoPanel({ isOpen, onOpenChange, selectedObject, onUpdateMeteor
              <div className="px-6 py-4 space-y-4">
                 <h3 className="font-semibold text-lg text-foreground">Known Meteors ({selectedObject.meteors.length})</h3>
                 {selectedObject.meteors.length > 0 ? (
-                  <ScrollArea className="h-60">
+                  <ScrollArea className="h-40">
                     <ul className="space-y-3 text-sm text-muted-foreground pr-4">
                       {selectedObject.meteors.map(meteor => (
                         <li key={meteor.id} className="p-3 bg-muted/50 rounded-md">
@@ -62,10 +64,35 @@ export function InfoPanel({ isOpen, onOpenChange, selectedObject, onUpdateMeteor
                 )}
              </div>
           )}
+
+          {selectedObject.type === 'star' && (
+            <div className="px-6 py-4 space-y-4">
+              <h3 className="font-semibold text-lg text-foreground">Known Comets ({selectedObject.comets?.length || 0})</h3>
+              {(selectedObject.comets?.length ?? 0) > 0 ? (
+                  <ScrollArea className="h-40">
+                    <ul className="space-y-3 text-sm text-muted-foreground pr-4">
+                      {selectedObject.comets!.map(comet => (
+                        <li key={comet.id} className="p-3 bg-muted/50 rounded-md">
+                          <p><strong>Name:</strong> {comet.name}</p>
+                          <p><strong>Size:</strong> {comet.size}km</p>
+                          <p><strong>Period:</strong> {comet.orbitalPeriod} years</p>
+                          <p className="truncate"><strong>Trajectory:</strong> {comet.trajectory}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </ScrollArea>
+              ) : (
+                <p className="text-sm text-muted-foreground">No comet data available. Use the tool below to generate some.</p>
+              )}
+            </div>
+          )}
         </ScrollArea>
 
         {selectedObject.type === 'planet' && (
           <DataGenerator planet={selectedObject} onUpdateMeteors={onUpdateMeteors} />
+        )}
+        {selectedObject.type === 'star' && (
+          <CometGenerator onUpdateComets={onUpdateComets} />
         )}
       </SheetContent>
     </Sheet>

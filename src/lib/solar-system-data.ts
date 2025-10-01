@@ -18,7 +18,7 @@ export type CometData = {
 export type CelestialObject = {
   id: string;
   name: string;
-  type: 'star' | 'planet' | 'asteroid-belt';
+  type: 'star' | 'planet' | 'asteroid-belt' | 'comet';
   size: number; // radius in arbitrary units
   distance: number; // distance from sun in arbitrary units
   color: string; // hex color
@@ -27,6 +27,10 @@ export type CelestialObject = {
   meteors: MeteorData[];
   comets?: CometData[];
   rings?: { innerRadius: number; outerRadius: number };
+  // Comet specific properties
+  orbitalPeriod?: number; 
+  eccentricity?: number;
+  inclination?: number;
 };
 
 export const initialSolarSystemData: CelestialObject[] = [
@@ -40,6 +44,7 @@ export const initialSolarSystemData: CelestialObject[] = [
     orbitalSpeed: 0,
     rotationSpeed: 0.05,
     meteors: [],
+    comets: [],
   },
   {
     id: 'mercury',
