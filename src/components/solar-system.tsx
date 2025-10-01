@@ -244,7 +244,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
     const clock = new THREE.Clock();
     const animate = () => {
-      if (!stateRef.renderer || !stateRef.controls) return;
+      if (!stateRef.renderer) return;
       requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
       const newLabels: LabelData[] = [];
@@ -284,7 +284,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         positions.needsUpdate = true;
       }
       
-      stateRef.controls.update();
+      if (stateRef.controls) stateRef.controls.update();
       renderer.render(scene, camera);
     };
     animate();
