@@ -18,6 +18,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
   const clickableObjectsRef = useRef<THREE.Mesh[]>([]);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const labelRendererRef = useRef<CSS2DRenderer | null>(null);
+  const controlsRef = useRef<OrbitControls | null>(null);
 
   useEffect(() => {
     if (!mountRef.current || rendererRef.current) return;
@@ -49,6 +50,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     controls.enableDamping = true;
     controls.minDistance = 50;
     controls.maxDistance = 1000;
+    controlsRef.current = controls;
 
     // Raycaster for clicking
     const raycaster = new THREE.Raycaster();
@@ -107,6 +109,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
+      controlsRef.current?.dispose();
       if (rendererRef.current) {
         rendererRef.current.domElement.removeEventListener('click', handleClick);
         mountRef.current?.removeChild(rendererRef.current.domElement);
@@ -127,6 +130,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
           }
         }
       });
+      sceneRef.current = null;
     };
   }, [onSelectObject]);
 
@@ -136,10 +140,19 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     
     // Clear existing objects but keep ambient light
     const lights = scene.children.filter(c => c.type.includes('Light'));
-    while(scene.children.length > 0){ 
-      scene.remove(scene.children[0]);
-    }
-    lights.forEach(l => scene.add(l));
+    const objectsToRemove = scene.children.filter(c => !c.type.includes('Light'));
+
+    objectsToRemove.forEach(child => {
+        scene.remove(child);
+        // If the child has its own children (like labels), we need to handle them too
+        if (child instanceof THREE.Group || child instanceof THREE.Mesh) {
+            child.traverse(object => {
+                if (object instanceof CSS2DObject) {
+                    object.removeFromParent();
+                }
+            });
+        }
+    });
     
     clickableObjectsRef.current = [];
     if(lights.length === 0) scene.add(new THREE.AmbientLight(0xffffff, 0.2));
