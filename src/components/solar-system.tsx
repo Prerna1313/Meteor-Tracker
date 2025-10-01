@@ -446,7 +446,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
                   : 'text-white/80'
               }`}
               style={{
-                transform: `translate(-50%, -50%) translate(${screenX}px, ${screenY}px)`,
+                transform: `translate(10px, -50%) translate(${screenX}px, ${screenY}px)`,
                 left: 0,
                 top: 0,
               }}
