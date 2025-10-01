@@ -3,7 +3,6 @@
 import { useEffect, useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import type { CelestialObject } from '@/lib/solar-system-data';
 
 type SolarSystemProps = {
@@ -28,8 +27,8 @@ const createSunGlow = () => {
     canvas.height / 2,
     canvas.width / 2
   );
-  gradient.addColorStop(0.1, 'rgba(255, 255, 143, 1)');
-  gradient.addColorStop(0.5, 'rgba(255, 255, 143, 0.5)');
+  gradient.addColorStop(0.1, 'rgba(255, 255, 255, 1)');
+  gradient.addColorStop(0.4, 'rgba(255, 255, 143, 0.5)');
   gradient.addColorStop(1, 'rgba(255, 255, 143, 0)');
 
   context.fillStyle = gradient;
@@ -43,7 +42,7 @@ const createSunGlow = () => {
     transparent: true,
   });
   const sprite = new THREE.Sprite(material);
-  sprite.scale.set(100, 100, 1); // Adjust size of the glow
+  sprite.scale.set(120, 120, 1);
   return sprite;
 };
 
@@ -129,7 +128,6 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     scene: new THREE.Scene(),
     camera: new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000),
     renderer: null as THREE.WebGLRenderer | null,
-    labelRenderer: null as CSS2DRenderer | null,
     controls: null as OrbitControls | null,
     clickableObjects: [] as THREE.Object3D[],
     celestialObjects: new Map<string, THREE.Object3D>(),
@@ -145,7 +143,8 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
     const { scene, camera } = stateRef;
 
-    camera.position.set(0, 500, 800);
+    camera.position.set(250, 250, 250);
+    camera.lookAt(0,0,0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -153,14 +152,6 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     renderer.setClearColor(0x000000, 0);
     mountRef.current.appendChild(renderer.domElement);
     stateRef.renderer = renderer;
-
-    const labelRenderer = new CSS2DRenderer();
-    labelRenderer.setSize(window.innerWidth, window.innerHeight);
-    labelRenderer.domElement.style.position = 'absolute';
-    labelRenderer.domElement.style.top = '0px';
-    labelRenderer.domElement.style.pointerEvents = 'none';
-    mountRef.current.appendChild(labelRenderer.domElement);
-    stateRef.labelRenderer = labelRenderer;
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -194,7 +185,6 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      labelRenderer.setSize(window.innerWidth, window.innerHeight);
     };
     window.addEventListener('resize', handleResize);
 
@@ -231,7 +221,6 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       
       if(stateRef.controls) stateRef.controls.update();
       renderer.render(scene, camera);
-      if(stateRef.labelRenderer) stateRef.labelRenderer.render(scene, camera);
     };
     animate();
 
@@ -239,9 +228,8 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       window.removeEventListener('resize', handleResize);
       controls.dispose();
       renderer.domElement.removeEventListener('click', handleClick);
-      if (mountRef.current) {
-        if(renderer.domElement) mountRef.current.removeChild(renderer.domElement);
-        if(stateRef.labelRenderer?.domElement) mountRef.current.removeChild(stateRef.labelRenderer.domElement);
+      if (mountRef.current && renderer.domElement) {
+        mountRef.current.removeChild(renderer.domElement);
       }
       renderer.dispose();
       stateRef.renderer = null;
@@ -250,7 +238,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
   // Update scene when data changes
   useEffect(() => {
-    const { scene, celestialObjects, orbitLines, clickableObjects } = stateRef;
+    const { scene, celestialObjects, orbitLines } = stateRef;
 
     // --- Cleanup previous objects ---
     celestialObjects.forEach(obj => {
@@ -263,9 +251,6 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
                     child.material.dispose();
                 }
             }
-             if (child instanceof CSS2DObject) {
-                child.element.remove();
-             }
         });
         scene.remove(obj);
     });
@@ -327,17 +312,6 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         scene.add(celestialObj);
         celestialObjects.set(objData.id, celestialObj);
         stateRef.clickableObjects.push(celestialObj);
-        
-        // Label
-        const labelDiv = document.createElement('div');
-        labelDiv.className = objData.type === 'star' 
-          ? 'text-accent font-bold p-2 rounded-md bg-background/30 text-sm whitespace-nowrap' 
-          : 'text-foreground p-1 rounded-md bg-background/30 text-xs whitespace-nowrap backdrop-blur-sm';
-        labelDiv.textContent = objData.name;
-        const label = new CSS2DObject(labelDiv);
-        const labelOffset = objData.type === 'star' ? objData.size + 5 : objData.size + 2;
-        label.position.set(0, labelOffset, 0);
-        celestialObj.add(label);
       }
     });
 
@@ -350,14 +324,20 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       const mesh = obj as THREE.Mesh;
 
       if (mesh && mesh.material) {
-        // Only apply emissive to MeshStandardMaterial (planets)
         if (mesh.material instanceof THREE.MeshStandardMaterial) {
           if (isSelected) {
             mesh.material.emissive.setHex(0x7DF9FF); // Accent color
-            mesh.material.emissiveIntensity = 0.5;
+            mesh.material.emissiveIntensity = 0.7;
           } else {
             mesh.material.emissive.setHex(0x000000);
           }
+        }
+         // Highlight sun
+        else if (mesh.material instanceof THREE.MeshBasicMaterial && obj.userData.type === 'star') {
+           const glow = obj.children.find(c => c instanceof THREE.Sprite);
+            if(glow) {
+               (glow as THREE.Sprite).material.opacity = isSelected ? 1 : 0.5;
+            }
         }
       }
     });
