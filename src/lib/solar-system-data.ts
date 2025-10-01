@@ -5,6 +5,16 @@ export type MeteorData = {
   composition: string;
 };
 
+export type CometData = {
+  id: string;
+  name: string;
+  size: number; // radius in km
+  composition: string;
+  orbitalPeriod: number; // in years
+  trajectory: string;
+};
+
+
 export type CelestialObject = {
   id: string;
   name: string;
@@ -15,6 +25,7 @@ export type CelestialObject = {
   orbitalSpeed: number; // arbitrary speed factor
   rotationSpeed: number; // arbitrary speed factor
   meteors: MeteorData[];
+  comets?: CometData[];
 };
 
 export const initialSolarSystemData: CelestialObject[] = [
@@ -93,6 +104,39 @@ export const initialSolarSystemData: CelestialObject[] = [
     color: '#D2B48C',
     orbitalSpeed: 0.4,
     rotationSpeed: 0.8,
+    meteors: [],
+  },
+  {
+    id: 'saturn',
+    name: 'Saturn',
+    type: 'planet',
+    size: 9,
+    distance: 450,
+    color: '#F0E68C',
+    orbitalSpeed: 0.32,
+    rotationSpeed: 0.75,
+    meteors: [],
+  },
+  {
+    id: 'uranus',
+    name: 'Uranus',
+    type: 'planet',
+    size: 7,
+    distance: 600,
+    color: '#AFEEEE',
+    orbitalSpeed: 0.22,
+    rotationSpeed: 0.6,
+    meteors: [],
+  },
+  {
+    id: 'neptune',
+    name: 'Neptune',
+    type: 'planet',
+    size: 7,
+    distance: 750,
+    color: '#3F51B5',
+    orbitalSpeed: 0.18,
+    rotationSpeed: 0.55,
     meteors: [],
   },
 ];
