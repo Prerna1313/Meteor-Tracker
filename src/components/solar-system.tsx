@@ -167,7 +167,6 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     controls: null as OrbitControls | null,
     clickableObjects: [] as THREE.Object3D[],
     celestialObjects: new Map<string, THREE.Object3D>(),
-    orbitLines: new Map<string, THREE.Line>(),
     asteroidBelt: null as THREE.Points | null,
     stardust: null as THREE.Points | null,
   }).current;
@@ -250,29 +249,33 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       const newLabels: LabelData[] = [];
 
       stateRef.celestialObjects.forEach(obj => {
-        const { type, orbitalSpeed, rotationSpeed, distance, eccentricity = 0, orbitalPeriod = 1, inclination = 0 } = obj.userData;
-        
-        if ((type === 'planet' || type === 'comet') && orbitalSpeed > 0) {
-          const semiMajorAxis = distance;
-          const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
-          const angle = elapsedTime * (orbitalSpeed / 10);
-          
-          const x = Math.cos(angle) * semiMajorAxis;
-          const z = Math.sin(angle) * semiMinorAxis;
-          
-          // Apply inclination
-          const y = Math.sin(angle) * semiMajorAxis * Math.sin(THREE.MathUtils.degToRad(inclination));
+        const { type, orbitalSpeed, rotationSpeed } = obj.userData;
+        const planetBody = obj.children.find(c => c.userData.isPlanetBody || c.userData.isCometBody);
 
-          obj.position.set(x, y, z);
-        }
-        
-        if (rotationSpeed > 0) {
-          obj.rotation.y += rotationSpeed / 50;
+        if (planetBody) {
+            const { distance, eccentricity = 0, inclination = 0 } = obj.userData;
+             if ((type === 'planet' || type === 'comet') && orbitalSpeed > 0) {
+              const semiMajorAxis = distance;
+              const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
+              const angle = elapsedTime * (orbitalSpeed / 10);
+              
+              const x = Math.cos(angle) * semiMajorAxis;
+              const z = Math.sin(angle) * semiMinorAxis;
+              
+              const y = Math.sin(angle) * semiMajorAxis * Math.sin(THREE.MathUtils.degToRad(inclination));
+
+              planetBody.position.set(x, y, z);
+            }
+            
+            if (rotationSpeed > 0) {
+              planetBody.rotation.y += rotationSpeed / 50;
+            }
         }
         
         if (type === 'planet' || type === 'star' || type === 'comet') {
           const vector = new THREE.Vector3();
-          obj.getWorldPosition(vector);
+          const bodyToTrack = planetBody || obj;
+          bodyToTrack.getWorldPosition(vector);
           vector.project(camera);
           newLabels.push({ id: obj.userData.id, name: obj.userData.name, position: vector });
         }
@@ -314,7 +317,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
   // Update scene when data changes
   useEffect(() => {
-    const { scene, celestialObjects, orbitLines } = stateRef;
+    const { scene, celestialObjects } = stateRef;
     
     // --- Combine all objects to render ---
     const allObjects = [...data];
@@ -341,7 +344,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     // --- Cleanup previous objects ---
     celestialObjects.forEach(obj => {
         obj.traverse(child => {
-            if (child instanceof THREE.Mesh) {
+            if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
                 if(child.geometry) child.geometry.dispose();
                 if (Array.isArray(child.material)) {
                     child.material.forEach(m => { if(m.map) m.map.dispose(); m.dispose() });
@@ -358,13 +361,6 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     });
     celestialObjects.clear();
     stateRef.clickableObjects = [];
-
-    orbitLines.forEach(line => {
-      scene.remove(line);
-      line.geometry.dispose();
-      (line.material as THREE.Material).dispose();
-    });
-    orbitLines.clear();
     
     if (stateRef.asteroidBelt) {
       scene.remove(stateRef.asteroidBelt);
@@ -389,54 +385,56 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         star.add(pointLight);
 
         celestialObj = star;
-      } else if (objData.type === 'planet') {
-        const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
-        const material = new THREE.MeshStandardMaterial({ color: objData.color, roughness: 0.8 });
-        const planet = new THREE.Mesh(geometry, material);
+      } else if (objData.type === 'planet' || objData.type === 'comet') {
+        const objectGroup = new THREE.Group();
+        let planetBody: THREE.Mesh;
 
-        if (objData.rings) {
-          const rings = createSaturnRings(objData.rings.innerRadius, objData.rings.outerRadius);
-          planet.add(rings);
+        if (objData.type === 'planet') {
+            const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
+            const material = new THREE.MeshStandardMaterial({ color: objData.color, roughness: 0.8 });
+            planetBody = new THREE.Mesh(geometry, material);
+            planetBody.userData.isPlanetBody = true;
+
+            if (objData.rings) {
+                const rings = createSaturnRings(objData.rings.innerRadius, objData.rings.outerRadius);
+                planetBody.add(rings);
+            }
+        } else { // comet
+            const geometry = new THREE.SphereGeometry(objData.size, 16, 16);
+            const material = new THREE.MeshBasicMaterial({ color: objData.color });
+            planetBody = new THREE.Mesh(geometry, material);
+            planetBody.userData.isCometBody = true;
         }
+
+        objectGroup.add(planetBody);
         
-        celestialObj = planet;
-
         // Orbit line
-        const orbitGeometry = new THREE.BufferGeometry().setFromPoints(
-          new THREE.Path().absarc(0, 0, objData.distance, 0, Math.PI * 2, false).getSpacedPoints(128)
-        );
-        const orbitMaterial = new THREE.LineBasicMaterial({ color: 0xEEEEEE, transparent: true, opacity: 0.2 });
-        const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
-        orbit.rotation.x = Math.PI / 2;
-        scene.add(orbit);
-        orbitLines.set(objData.id, orbit);
-      } else if (objData.type === 'asteroid-belt') {
-        stateRef.asteroidBelt = createAsteroidBelt(scene);
-      } else if (objData.type === 'comet') {
-        const geometry = new THREE.SphereGeometry(objData.size, 16, 16);
-        const material = new THREE.MeshBasicMaterial({ color: objData.color });
-        const comet = new THREE.Mesh(geometry, material);
-        celestialObj = comet;
-
         const semiMajorAxis = objData.distance;
         const eccentricity = objData.eccentricity ?? 0;
         const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
         const ellipse = new THREE.EllipseCurve(
-            0,  0,            // ax, aY
-            semiMajorAxis, semiMinorAxis, // xRadius, yRadius
-            0,  2 * Math.PI,  // aStartAngle, aEndAngle
-            false,            // aClockwise
-            0                 // aRotation
+            0, 0,
+            semiMajorAxis, semiMinorAxis,
+            0, 2 * Math.PI,
+            false, 0
         );
 
-        const points = ellipse.getPoints( 200 );
-        const orbitGeometry = new THREE.BufferGeometry().setFromPoints( points );
-        const orbitMaterial = new THREE.LineBasicMaterial( { color: 0x888888, transparent: true, opacity: 0.4 } );
-        const orbit = new THREE.Line( orbitGeometry, orbitMaterial );
+        const points = ellipse.getPoints(200);
+        const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
+        const orbitMaterial = new THREE.LineBasicMaterial({
+            color: objData.type === 'comet' ? 0x888888 : 0xEEEEEE,
+            transparent: true,
+            opacity: objData.type === 'comet' ? 0.4 : 0.2
+        });
+        const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
         orbit.rotation.x = Math.PI / 2;
         orbit.rotation.z = THREE.MathUtils.degToRad(objData.inclination ?? 0);
-        scene.add(orbit);
-        orbitLines.set(objData.id, orbit);
+        
+        objectGroup.add(orbit);
+        celestialObj = objectGroup;
+
+      } else if (objData.type === 'asteroid-belt') {
+        stateRef.asteroidBelt = createAsteroidBelt(scene);
       }
 
       if (celestialObj) {
@@ -458,30 +456,29 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
   // Highlight selected object
   useEffect(() => {
     stateRef.celestialObjects.forEach((obj, id) => {
-      const isSelected = id === selectedObjectId;
-      const mesh = obj as THREE.Mesh;
+        const isSelected = id === selectedObjectId;
+        const body = obj.children.find(c => (c as THREE.Mesh).isMesh) as THREE.Mesh | undefined;
+        const mesh = obj.userData.type === 'star' ? (obj as THREE.Mesh) : body;
 
-      if (mesh && mesh.material) {
-        // Planets or Comets
-        if (mesh.material instanceof THREE.MeshStandardMaterial || (mesh.material instanceof THREE.MeshBasicMaterial && obj.userData.type === 'comet')) {
-          const material = mesh.material as THREE.MeshStandardMaterial | THREE.MeshBasicMaterial;
-          if (isSelected) {
-            material.emissive?.setHex(0x7DF9FF); // Accent color
-            if (material instanceof THREE.MeshStandardMaterial) {
-              material.emissiveIntensity = 0.7;
-            }
-          } else {
-            material.emissive?.setHex(0x000000);
-          }
+        if (mesh && mesh.material) {
+             const material = mesh.material as THREE.MeshStandardMaterial | THREE.MeshBasicMaterial;
+             
+             if (material instanceof THREE.MeshStandardMaterial || (material instanceof THREE.MeshBasicMaterial && obj.userData.type === 'comet')) {
+                 if (isSelected) {
+                    material.emissive?.setHex(0x7DF9FF); // Accent color
+                    if (material instanceof THREE.MeshStandardMaterial) {
+                        material.emissiveIntensity = 0.7;
+                    }
+                } else {
+                    material.emissive?.setHex(0x000000);
+                }
+             } else if (material instanceof THREE.MeshBasicMaterial && obj.userData.type === 'star') {
+                const glow = obj.children.find(c => c instanceof THREE.Sprite);
+                if(glow) {
+                    (glow as THREE.Sprite).material.opacity = isSelected ? 1 : 0.5;
+                }
+             }
         }
-         // Sun
-        else if (mesh.material instanceof THREE.MeshBasicMaterial && obj.userData.type === 'star') {
-           const glow = obj.children.find(c => c instanceof THREE.Sprite);
-            if(glow) {
-               (glow as THREE.Sprite).material.opacity = isSelected ? 1 : 0.5;
-            }
-        }
-      }
     });
   }, [selectedObjectId, stateRef.celestialObjects]);
 
