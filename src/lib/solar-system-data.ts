@@ -14,6 +14,16 @@ export type CometData = {
   trajectory: string;
 };
 
+export type AsteroidData = {
+    id: string;
+    name: string;
+    estimated_diameter_km_min: number;
+    estimated_diameter_km_max: number;
+    is_potentially_hazardous_asteroid: boolean;
+    orbital_period_days: number;
+    relative_velocity_kps: number;
+    miss_distance_au: number;
+};
 
 export type CelestialObject = {
   id: string;
@@ -26,6 +36,7 @@ export type CelestialObject = {
   rotationSpeed: number; // arbitrary speed factor
   meteors: MeteorData[];
   comets?: CometData[];
+  asteroids?: AsteroidData[];
   rings?: { innerRadius: number; outerRadius: number };
   // Comet specific properties
   orbitalPeriod?: number; 
@@ -97,9 +108,10 @@ export const initialSolarSystemData: CelestialObject[] = [
     size: 0.1, 
     distance: 220, // Average distance
     color: '#FFFFFF',
-    orbitalSpeed: 0.5,
+    orbitalSpeed: 0,
     rotationSpeed: 0,
-    meteors: [], 
+    meteors: [],
+    asteroids: [],
   },
   {
     id: 'jupiter',

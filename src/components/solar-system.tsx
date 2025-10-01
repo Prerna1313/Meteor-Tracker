@@ -82,16 +82,19 @@ const createSaturnRings = (innerRadius: number, outerRadius: number) => {
 
 
 // Function to create the Asteroid Belt
-const createAsteroidBelt = (scene: THREE.Scene) => {
-  const asteroidCount = 10000;
+const createAsteroidBelt = (scene: THREE.Scene, asteroids: any[]) => {
+  const asteroidCount = 10000 + asteroids.length;
   const particles = new THREE.BufferGeometry();
   const positions = new Float32Array(asteroidCount * 3);
   const angles = new Float32Array(asteroidCount);
   const radii = new Float32Array(asteroidCount);
   const speeds = new Float32Array(asteroidCount);
-
+  const colors = new Float32Array(asteroidCount * 3);
+  
   const innerRadius = 180;
   const outerRadius = 260;
+  const hazardousColor = new THREE.Color(0xff4500);
+  const normalColor = new THREE.Color(0x666666);
 
   for (let i = 0; i < asteroidCount; i++) {
     const angle = Math.random() * Math.PI * 2;
@@ -107,18 +110,26 @@ const createAsteroidBelt = (scene: THREE.Scene) => {
     angles[i] = angle;
     radii[i] = radius;
     speeds[i] = THREE.MathUtils.randFloat(0.05, 0.15);
+
+    // Assign color based on whether it's a generated hazardous asteroid
+    const isGeneratedHazardous = i >= 10000 && asteroids[i - 10000]?.is_potentially_hazardous_asteroid;
+    const color = isGeneratedHazardous ? hazardousColor : normalColor;
+    colors[i * 3] = color.r;
+    colors[i * 3 + 1] = color.g;
+    colors[i * 3 + 2] = color.b;
   }
 
   particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   particles.setAttribute('angle', new THREE.BufferAttribute(angles, 1));
   particles.setAttribute('radius', new THREE.BufferAttribute(radii, 1));
   particles.setAttribute('speed', new THREE.BufferAttribute(speeds, 1));
+  particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
   const particleMaterial = new THREE.PointsMaterial({
-    color: 0x666666,
     size: 0.3,
     transparent: true,
-    opacity: 0.6,
+    opacity: 0.8,
+    vertexColors: true,
   });
 
   const asteroidBelt = new THREE.Points(particles, particleMaterial);
@@ -437,7 +448,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         celestialObj = objectGroup;
 
       } else if (objData.type === 'asteroid-belt') {
-        stateRef.asteroidBelt = createAsteroidBelt(scene);
+        stateRef.asteroidBelt = createAsteroidBelt(scene, objData.asteroids || []);
       }
 
       if (celestialObj) {
@@ -453,6 +464,12 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         }
       }
     });
+    
+    // Add asteroid belt itself to clickable objects
+    if (stateRef.asteroidBelt) {
+        stateRef.clickableObjects.push(stateRef.asteroidBelt);
+    }
+
 
   }, [data, stateRef]);
   
@@ -483,6 +500,13 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
              }
         }
     });
+
+    if (stateRef.asteroidBelt) {
+        const isSelected = selectedObjectId === 'asteroid-belt';
+        const material = stateRef.asteroidBelt.material as THREE.PointsMaterial;
+        material.opacity = isSelected ? 1.0 : 0.6;
+    }
+
   }, [selectedObjectId, stateRef.celestialObjects]);
 
   return (

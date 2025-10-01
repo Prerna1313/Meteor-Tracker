@@ -9,6 +9,7 @@ import {
   type CelestialObject,
   type MeteorData,
   type CometData,
+  type AsteroidData,
 } from '@/lib/solar-system-data';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -56,6 +57,19 @@ export default function Home() {
     );
   };
 
+  const handleUpdateAsteroids = (newAsteroids: AsteroidData[]) => {
+    setSolarSystemData(prevData => 
+      prevData.map(obj => {
+        if (obj.id === 'asteroid-belt') {
+          const existingAsteroidIds = new Set(obj.asteroids?.map(a => a.id) || []);
+          const uniqueNewAsteroids = newAsteroids.filter(a => !existingAsteroidIds.has(a.id));
+          return { ...obj, asteroids: [...(obj.asteroids || []), ...uniqueNewAsteroids] };
+        }
+        return obj;
+      })
+    );
+  };
+
   const selectedObject = useMemo(() => {
     const directMatch = solarSystemData.find(obj => obj.id === selectedObjectId);
     if (directMatch) return directMatch;
@@ -87,6 +101,7 @@ export default function Home() {
             selectedObject={selectedObject}
             onUpdateMeteors={handleUpdateMeteors}
             onUpdateComets={handleUpdateComets}
+            onUpdateAsteroids={handleUpdateAsteroids}
           />
         </>
       ) : (
@@ -97,5 +112,3 @@ export default function Home() {
     </main>
   );
 }
-
-    
