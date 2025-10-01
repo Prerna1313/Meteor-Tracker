@@ -26,6 +26,7 @@ export type CelestialObject = {
   rotationSpeed: number; // arbitrary speed factor
   meteors: MeteorData[];
   comets?: CometData[];
+  rings?: { innerRadius: number; outerRadius: number };
 };
 
 export const initialSolarSystemData: CelestialObject[] = [
@@ -116,6 +117,7 @@ export const initialSolarSystemData: CelestialObject[] = [
     orbitalSpeed: 0.32,
     rotationSpeed: 0.75,
     meteors: [],
+    rings: { innerRadius: 12, outerRadius: 20 },
   },
   {
     id: 'uranus',

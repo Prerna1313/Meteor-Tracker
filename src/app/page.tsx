@@ -11,6 +11,13 @@ import {
 } from '@/lib/solar-system-data';
 import { Skeleton } from '@/components/ui/skeleton';
 
+export type LabelData = {
+  id: string;
+  name: string;
+  position: THREE.Vector3;
+};
+
+
 export default function Home() {
   const [solarSystemData, setSolarSystemData] = useState<CelestialObject[]>(
     initialSolarSystemData
@@ -18,6 +25,7 @@ export default function Home() {
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [labels, setLabels] = useState<LabelData[]>([]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -55,7 +63,36 @@ export default function Home() {
               data={solarSystemData}
               onSelectObject={handleSelectObject}
               selectedObjectId={selectedObjectId}
+              onUpdateLabels={setLabels}
             />
+             <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+              {labels.map(label => {
+                const screenX = (label.position.x + 1) / 2 * window.innerWidth;
+                const screenY = (-label.position.y + 1) / 2 * window.innerHeight;
+                
+                // Hide labels that are behind the camera
+                if (label.position.z > 1) return null;
+
+                return (
+                  <div
+                    key={label.id}
+                    className={`absolute text-xs p-1 rounded-sm transition-colors duration-300 ${
+                      selectedObjectId === label.id
+                        ? 'text-primary bg-background/50'
+                        : 'text-white/80'
+                    }`}
+                    style={{
+                      transform: `translate(-50%, -50%) translate(${screenX}px, ${screenY}px)`,
+                      left: 0,
+                      top: 0,
+                    }}
+                    onClick={() => handleSelectObject(label.id)}
+                  >
+                    {label.name}
+                  </div>
+                );
+              })}
+            </div>
           </div>
           <InfoPanel
             isOpen={isPanelOpen}
