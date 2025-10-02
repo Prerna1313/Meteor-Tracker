@@ -267,7 +267,7 @@ export function SolarSystem({
       const newLabels: LabelData[] = [];
       
       const timeSpeed = 0.1;
-      const d = (Date.now() - stateRef.startTime) / (1000 * 60 * 60 * 24) * timeSpeed;
+      const d = (Date.now() - stateRef.startTime) / (1000 * 60 * 60 * 24);
 
       stateRef.celestialObjects.forEach((objGroup, id) => {
         const objData = objGroup.userData as CelestialObject;
@@ -280,10 +280,12 @@ export function SolarSystem({
           const Omega = THREE.MathUtils.degToRad(objData.longitudeOfAscendingNode);
 
           const P = objData.orbitalSpeed; // Period in years
-          const M0 = (L - varpi);
-          const n = (2 * Math.PI) / (P * 365.25); // Mean motion
           
-          let M = (M0 + n * d) % (2 * Math.PI);
+          // Mean anomaly M
+          const M0 = L - varpi;
+          const n = (2 * Math.PI) / (P * 365.25); // Mean motion in radians/day
+          let M = (M0 + n * d * timeSpeed) % (2 * Math.PI);
+          if (M < 0) M += 2 * Math.PI;
 
           // Solve Kepler's equation for E (Eccentric Anomaly)
           let E = M;
@@ -291,14 +293,22 @@ export function SolarSystem({
               E = M + e * Math.sin(E);
           }
 
+          // True anomaly nu
           const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
+          // Heliocentric distance r
           const r = a * (1 - e * Math.cos(E));
 
           const argOfPeri = varpi - Omega;
 
-          const x_ecl = r * (Math.cos(Omega) * Math.cos(nu + argOfPeri) - Math.sin(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i));
-          const z_ecl = r * (Math.sin(Omega) * Math.cos(nu + argOfPeri) + Math.cos(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i));
-          const y_ecl = r * (Math.sin(nu + argOfPeri) * Math.sin(i));
+          // Position in orbital plane
+          const x_orb = r * Math.cos(nu);
+          const y_orb = r * Math.sin(nu);
+
+          // Rotate to ecliptic coordinates
+          const x_ecl = x_orb * (Math.cos(argOfPeri) * Math.cos(Omega) - Math.sin(argOfPeri) * Math.sin(Omega) * Math.cos(i)) - y_orb * (Math.sin(argOfPeri) * Math.cos(Omega) + Math.cos(argOfPeri) * Math.sin(Omega) * Math.cos(i));
+          const z_ecl = x_orb * (Math.cos(argOfPeri) * Math.sin(Omega) + Math.sin(argOfPeri) * Math.cos(Omega) * Math.cos(i)) + y_orb * (Math.cos(argOfPeri) * Math.cos(Omega) * Math.cos(i) - Math.sin(argOfPeri) * Math.sin(Omega));
+          const y_ecl = x_orb * (Math.sin(argOfPeri) * Math.sin(i)) + y_orb * (Math.cos(argOfPeri) * Math.sin(i));
+
 
           objGroup.position.set(
             x_ecl * AU_SCALE, 
@@ -459,9 +469,12 @@ export function SolarSystem({
             const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
             const r = a * (1 - e * Math.cos(E));
             
-            const x_ecl = r * (Math.cos(Omega) * Math.cos(nu + argOfPeri) - Math.sin(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i));
-            const z_ecl = r * (Math.sin(Omega) * Math.cos(nu + argOfPeri) + Math.cos(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i));
-            const y_ecl = r * (Math.sin(nu + argOfPeri) * Math.sin(i));
+            const x_orb = r * Math.cos(nu);
+            const y_orb = r * Math.sin(nu);
+    
+            const x_ecl = x_orb * (Math.cos(argOfPeri) * Math.cos(Omega) - Math.sin(argOfPeri) * Math.sin(Omega) * Math.cos(i)) - y_orb * (Math.sin(argOfPeri) * Math.cos(Omega) + Math.cos(argOfPeri) * Math.sin(Omega) * Math.cos(i));
+            const z_ecl = x_orb * (Math.cos(argOfPeri) * Math.sin(Omega) + Math.sin(argOfPeri) * Math.cos(Omega) * Math.cos(i)) + y_orb * (Math.cos(argOfPeri) * Math.cos(Omega) * Math.cos(i) - Math.sin(argOfPeri) * Math.sin(Omega));
+            const y_ecl = x_orb * (Math.sin(argOfPeri) * Math.sin(i)) + y_orb * (Math.cos(argOfPeri) * Math.sin(i));
 
 
             curvePoints.push(new THREE.Vector3(x_ecl * AU_SCALE, y_ecl * AU_SCALE, z_ecl * AU_SCALE));

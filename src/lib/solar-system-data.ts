@@ -82,7 +82,7 @@ export const solarSystemData: CelestialObject[] = [
     description: 'Venus is the second planet from the Sun. It is named after the Roman goddess of love and beauty. As the second-brightest natural object in the night sky after the Moon, Venus can cast shadows and can be, on rare occasion, visible to the naked eye in broad daylight.',
     diameter: 12104,
     mass: '4.87',
-    dayLength: 2802.0,
+    dayLength: 5832.0,
     semiMajorAxis: 0.723,
     eccentricity: 0.007,
     orbitalInclination: 3.39,
