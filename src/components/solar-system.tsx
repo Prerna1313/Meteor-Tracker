@@ -205,6 +205,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
     controls.minDistance = 10;
     controls.maxDistance = 3000;
     stateRef.controls = controls;
@@ -270,7 +271,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
              if ((type === 'planet' || type === 'comet') && orbitalSpeed > 0) {
               const semiMajorAxis = distance;
               const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
-              const angle = elapsedTime * (orbitalSpeed / 10);
+              const angle = elapsedTime * (orbitalSpeed / 50);
               
               const x = Math.cos(angle) * semiMajorAxis;
               const z = Math.sin(angle) * semiMinorAxis;
@@ -282,7 +283,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         }
             
         if (rotationSpeed > 0 && planetBody) {
-          planetBody.rotation.y += rotationSpeed / 50;
+          planetBody.rotation.y += rotationSpeed / 100;
         }
         
         if (type === 'planet' || type === 'star' || type === 'comet') {
@@ -304,7 +305,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
 
         for (let i = 0; i < positions.count; i++) {
           let currentAngle = angles.getX(i);
-          currentAngle += speeds.getX(i) * 0.1; // Adjust speed multiplier as needed
+          currentAngle += speeds.getX(i) * 0.01;
           const radius = radii.getX(i);
           positions.setX(i, Math.cos(currentAngle) * radius);
           positions.setZ(i, Math.sin(currentAngle) * radius);
