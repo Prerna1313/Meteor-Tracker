@@ -471,14 +471,11 @@ export function SolarSystem({
         
         let opacity = 0.9;
         let color = objData.color;
-        if (isAsteroid) {
+        if (isAsteroid || isComet) {
             opacity = 0.4;
             color = '#888888';
         }
-        if (isComet) {
-            opacity = 0.7;
-            color = '#A0A0FF';
-        }
+
         if (objData.id === 'earth') opacity = 0.9;
 
         const orbitMaterial = new THREE.LineBasicMaterial({
@@ -513,8 +510,7 @@ export function SolarSystem({
         
         if(line.material instanceof THREE.LineBasicMaterial) {
             let baseOpacity = 0.9;
-            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.4;
-            if (COMET_IDS.includes(id)) baseOpacity = 0.7;
+            if (ASTEROID_IDS.includes(id) || COMET_IDS.includes(id)) baseOpacity = 0.4;
             if (id === 'earth') baseOpacity = 0.9;
             line.material.opacity = isHovered || isSelected ? 1.0 : baseOpacity;
             line.material.needsUpdate = true;
@@ -636,7 +632,7 @@ export function SolarSystem({
       return '#FFFFFF';
     }
     if (COMET_IDS.includes(label.id)) {
-      return '#A0A0FF';
+      return '#FFFFFF';
     }
     return label.color;
   };

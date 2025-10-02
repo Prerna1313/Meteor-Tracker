@@ -594,7 +594,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Borrelly',
     type: 'comet',
     size: 0.1,
-    color: '#FFD700',
+    color: '#AAAAAA',
     description: 'Comet Borrelly is a periodic comet, which was visited by the spacecraft Deep Space 1 in 2001. The comet nucleus is 8 km long and has a highly varied terrain.',
     semiMajorAxis: 3.61, // a (AU)
     eccentricity: 0.624, // e
@@ -611,7 +611,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Hartley 2',
     type: 'comet',
     size: 0.1,
-    color: '#FFD700',
+    color: '#AAAAAA',
     description: 'Comet Hartley 2 is a small periodic comet that was visited by the Deep Impact spacecraft in 2010. Its nucleus is elongated and peanut-shaped.',
     semiMajorAxis: 3.46, // a (AU)
     eccentricity: 0.695, // e
@@ -628,7 +628,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Tempel 1',
     type: 'comet',
     size: 0.1,
-    color: '#FFD700',
+    color: '#AAAAAA',
     description: 'Comet Tempel 1 is a periodic comet discovered in 1867. It was the target of the Deep Impact mission, which released an impactor into the comet nucleus to study its interior.',
     semiMajorAxis: 3.12, // a (AU)
     eccentricity: 0.52, // e
@@ -645,7 +645,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Wild 2',
     type: 'comet',
     size: 0.1,
-    color: '#FFD700',
+    color: '#AAAAAA',
     description: 'Comet Wild 2 is a comet named after Swiss astronomer Paul Wild, who discovered it in 1978. It was visited by the NASA Stardust spacecraft, which returned samples to Earth.',
     semiMajorAxis: 3.44, // a (AU)
     eccentricity: 0.54, // e
