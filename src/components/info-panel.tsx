@@ -28,11 +28,11 @@ export function InfoPanel({ isOpen, onOpenChange, selectedObject, onUpdateMeteor
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[400px] sm:w-[540px] p-0 flex flex-col border-l-2 border-accent/50">
+      <SheetContent className="w-[400px] sm:w-[540px] p-0 flex flex-col bg-background/80 backdrop-blur-sm border-l-2 border-primary/50">
         <SheetHeader className="p-6 pb-2">
           <SheetTitle className="text-2xl font-bold font-headline text-primary">{selectedObject.name}</SheetTitle>
           <SheetDescription>
-            <Badge variant="outline" className="capitalize border-accent/50 text-accent">{selectedObject.type}</Badge>
+            <Badge variant="outline" className="capitalize border-primary/50 text-primary">{selectedObject.type}</Badge>
           </SheetDescription>
         </SheetHeader>
         <ScrollArea className="flex-1">

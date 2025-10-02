@@ -570,7 +570,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
               className={`absolute text-xs p-1 rounded-sm transition-colors duration-300 pointer-events-auto cursor-pointer ${
                 selectedObjectId === label.id
                   ? 'text-primary bg-background/50'
-                  : 'text-white/80'
+                  : 'text-white/80 hover:text-primary'
               }`}
               style={{
                 transform: `translate(10px, -50%) translate(${screenX}px, ${screenY}px)`,
