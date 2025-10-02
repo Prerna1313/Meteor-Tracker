@@ -204,7 +204,7 @@ export function SolarSystem({
 
       camera.aspect =
         mountRef.current.clientWidth / mountRef.current.clientHeight;
-      camera.position.set(0, 40, 120);
+      camera.position.set(30, 15, 65);
       camera.lookAt(0, 0, 0);
       camera.updateProjectionMatrix();
 
