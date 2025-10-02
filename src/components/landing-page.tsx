@@ -36,7 +36,7 @@ export function LandingPage({ isExiting }: LandingPageProps) {
             <h1 className="text-3xl font-light tracking-[0.3em] text-white/70">EYES</h1>
             <h2 className="mt-1 text-md font-light tracking-[0.4em] text-white/50">ON</h2>
         </div>
-         <h1 className="mt-4 text-5xl font-medium tracking-[0.4em] text-white">METEORS</h1>
+         <h1 className="mt-4 text-5xl font-medium tracking-[0.5em] text-white">METEORS</h1>
       </div>
 
       <div className="absolute bottom-10 flex flex-col items-center space-y-2 z-10">
