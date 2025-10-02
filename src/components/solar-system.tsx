@@ -216,43 +216,23 @@ export function SolarSystem({
     };
     window.addEventListener('resize', handleResize);
 
-    const clock = new THREE.Clock();
     const animate = () => {
       if (!stateRef.renderer) return;
       const animationFrameId = requestAnimationFrame(animate);
-      const elapsedTime = clock.getElapsedTime();
       const newLabels: LabelData[] = [];
 
       stateRef.celestialObjects.forEach((obj) => {
-        const {
-          id,
-          type,
-          orbitalSpeed,
-          rotationSpeed,
-          orbitCurve,
-          orbitalOffset = 0,
-        } = obj.userData;
         const body = obj.children.find((c) => (c as THREE.Mesh).isMesh);
-
-        if (id === 'sun') {
-          obj.position.set(0, 0, 0);
-        } else if ((type === 'planet' || type === 'comet') && orbitalSpeed > 0 && orbitCurve) {
-          const t = (elapsedTime * (orbitalSpeed / 50) + orbitalOffset) % 1;
-          const point = orbitCurve.getPointAt(t);
-          obj.position.set(point.x, obj.position.y, point.y); // Keep y for inclination
-        }
-        
-        if (rotationSpeed > 0 && body) {
-          body.rotation.y += rotationSpeed / 100;
+        if (obj.userData.rotationSpeed > 0 && body && obj.userData.id === 'sun') {
+          body.rotation.y += obj.userData.rotationSpeed / 100;
         }
 
-        // Update label positions
         const vector = new THREE.Vector3();
         obj.getWorldPosition(vector);
         const labelPos = vector.clone();
 
         const objSize = obj.userData.size || 0;
-        labelPos.y += objSize; // Offset label above the object
+        labelPos.y += objSize;
 
         newLabels.push({
           id: obj.userData.id,
@@ -385,6 +365,13 @@ export function SolarSystem({
 
         objData.orbitCurve = ellipse;
 
+        // Set static position
+        const t = (objData.orbitalOffset || 0) % 1;
+        const point = ellipse.getPointAt(t);
+        if (celestialObj) {
+            celestialObj.position.set(point.x, celestialObj.position.y, point.y);
+        }
+
         const points = ellipse.getPoints(200);
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
         const orbitMaterial = new THREE.LineBasicMaterial({
@@ -406,6 +393,9 @@ export function SolarSystem({
 
 
       if (celestialObj) {
+        if(objData.id === 'sun') {
+            celestialObj.position.set(0, 0, 0);
+        }
         celestialObj.userData = { ...objData };
         scene.add(celestialObj);
         celestialObjects.set(objData.id, celestialObj);
