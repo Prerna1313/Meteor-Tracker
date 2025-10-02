@@ -570,27 +570,32 @@ export function SolarSystem({
   return (
     <div ref={mountRef} className="absolute top-0 left-0 w-full h-full">
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        {displayedLabels.map((label) => (
-          <div
-            key={label.id}
-            className={`absolute p-1 rounded-sm transition-all duration-300 pointer-events-auto cursor-pointer uppercase tracking-wider text-xs font-medium hover:font-bold ${
-              (hoveredObjectId && hoveredObjectId !== label.id) || (selectedObjectId && selectedObjectId !== label.id) ? 'opacity-50' : 'opacity-100'
-            }`}
-            style={{
-              transform: `translate(10px, -50%) translate(${label.screenX}px, ${label.screenY}px)`,
-              color: getLabelColor(label),
-              opacity: (selectedObjectId && selectedObjectId !== label.id) ? 0.5 : 1,
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelectObject(label.id);
-            }}
-            onMouseEnter={() => onHoverObject(label.id)}
-            onMouseLeave={() => onHoverObject(null)}
-          >
-            {label.name}
-          </div>
-        ))}
+        {displayedLabels.map((label) => {
+          const isAsteroid = ASTEROID_IDS.includes(label.id);
+          return (
+            <div
+              key={label.id}
+              className={`absolute p-1 rounded-sm transition-all duration-300 pointer-events-auto cursor-pointer uppercase tracking-wider text-xs hover:font-bold ${
+                isAsteroid ? 'font-normal' : 'font-medium'
+              } ${
+                (hoveredObjectId && hoveredObjectId !== label.id) || (selectedObjectId && selectedObjectId !== label.id) ? 'opacity-50' : 'opacity-100'
+              }`}
+              style={{
+                transform: `translate(10px, -50%) translate(${label.screenX}px, ${label.screenY}px)`,
+                color: getLabelColor(label),
+                opacity: (selectedObjectId && selectedObjectId !== label.id) ? 0.5 : 1,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectObject(label.id);
+              }}
+              onMouseEnter={() => onHoverObject(label.id)}
+              onMouseLeave={() => onHoverObject(null)}
+            >
+              {label.name}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
