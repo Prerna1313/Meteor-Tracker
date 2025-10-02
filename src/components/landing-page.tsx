@@ -38,12 +38,12 @@ export function LandingPage({ isExiting }: LandingPageProps) {
             alt="Asteroid" 
             width={150}
             height={150}
-            className="mx-auto rounded-full object-cover opacity-60"
+            className="mx-auto rounded-full object-cover opacity-60 mb-8"
             data-ai-hint="asteroid"
         />
-        <h1 className="mt-4 text-4xl font-light tracking-[0.5em] text-white/80">EYES</h1>
-        <h2 className="mt-2 text-sm font-light tracking-[0.9em] text-white/60">ON</h2>
-        <h1 className="mt-4 text-5xl font-medium tracking-[0.4em] text-white">ASTEROIDS</h1>
+        <h1 className="text-5xl font-light tracking-[0.4em] text-white/80">EYES</h1>
+        <h2 className="mt-2 text-lg font-light tracking-[0.7em] text-white/60">ON</h2>
+        <h1 className="mt-2 text-6xl font-medium tracking-[0.2em] text-white">ASTEROIDS</h1>
       </div>
 
       <div className="absolute bottom-10 flex flex-col items-center space-y-2">
