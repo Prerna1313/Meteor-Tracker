@@ -308,7 +308,7 @@ export const solarSystemData: CelestialObject[] = [
     semiMajorAxis: 5.203,
     eccentricity: 0.048,
     orbitalInclination: 1.31,
-    meanLongitude: 34.40,
+    meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 14.75,
     longitudeOfAscendingNode: 100.56,
   },

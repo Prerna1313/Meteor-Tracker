@@ -408,7 +408,7 @@ export function SolarSystem({
         
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(curvePoints);
         
-        let opacity = 0.4;
+        let opacity = 0.9;
         if (ASTEROID_IDS.includes(objData.id)) opacity = 0.4;
         if (objData.id === 'earth') opacity = 0.9;
 
@@ -443,7 +443,7 @@ export function SolarSystem({
         const isSelected = id === selectedObjectId;
         
         if(line.material instanceof THREE.LineBasicMaterial) {
-            let baseOpacity = 0.4;
+            let baseOpacity = 0.9;
             if (ASTEROID_IDS.includes(id)) baseOpacity = 0.4;
             if (id === 'earth') baseOpacity = 0.9;
             line.material.opacity = isHovered || isSelected ? 1.0 : baseOpacity;
