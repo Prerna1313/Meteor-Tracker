@@ -547,12 +547,8 @@ export function SolarSystem({
         {displayedLabels.map((label) => (
           <div
             key={label.id}
-            className={`absolute p-1 rounded-sm transition-all duration-300 pointer-events-auto cursor-pointer uppercase tracking-wider text-xs ${
-              selectedObjectId === label.id
-                ? 'text-white font-bold'
-                : 'text-white/70 hover:text-white'
-            } ${
-                (hoveredObjectId && hoveredObjectId !== label.id) || (selectedObjectId && selectedObjectId !== label.id) ? 'opacity-50' : 'opacity-100'
+            className={`absolute p-1 rounded-sm transition-all duration-300 pointer-events-auto cursor-pointer uppercase tracking-wider text-xs font-medium hover:font-bold ${
+              (hoveredObjectId && hoveredObjectId !== label.id) || (selectedObjectId && selectedObjectId !== label.id) ? 'opacity-50' : 'opacity-100'
             }`}
             style={{
               transform: `translate(10px, -50%) translate(${label.screenX}px, ${label.screenY}px)`,
