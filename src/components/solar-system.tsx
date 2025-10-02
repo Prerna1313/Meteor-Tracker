@@ -28,30 +28,13 @@ const createAsteroidDust = () => {
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particles * 3);
 
-    const textureCanvas = document.createElement('canvas');
-    textureCanvas.width = 32;
-    textureCanvas.height = 32;
-    const context = textureCanvas.getContext('2d');
-    if(context) {
-        const gradient = context.createRadialGradient(16, 16, 0, 16, 16, 16);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-        gradient.addColorStop(0.2, 'rgba(200, 255, 255, 0.6)');
-        gradient.addColorStop(0.7, 'rgba(0, 255, 255, 0.3)');
-        gradient.addColorStop(1, 'rgba(0, 150, 150, 0)');
-        context.fillStyle = gradient;
-        context.fillRect(0, 0, 32, 32);
-    }
-    const texture = new THREE.CanvasTexture(textureCanvas);
-
     const material = new THREE.PointsMaterial({
         color: 0x00bfff,
-        size: 0.3,
-        map: texture,
+        size: 0.05,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         transparent: true,
-        opacity: 0.5,
-        sizeAttenuation: true,
+        opacity: 0.35,
     });
     
     const marsOrbit = 1.524 * AU_SCALE;
@@ -448,9 +431,9 @@ export function SolarSystem({
         const isSelected = id === selectedObjectId;
         
         if(line.material instanceof THREE.LineBasicMaterial) {
-            let baseOpacity = 0.8;
-            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.3;
-            if (id === 'earth') baseOpacity = 1.0;
+            let baseOpacity = 0.4;
+            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.2;
+            if (id === 'earth') baseOpacity = 0.9;
             line.material.opacity = isHovered || isSelected ? 1.0 : baseOpacity;
             line.material.needsUpdate = true;
         }
@@ -490,7 +473,7 @@ export function SolarSystem({
     belt.forEach(obj => {
         if(obj instanceof THREE.Points && obj.material instanceof THREE.PointsMaterial) {
              obj.material.color.setHex(isBeltSelected ? 0xffffff : 0x00bfff);
-             obj.material.opacity = isBeltSelected ? 0.8 : 0.5;
+             obj.material.opacity = isBeltSelected ? 0.7 : 0.35;
         }
     });
 
@@ -564,6 +547,7 @@ export function SolarSystem({
             style={{
               transform: `translate(10px, -50%) translate(${label.screenX}px, ${label.screenY}px)`,
               color: selectedObjectId === label.id ? 'hsl(var(--primary))' : label.color,
+              opacity: (selectedObjectId && selectedObjectId !== label.id) ? 0.5 : 1,
             }}
             onClick={(e) => {
               e.stopPropagation();
