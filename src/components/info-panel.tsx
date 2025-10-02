@@ -29,20 +29,18 @@ const CometIcon = (props: React.SVGProps<SVGSVGElement>) => (
       {...props}
     >
       <path
-        d="M24 4C12.95 4 4 12.95 4 24C4 35.05 12.95 44 24 44C35.05 44 44 35.05 44 24C44 12.95 35.05 4 24 4Z"
-        fill="currentColor"
-        fillOpacity="0.1"
-      />
-      <path
-        d="M17.5 17.5L20 15L22.5 17.5L25 15L27.5 17.5"
-        stroke="white"
+        d="M13.9999 25.6667C13.9999 25.6667 23.3333 19.8334 23.3333 13.4167V6.41669L13.9999 2.33335L4.66659 6.41669V13.4167C4.66659 19.8334 13.9999 25.6667Z"
+        stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        fill="currentColor"
+        fillOpacity="0.1"
       />
-      <path
-        d="M15 25C15 25 18.5 28.5 24 28.5C29.5 28.5 33 25 33 25"
+       <path
+        d="M24.3333 2.33335L19.6666 14.8334L11.8333 13.5L16.5 21.8334L6.83325 25.6667L18.4999 25.6667L21.1666 34.3334L25.3333 25.6667L34.8333 31.8334L29.4999 23.5L38.3333 20.3334L29.4999 18.5L34.8333 8.33335L26.1666 14.8334L24.3333 2.33335Z"
         stroke="white"
+        strokeOpacity="0.8"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -90,13 +88,13 @@ export function InfoPanel({ object, onClose, solarSystemData }: InfoPanelProps) 
 
     const essentialStats = [
         { label: "Size", description: "Diameter", value: `${object.diameter?.toLocaleString() ?? 'N/A'} km`, condition: object.diameter },
-        { label: "Orbital Period", description: "Time to complete one solar orbit", value: `${object.orbitalSpeed.toFixed(2)} years`, condition: object.orbitalSpeed },
         { label: "Rotation Period", description: "Length of one day", value: `${object.dayLength?.toLocaleString() ?? 'N/A'} hours`, condition: object.dayLength },
         { label: "Distance from Earth", description: "Current", value: '2.5 AU', condition: true }, // Placeholder
         { label: "Discovered", description: "Year", value: object.discoveryYear, condition: object.discoveryYear && (object.type === 'comet' || object.type !== 'planet' )},
     ].filter(stat => stat.condition);
-
+    
     const orbitalPathStats = [
+        { label: "Orbital Period", description: "Time to complete one solar orbit", value: `${object.orbitalSpeed.toFixed(2)} years`, condition: object.orbitalSpeed },
         { label: "Eccentricity", description: "Orbit shape", value: object.eccentricity?.toFixed(3) ?? 'N/A', condition: object.eccentricity !== undefined },
         { label: "Perihelion", description: "Closest to Sun", value: `${object.perihelion?.toFixed(2) ?? 'N/A'} AU`, condition: object.perihelion !== undefined },
         { label: "Aphelion", description: "Farthest from Sun", value: `${object.aphelion?.toFixed(2) ?? 'N/A'} AU`, condition: object.aphelion !== undefined },
@@ -152,7 +150,7 @@ export function InfoPanel({ object, onClose, solarSystemData }: InfoPanelProps) 
                         {object.type !== 'comet' && object.type !== 'planet' && <AsteroidIcon className="w-8 h-8 opacity-80" />}
                         
                         <div className="flex flex-col">
-                            {object.type !== 'comet' && object.id.match(/\d+/) && <p className="text-xl text-white/80">{object.id.match(/\d+/)?.[0]}</p>}
+                            {object.type !== 'comet' && object.id.match(/\d+/) && <p className="text-lg text-white/80">{object.id.match(/\d+/)?.[0]}</p>}
                             <h2 className="text-2xl">{object.name}</h2>
                         </div>
                     </div>
