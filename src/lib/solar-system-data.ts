@@ -35,7 +35,7 @@ export const solarSystemData: CelestialObject[] = [
     id: 'sun',
     name: 'Sun',
     type: 'star',
-    size: 6,
+    size: 4,
     distance: 0,
     color: '#FFD700',
     orbitalSpeed: 0,
@@ -446,3 +446,5 @@ export const solarSystemData: CelestialObject[] = [
     longitudeOfAscendingNode: 131.72,
   },
 ];
+
+    
