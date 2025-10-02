@@ -559,8 +559,8 @@ export function SolarSystem({
 
     comets.forEach(cometData => {
         const cometGroup = new THREE.Group();
-        const headGeometry = new THREE.IcosahedronGeometry(cometData.size, 0);
-        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, flatShading: true });
+        const headGeometry = new THREE.IcosahedronGeometry(cometData.size / 4, 3);
+        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 });
         const head = new THREE.Mesh(headGeometry, headMaterial);
         cometGroup.add(head);
 
@@ -692,3 +692,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
