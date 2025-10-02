@@ -82,14 +82,9 @@ const createSunGlow = () => {
 };
 
 const createGalaxy = () => {
-  const particles = 100000;
-  const geometry = new THREE.BufferGeometry();
-  const positions = new Float32Array(particles * 3);
-  const colors = new Float32Array(particles * 3);
-  const color = new THREE.Color();
-  const radius = 50000;
-  
   const parameters = {
+      count: 100000,
+      size: 20,
       radius: 50000,
       branches: 4,
       spin: 1,
@@ -99,44 +94,47 @@ const createGalaxy = () => {
       outsideColor: '#1b3984'
   };
 
-  const insideColor = new THREE.Color(parameters.insideColor);
-  const outsideColor = new THREE.Color(parameters.outsideColor);
+  const geometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(parameters.count * 3);
+  const colors = new Float32Array(parameters.count * 3);
 
+  const colorInside = new THREE.Color(parameters.insideColor);
+  const colorOutside = new THREE.Color(parameters.outsideColor);
 
-  for (let i = 0; i < particles; i++) {
-    const i3 = i * 3;
+  for(let i = 0; i < parameters.count; i++) {
+      const i3 = i * 3;
 
-    // Position
-    const r = Math.random() * parameters.radius;
-    const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2;
+      // Position
+      const radius = Math.random() * parameters.radius;
+      const spinAngle = radius * 0.0001; // This should be small to make arms visible
+      const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2;
+      
+      const randomX = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius;
+      const randomY = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius * 0.1;
+      const randomZ = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius;
 
-    const randomX = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * r;
-    const randomY = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * r * 0.1;
-    const randomZ = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * r;
+      positions[i3    ] = Math.cos(branchAngle + spinAngle) * radius + randomX;
+      positions[i3 + 1] = randomY;
+      positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
 
+      // Color
+      const mixedColor = colorInside.clone();
+      mixedColor.lerp(colorOutside, radius / parameters.radius);
 
-    positions[i3    ] = Math.cos(branchAngle + r * 0.0001) * r + randomX;
-    positions[i3 + 1] = randomY;
-    positions[i3 + 2] = Math.sin(branchAngle + r * 0.0001) * r + randomZ;
-    
-    // Color
-    const mixedColor = insideColor.clone();
-    mixedColor.lerp(outsideColor, r / parameters.radius);
-
-    colors[i3    ] = mixedColor.r;
-    colors[i3 + 1] = mixedColor.g;
-    colors[i3 + 2] = mixedColor.b;
+      colors[i3    ] = mixedColor.r;
+      colors[i3 + 1] = mixedColor.g;
+      colors[i3 + 2] = mixedColor.b;
   }
 
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
   const material = new THREE.PointsMaterial({
-    size: 20,
-    sizeAttenuation: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    vertexColors: true
+      size: parameters.size,
+      sizeAttenuation: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      vertexColors: true
   });
 
   const galaxy = new THREE.Points(geometry, material);
@@ -197,7 +195,7 @@ const createStardust = (
 };
 
 const createAsteroidBelt = (count: number) => {
-  const baseGeometry = new THREE.IcosahedronGeometry(0.5, 0);
+  const baseGeometry = new THREE.IcosahedronGeometry(0.5, 1);
   const material = new THREE.MeshStandardMaterial({
     color: 0xaaaaaa,
     roughness: 0.8,
@@ -659,7 +657,7 @@ export function SolarSystem({
     comets.forEach(cometData => {
         const cometGroup = new THREE.Group();
         const headGeometry = new THREE.IcosahedronGeometry(cometData.size, 1);
-        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, emissive: 0x66ddff, emissiveIntensity: 0 });
+        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 });
         const head = new THREE.Mesh(headGeometry, headMaterial);
         cometGroup.add(head);
 
@@ -791,3 +789,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
