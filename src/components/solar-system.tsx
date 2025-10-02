@@ -140,14 +140,14 @@ const createAsteroidBelt = (scene: THREE.Scene, asteroids: any[]) => {
 
 // Function to create the stardust background
 const createStardust = (scene: THREE.Scene) => {
-  const starCount = 5000;
+  const starCount = 20000;
   const particles = new THREE.BufferGeometry();
   const positions = new Float32Array(starCount * 3);
 
   for (let i = 0; i < starCount; i++) {
-    const x = THREE.MathUtils.randFloatSpread(4000);
-    const y = THREE.MathUtils.randFloatSpread(4000);
-    const z = THREE.MathUtils.randFloatSpread(4000);
+    const x = THREE.MathUtils.randFloatSpread(10000);
+    const y = THREE.MathUtils.randFloatSpread(10000);
+    const z = THREE.MathUtils.randFloatSpread(10000);
     positions[i * 3] = x;
     positions[i * 3 + 1] = y;
     positions[i * 3 + 2] = z;
@@ -157,7 +157,7 @@ const createStardust = (scene: THREE.Scene) => {
   
   const particleMaterial = new THREE.PointsMaterial({
     color: 0xffffff,
-    size: 0.5,
+    size: 1.5,
     transparent: true,
     opacity: 0.8,
   });
@@ -173,7 +173,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
   const [labels, setLabels] = useState<LabelData[]>([]);
   const stateRef = useRef({
     scene: new THREE.Scene(),
-    camera: new THREE.PerspectiveCamera(75, 1, 0.1, 5000),
+    camera: new THREE.PerspectiveCamera(75, 1, 0.1, 20000),
     renderer: null as THREE.WebGLRenderer | null,
     controls: null as OrbitControls | null,
     clickableObjects: [] as THREE.Object3D[],
@@ -207,7 +207,7 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.minDistance = 10;
-    controls.maxDistance = 3000;
+    controls.maxDistance = 10000;
     stateRef.controls = controls;
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
@@ -590,5 +590,3 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     </div>
   );
 }
-
-    
