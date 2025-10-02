@@ -85,7 +85,7 @@ const createAsteroidDust = () => {
     for (let i = 0; i < particles; i++) {
         const isMainBelt = Math.random() > 0.1;
         const dist = isMainBelt 
-            ? THREE.MathUtils.randFloat(150, 250) 
+            ? THREE.MathUtils.randFloat(200, 250) 
             : THREE.MathUtils.randFloat(0, 250);
 
         const angle = Math.random() * Math.PI * 2;
@@ -263,13 +263,16 @@ export function SolarSystem({
 
   useEffect(() => {
     const { scene, clickableObjects, celestialObjects, orbitLines } = stateRef;
-    
+
+    // Clear previous objects, but keep the asteroid belt
     celestialObjects.forEach(obj => scene.remove(obj));
     celestialObjects.clear();
     orbitLines.forEach(line => scene.remove(line));
     orbitLines.length = 0;
-    
-    stateRef.clickableObjects = stateRef.clickableObjects.filter(obj => obj.userData.id === 'asteroid_belt');
+
+    // Reset clickable objects, preserving the asteroid belt if it exists
+    const asteroidBelt = clickableObjects.find(obj => obj.userData.id === 'asteroid_belt');
+    stateRef.clickableObjects = asteroidBelt ? [asteroidBelt] : [];
 
 
     data.forEach((objData) => {
