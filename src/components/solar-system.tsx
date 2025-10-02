@@ -81,41 +81,49 @@ const createSunGlow = () => {
 };
 
 const createStardust = (count: number): Stardust => {
-  const particles = new THREE.BufferGeometry();
-  const positions = new Float32Array(count * 3);
-  const colors = new Float32Array(count * 3);
+    const particles = new THREE.BufferGeometry();
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
 
-  const color = new THREE.Color('#1b3984');
+    const realisticStarColors = [
+        new THREE.Color('#FFFFFF'),
+        new THREE.Color('#FFF8E7'),
+        new THREE.Color('#D4E5FF'),
+    ];
 
-  for (let i = 0; i < count; i++) {
-    const i3 = i * 3;
-    const radius = THREE.MathUtils.randFloat(50, 50000);
-    const angle = Math.random() * Math.PI * 2;
-    
-    positions[i3] = Math.cos(angle) * radius;
-    positions[i3 + 1] = THREE.MathUtils.randFloatSpread(5000);
-    positions[i3 + 2] = Math.sin(angle) * radius;
+    for (let i = 0; i < count; i++) {
+        const i3 = i * 3;
+        const radius = THREE.MathUtils.randFloat(50, 50000);
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos((Math.random() * 2) - 1);
+        
+        positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+        positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+        positions[i3 + 2] = radius * Math.cos(phi);
 
-    colors[i3] = color.r;
-    colors[i3 + 1] = color.g;
-    colors[i3 + 2] = color.b;
-  }
+        const baseColor = realisticStarColors[Math.floor(Math.random() * realisticStarColors.length)];
+        const finalColor = baseColor.clone().multiplyScalar(THREE.MathUtils.randFloat(0.6, 1.0));
+        
+        colors[i3] = finalColor.r;
+        colors[i3 + 1] = finalColor.g;
+        colors[i3 + 2] = finalColor.b;
+    }
 
-  particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-  const particleMaterial = new THREE.PointsMaterial({
-    size: 20,
-    sizeAttenuation: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    vertexColors: true,
-    transparent: true,
-    opacity: 0.8,
-  });
+    const particleMaterial = new THREE.PointsMaterial({
+        size: THREE.MathUtils.randFloat(15, 25),
+        sizeAttenuation: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.9,
+    });
 
-  const points = new THREE.Points(particles, particleMaterial);
-  return { points };
+    const points = new THREE.Points(particles, particleMaterial);
+    return { points };
 };
 
 
@@ -278,7 +286,7 @@ export function SolarSystem({
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
       controls.minDistance = 10;
-      controls.maxDistance = 10000;
+      controls.maxDistance = 20000;
       stateRef.controls = controls;
 
       scene.add(new THREE.AmbientLight(0xffffff, 0.3));
