@@ -38,7 +38,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Mercury',
     type: 'planet',
     size: 2,
-    distance: 80,
+    distance: 60,
     color: '#9C27B0', // Purple
     orbitalSpeed: 1.6,
     rotationSpeed: 0.1,
@@ -53,7 +53,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Venus',
     type: 'planet',
     size: 4,
-    distance: 120,
+    distance: 90,
     color: '#FFC107', // Dark Yellow
     orbitalSpeed: 1.2,
     rotationSpeed: 0.08,
@@ -68,7 +68,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Earth',
     type: 'planet',
     size: 4,
-    distance: 150,
+    distance: 120,
     color: '#2196F3', // Shiny Blue
     orbitalSpeed: 1,
     rotationSpeed: 0.5,
@@ -83,7 +83,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Mars',
     type: 'planet',
     size: 3,
-    distance: 200,
+    distance: 150,
     color: '#FF9800', // Light Orange
     orbitalSpeed: 0.8,
     rotationSpeed: 0.45,

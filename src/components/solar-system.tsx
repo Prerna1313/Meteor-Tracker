@@ -85,8 +85,8 @@ const createAsteroidDust = () => {
         // Concentrate most particles in the main belt region
         const isMainBelt = Math.random() > 0.1;
         const dist = isMainBelt 
-            ? THREE.MathUtils.randFloat(200, 250) 
-            : THREE.MathUtils.randFloat(0, 250);
+            ? THREE.MathUtils.randFloat(160, 280) // Between Mars and Jupiter
+            : THREE.MathUtils.randFloat(50, 280);
 
         const angle = Math.random() * Math.PI * 2;
         // Keep it relatively flat
