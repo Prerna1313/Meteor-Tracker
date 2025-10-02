@@ -30,6 +30,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  devIndicators: {
+    allowedDevOrigins: [
+      '**', // Allow any origin for development, as the cloud workstation URL can change.
+    ],
+  },
 };
 
 export default nextConfig;
