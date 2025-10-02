@@ -98,7 +98,7 @@ const createAsteroidDust = () => {
         if (zone < 0.7) { // 70% in Main Belt
             dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
             y = THREE.MathUtils.randFloatSpread(8); 
-        } else if (zone < 0.8) { // 10% in Inner System
+        } else if (zone < 0.1) { // 10% in Inner System
             dist = THREE.MathUtils.randFloat(0, mainBeltInner);
             y = THREE.MathUtils.randFloatSpread(4);
         } else { // 20% in Outer System
@@ -118,6 +118,40 @@ const createAsteroidDust = () => {
     points.userData = { id: 'asteroid_belt', name: 'Asteroid Belt' };
     return points;
 };
+
+const createMeteors = () => {
+  const meteorCount = 200;
+  const meteors = new THREE.Group();
+  const meteorMaterial = new THREE.MeshStandardMaterial({
+    color: 0x888888,
+    roughness: 0.8,
+    metalness: 0.5,
+  });
+
+  const marsOrbit = 125;
+  const jupiterOrbit = 200;
+  const mainBeltInner = marsOrbit + 15;
+  const mainBeltOuter = jupiterOrbit - 25;
+
+  for (let i = 0; i < meteorCount; i++) {
+    const size = THREE.MathUtils.randFloat(0.1, 0.5);
+    const meteorGeometry = new THREE.IcosahedronGeometry(size, 0);
+    const meteor = new THREE.Mesh(meteorGeometry, meteorMaterial);
+
+    const dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
+    const angle = Math.random() * Math.PI * 2;
+    const y = THREE.MathUtils.randFloatSpread(10);
+
+    meteor.position.set(
+      Math.cos(angle) * dist,
+      y,
+      Math.sin(angle) * dist
+    );
+    
+    meteors.add(meteor);
+  }
+  return meteors;
+}
 
 
 export function SolarSystem({
@@ -311,6 +345,9 @@ export function SolarSystem({
     scene.add(asteroidDust);
     clickableObjects.push(asteroidDust);
 
+    const meteors = createMeteors();
+    scene.add(meteors);
+
     data.forEach((objData) => {
       let celestialObj: THREE.Object3D | null = null;
       
@@ -485,3 +522,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
