@@ -17,6 +17,8 @@ type SolarSystemProps = {
   data: CelestialObject[];
   selectedObjectId: string | null;
   onSelectObject: (id: string | null) => void;
+  hoveredObjectId: string | null;
+  onHoverObject: (id: string | null) => void;
 };
 
 const createAsteroidDust = () => {
@@ -124,6 +126,8 @@ export function SolarSystem({
   data,
   selectedObjectId,
   onSelectObject,
+  hoveredObjectId,
+  onHoverObject,
 }: SolarSystemProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const [labels, setLabels] = useState<LabelData[]>([]);
@@ -137,6 +141,7 @@ export function SolarSystem({
     textureLoader: new THREE.TextureLoader(),
     clickableObjects: [] as THREE.Object3D[],
     celestialObjects: new Map<string, THREE.Object3D>(),
+    orbitLines: new Map<string, THREE.Line>(),
   }).current;
 
   useEffect(() => {
@@ -224,7 +229,7 @@ export function SolarSystem({
       stateRef.celestialObjects.forEach((obj) => {
         const body = obj.children.find((c) => (c as THREE.Mesh).isMesh);
         if (obj.userData.rotationSpeed > 0 && body && obj.userData.id === 'sun') {
-          body.rotation.y += obj.userData.rotationSpeed / 100;
+          // body.rotation.y += obj.userData.rotationSpeed / 100;
         }
 
         const vector = new THREE.Vector3();
@@ -263,7 +268,7 @@ export function SolarSystem({
   }, [stateRef, onSelectObject, data]);
 
   useEffect(() => {
-    const { scene, clickableObjects, celestialObjects } = stateRef;
+    const { scene, clickableObjects, celestialObjects, orbitLines } = stateRef;
 
     // --- Scene Cleanup ---
     while (scene.children.length > 0) {
@@ -281,6 +286,7 @@ export function SolarSystem({
     }
     celestialObjects.clear();
     clickableObjects.length = 0;
+    orbitLines.clear();
 
     // --- Scene Rebuilding ---
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
@@ -300,7 +306,7 @@ export function SolarSystem({
         const starGeometry = new THREE.SphereGeometry(objData.size, 32, 32);
         const starMaterial = new THREE.MeshBasicMaterial({ color: 0xFFD700, toneMapped: false });
         const starMesh = new THREE.Mesh(starGeometry, starMaterial);
-        starMesh.userData.isPlanetBody = true; // For rotation
+        starMesh.userData.isPlanetBody = true;
         starGroup.add(starMesh);
 
         const pointLight = new THREE.PointLight(0xffd886, 50, 5000);
@@ -309,10 +315,16 @@ export function SolarSystem({
 
       } else if (objData.type === 'planet') {
         const objectGroup = new THREE.Group();
-        const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
+        
+        let geometry;
+        if (objData.id === 'eurybates') {
+          geometry = new THREE.IcosahedronGeometry(objData.size, 0); // Hexagon-like
+        } else {
+          geometry = new THREE.SphereGeometry(objData.size, 32, 32);
+        }
+
         const material = new THREE.MeshStandardMaterial({
           color: new THREE.Color(objData.color),
-          // For stoney figures like Eurybates, don't make them emissive.
           emissive: objData.id === 'eurybates' ? new THREE.Color(0x000000) : new THREE.Color(objData.color),
           emissiveIntensity: 0.6,
         });
@@ -365,7 +377,6 @@ export function SolarSystem({
 
         objData.orbitCurve = ellipse;
 
-        // Set static position
         const t = (objData.orbitalOffset || 0) % 1;
         const point = ellipse.getPointAt(t);
         if (celestialObj) {
@@ -375,7 +386,7 @@ export function SolarSystem({
         const points = ellipse.getPoints(200);
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
         const orbitMaterial = new THREE.LineBasicMaterial({
-          color: new THREE.Color(objData.color),
+          color: objData.id === 'eurybates' ? new THREE.Color(0xffffff) : new THREE.Color(objData.color),
           transparent: true,
           opacity: 0.3,
         });
@@ -383,12 +394,13 @@ export function SolarSystem({
         orbit.rotation.x = Math.PI / 2;
 
         const inclination = THREE.MathUtils.degToRad(objData.orbitalInclination || 0);
-        orbit.rotation.z = inclination; // Approximation of inclination
+        orbit.rotation.z = inclination; 
         if (celestialObj) {
             celestialObj.rotation.z = inclination;
         }
 
         scene.add(orbit);
+        orbitLines.set(objData.id, orbit);
       }
 
 
@@ -405,6 +417,17 @@ export function SolarSystem({
   }, [data, stateRef]);
 
   useEffect(() => {
+    stateRef.orbitLines.forEach((line, id) => {
+        const isHovered = id === hoveredObjectId;
+        const isSelected = id === selectedObjectId;
+        if(line.material instanceof THREE.LineBasicMaterial) {
+            line.material.opacity = isHovered || isSelected ? 0.8 : 0.3;
+            line.material.needsUpdate = true;
+        }
+    });
+  }, [hoveredObjectId, selectedObjectId, stateRef.orbitLines]);
+
+  useEffect(() => {
     stateRef.celestialObjects.forEach((obj, id) => {
       const isSelected = id === selectedObjectId;
       const body = obj.children.find((c) => (c as THREE.Mesh).isMesh) as
@@ -417,7 +440,6 @@ export function SolarSystem({
             (body.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
         } else {
             const originalColor = obj.userData.color || 0xaaaaaa;
-            // Eurybates should not be emissive unless selected
             const emissiveColor = obj.userData.id === 'eurybates' ? 0x000000 : new THREE.Color(originalColor);
             (body.material as THREE.MeshStandardMaterial).emissive.set(emissiveColor);
             (body.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.6;
@@ -449,7 +471,6 @@ export function SolarSystem({
     return labels
       .map(label => {
         const vector = label.position.clone().project(stateRef.camera);
-        // Don't display labels that are behind the camera
         if (vector.z > 1) return null;
 
         return {
@@ -481,6 +502,8 @@ export function SolarSystem({
               e.stopPropagation();
               onSelectObject(label.id);
             }}
+            onMouseEnter={() => onHoverObject(label.id)}
+            onMouseLeave={() => onHoverObject(null)}
           >
             {label.name}
           </div>

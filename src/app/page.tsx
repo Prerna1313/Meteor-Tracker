@@ -11,6 +11,8 @@ import { InfoPanel } from '@/components/info-panel';
 
 export default function Home() {
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
+  const [hoveredObjectId, setHoveredObjectId] = useState<string | null>(null);
+
 
   const selectedObjectData = (() => {
     if (!selectedObjectId) return null;
@@ -36,6 +38,8 @@ export default function Home() {
           data={solarSystemData}
           onSelectObject={setSelectedObjectId}
           selectedObjectId={selectedObjectId}
+          onHoverObject={setHoveredObjectId}
+          hoveredObjectId={hoveredObjectId}
         />
       </div>
       {selectedObjectData && (

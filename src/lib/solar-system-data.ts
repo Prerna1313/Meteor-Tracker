@@ -38,7 +38,7 @@ export const solarSystemData: CelestialObject[] = [
     type: 'star',
     size: 8,
     distance: 0,
-    color: '#FFFF8F',
+    color: '#FFD700',
     orbitalSpeed: 0,
     rotationSpeed: 0.05,
     description: 'The Sun is the star at the center of the Solar System. It is a nearly perfect sphere of hot plasma, heated to incandescence by nuclear fusion reactions in its core.',
@@ -118,7 +118,7 @@ export const solarSystemData: CelestialObject[] = [
     color: '#888888', // Stoney grey
     orbitalSpeed: 0.4,
     rotationSpeed: 0.2,
-    orbitalOffset: 0.15,
+    orbitalOffset: 0.85,
     eccentricity: 0.048,
     description: 'Eurybates is a Greek Jupiter Trojan asteroid. It is a C-type asteroid and one of the targets of the Lucy mission. It has a small satellite, named Queta.',
     diameter: 64,
