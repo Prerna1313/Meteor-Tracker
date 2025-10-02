@@ -11,6 +11,7 @@ type LabelData = {
   name: string;
   color: string;
   position: THREE.Vector3;
+  type: CelestialObject['type'];
 };
 
 type SolarSystemProps = {
@@ -152,6 +153,15 @@ const createKuiperMeteors = () => {
 
 
 const ASTEROID_IDS = ['eurybates', 'orus', 'mathilde', 'patroclus', 'ceres', 'annefrank', 'leucus', 'itokawa', 'eros', 'bennu', 'ryugu', 'donaldjohanson', 'braille', 'polymele', 'lutetia', 'psyche', 'ida', 'gaspra', 'apophis', 'didymos', 'vesta'];
+const COMET_IDS = ['borrelly', 'hartley2', 'tempel1', 'wild2'];
+
+const CometIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16z"/>
+        <path d="M19.41 11H22v2h-2.59l-3.46 3.46-1.42-1.42L19.41 11zM18 6.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/>
+    </svg>
+);
+
 
 export function SolarSystem({
   data,
@@ -261,7 +271,7 @@ export function SolarSystem({
 
       stateRef.celestialObjects.forEach((objGroup, id) => {
         const objData = objGroup.userData as CelestialObject;
-        if (objData.type === 'planet') {
+        if (objData.type === 'planet' || objData.type === 'comet') {
           const a = objData.semiMajorAxis;
           const e = objData.eccentricity ?? 0;
           const i = THREE.MathUtils.degToRad(objData.orbitalInclination ?? 0);
@@ -309,6 +319,7 @@ export function SolarSystem({
           name: objGroup.userData.name,
           color: objGroup.userData.color,
           position: labelPos,
+          type: objGroup.userData.type,
         });
       });
       
@@ -379,9 +390,12 @@ export function SolarSystem({
         objectGroup.add(starMesh);
         celestialObj = objectGroup;
 
-      } else if (objData.type === 'planet') {
+      } else if (objData.type === 'planet' || objData.type === 'comet') {
         let geometry;
-        if (ASTEROID_IDS.includes(objData.id)) {
+        const isAsteroid = ASTEROID_IDS.includes(objData.id);
+        const isComet = COMET_IDS.includes(objData.id);
+
+        if (isAsteroid || isComet) {
           geometry = new THREE.IcosahedronGeometry(objData.size, 0); 
         } else {
           geometry = new THREE.SphereGeometry(objData.size, 32, 32);
@@ -389,9 +403,9 @@ export function SolarSystem({
 
         const material = new THREE.MeshStandardMaterial({
           color: new THREE.Color(objData.color),
-          emissive: ASTEROID_IDS.includes(objData.id) ? new THREE.Color(0x000000) : new THREE.Color(objData.color),
-          emissiveIntensity: ASTEROID_IDS.includes(objData.id) ? 0 : 0.6,
-          roughness: ASTEROID_IDS.includes(objData.id) ? 1 : 0.5,
+          emissive: (isAsteroid || isComet) ? new THREE.Color(0x000000) : new THREE.Color(objData.color),
+          emissiveIntensity: (isAsteroid || isComet) ? 0 : 0.6,
+          roughness: (isAsteroid || isComet) ? 1 : 0.5,
           metalness: 0,
         });
         const body = new THREE.Mesh(geometry, material);
@@ -433,8 +447,10 @@ export function SolarSystem({
 
         const curvePoints: THREE.Vector3[] = [];
         const argOfPeri = varpi - Omega;
-        for (let j = 0; j <= 200; j++) {
-            const M = (j / 200) * 2 * Math.PI;
+        
+        const pointCount = isComet ? 100 : 200;
+        for (let j = 0; j <= pointCount; j++) {
+            const M = (j / pointCount) * 2 * Math.PI;
             let E = M;
             for (let k = 0; k < 5; k++) {
               E = M + e * Math.sin(E);
@@ -453,11 +469,19 @@ export function SolarSystem({
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(curvePoints);
         
         let opacity = 0.9;
-        if (ASTEROID_IDS.includes(objData.id)) opacity = 0.4;
+        let color = objData.color;
+        if (isAsteroid) {
+            opacity = 0.4;
+            color = '#888888';
+        }
+        if (isComet) {
+            opacity = 0.7;
+            color = '#A0A0FF';
+        }
         if (objData.id === 'earth') opacity = 0.9;
 
         const orbitMaterial = new THREE.LineBasicMaterial({
-          color: ASTEROID_IDS.includes(objData.id) ? new THREE.Color(0x888888) : new THREE.Color(objData.color),
+          color: new THREE.Color(color),
           transparent: true,
           opacity: opacity,
         });
@@ -489,6 +513,7 @@ export function SolarSystem({
         if(line.material instanceof THREE.LineBasicMaterial) {
             let baseOpacity = 0.9;
             if (ASTEROID_IDS.includes(id)) baseOpacity = 0.4;
+            if (COMET_IDS.includes(id)) baseOpacity = 0.7;
             if (id === 'earth') baseOpacity = 0.9;
             line.material.opacity = isHovered || isSelected ? 1.0 : baseOpacity;
             line.material.needsUpdate = true;
@@ -504,14 +529,15 @@ export function SolarSystem({
         | undefined;
 
       if (body?.material instanceof THREE.MeshStandardMaterial) {
+        const isAsteroid = ASTEROID_IDS.includes(obj.userData.id) || COMET_IDS.includes(obj.userData.id);
         if (isSelected) {
           (body.material as THREE.MeshStandardMaterial).emissive.setHex(0xffffff);
           (body.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
         } else {
             const originalColor = obj.userData.color || 0xaaaaaa;
-            const emissiveColor = ASTEROID_IDS.includes(obj.userData.id) ? 0x000000 : new THREE.Color(originalColor);
+            const emissiveColor = isAsteroid ? 0x000000 : new THREE.Color(originalColor);
             (body.material as THREE.MeshStandardMaterial).emissive.set(emissiveColor);
-            (body.material as THREE.MeshStandardMaterial).emissiveIntensity = ASTEROID_IDS.includes(obj.userData.id) ? 0 : 0.6;
+            (body.material as THREE.MeshStandardMaterial).emissiveIntensity = isAsteroid ? 0 : 0.6;
         }
         body.material.needsUpdate = true;
       }
@@ -608,6 +634,9 @@ export function SolarSystem({
     if (ASTEROID_IDS.includes(label.id)) {
       return '#FFFFFF';
     }
+    if (COMET_IDS.includes(label.id)) {
+      return '#A0A0FF';
+    }
     return label.color;
   };
 
@@ -616,11 +645,12 @@ export function SolarSystem({
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         {displayedLabels.map((label) => {
           const isAsteroid = ASTEROID_IDS.includes(label.id);
+          const isComet = label.type === 'comet';
           return (
             <div
               key={label.id}
-              className={`absolute p-1 rounded-sm transition-all duration-300 pointer-events-auto cursor-pointer uppercase tracking-wider text-xs hover:font-bold ${
-                isAsteroid ? 'font-normal' : 'font-medium'
+              className={`absolute flex items-center gap-1.5 p-1 rounded-sm transition-all duration-300 pointer-events-auto cursor-pointer uppercase tracking-wider text-xs hover:font-bold ${
+                isAsteroid || isComet ? 'font-normal' : 'font-medium'
               } ${
                 (hoveredObjectId && hoveredObjectId !== label.id) || (selectedObjectId && selectedObjectId !== label.id) ? 'opacity-50' : 'opacity-100'
               }`}
@@ -636,6 +666,7 @@ export function SolarSystem({
               onMouseEnter={() => onHoverObject(label.id)}
               onMouseLeave={() => onHoverObject(null)}
             >
+              {isComet && <CometIcon className="w-4 h-4" />}
               {label.name}
             </div>
           );

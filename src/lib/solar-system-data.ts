@@ -4,7 +4,7 @@ import * as THREE from 'three';
 export type CelestialObject = {
   id: string;
   name: string;
-  type: 'star' | 'planet' | 'region';
+  type: 'star' | 'planet' | 'region' | 'comet';
   size: number;
   distance: number; // Semi-major axis (a) in AU for planets, used for scaling here
   color: string;
@@ -588,5 +588,73 @@ export const solarSystemData: CelestialObject[] = [
     longitudeOfPerihelion: 151.0,
     longitudeOfAscendingNode: 103.8,
     distance: 8.4 * AU_SCALE,
-  }
+  },
+  {
+    id: 'borrelly',
+    name: 'Borrelly',
+    type: 'comet',
+    size: 0.1,
+    color: '#FFD700',
+    description: 'Comet Borrelly is a periodic comet, which was visited by the spacecraft Deep Space 1 in 2001. The comet nucleus is 8 km long and has a highly varied terrain.',
+    semiMajorAxis: 3.61, // a (AU)
+    eccentricity: 0.624, // e
+    orbitalInclination: 30.3, // i (degrees)
+    longitudeOfAscendingNode: 76.5, // Ω (degrees)
+    longitudeOfPerihelion: 352.5, // Argument of Perihelion ϖ (degrees)
+    orbitalSpeed: 6.84, // Period (years)
+    meanLongitude: Math.random() * 360, // L (degrees) - randomized
+    rotationSpeed: 0.2,
+    distance: 9 * AU_SCALE,
+  },
+  {
+    id: 'hartley2',
+    name: 'Hartley 2',
+    type: 'comet',
+    size: 0.1,
+    color: '#FFD700',
+    description: 'Comet Hartley 2 is a small periodic comet that was visited by the Deep Impact spacecraft in 2010. Its nucleus is elongated and peanut-shaped.',
+    semiMajorAxis: 3.46, // a (AU)
+    eccentricity: 0.695, // e
+    orbitalInclination: 13.6, // i (degrees)
+    longitudeOfAscendingNode: 219.7, // Ω (degrees)
+    longitudeOfPerihelion: 181.1, // Argument of Perihelion ϖ (degrees)
+    orbitalSpeed: 6.46, // Period (years)
+    meanLongitude: Math.random() * 360, // L (degrees) - randomized
+    rotationSpeed: 0.2,
+    distance: 8.9 * AU_SCALE,
+  },
+  {
+    id: 'tempel1',
+    name: 'Tempel 1',
+    type: 'comet',
+    size: 0.1,
+    color: '#FFD700',
+    description: 'Comet Tempel 1 is a periodic comet discovered in 1867. It was the target of the Deep Impact mission, which released an impactor into the comet nucleus to study its interior.',
+    semiMajorAxis: 3.12, // a (AU)
+    eccentricity: 0.52, // e
+    orbitalInclination: 10.5, // i (degrees)
+    longitudeOfAscendingNode: 69.4, // Ω (degrees)
+    longitudeOfPerihelion: 179.1, // Argument of Perihelion ϖ (degrees)
+    orbitalSpeed: 5.58, // Period (years)
+    meanLongitude: Math.random() * 360, // L (degrees) - randomized
+    rotationSpeed: 0.2,
+    distance: 8.8 * AU_SCALE,
+  },
+  {
+    id: 'wild2',
+    name: 'Wild 2',
+    type: 'comet',
+    size: 0.1,
+    color: '#FFD700',
+    description: 'Comet Wild 2 is a comet named after Swiss astronomer Paul Wild, who discovered it in 1978. It was visited by the NASA Stardust spacecraft, which returned samples to Earth.',
+    semiMajorAxis: 3.44, // a (AU)
+    eccentricity: 0.54, // e
+    orbitalInclination: 3.25, // i (degrees)
+    longitudeOfAscendingNode: 101.4, // Ω (degrees)
+    longitudeOfPerihelion: 157.3, // Argument of Perihelion ϖ (degrees)
+    orbitalSpeed: 6.41, // Period (years)
+    meanLongitude: Math.random() * 360, // L (degrees) - randomized
+    rotationSpeed: 0.2,
+    distance: 8.9 * AU_SCALE,
+  },
 ];
