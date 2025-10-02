@@ -173,8 +173,10 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
             const semiMajorAxis = objData.distance;
             const eccentricity = objData.eccentricity ?? 0;
             const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
+            const focusOffset = eccentricity * semiMajorAxis;
+
             const ellipse = new THREE.EllipseCurve(
-                -eccentricity * semiMajorAxis, 0,
+                -focusOffset, 0,
                 semiMajorAxis, semiMinorAxis,
                 0, 2 * Math.PI,
                 false, 0
@@ -246,8 +248,9 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
             const semiMajorAxis = distance;
             const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
             const angle = elapsedTime * (orbitalSpeed / 50);
-            
-            const x = Math.cos(angle) * semiMajorAxis;
+            const focusOffset = eccentricity * semiMajorAxis;
+
+            const x = Math.cos(angle) * semiMajorAxis - focusOffset;
             const z = Math.sin(angle) * semiMinorAxis;
             obj.position.set(x, 0, z);
         }
