@@ -526,8 +526,17 @@ export function SolarSystem({
   
     // Filter out overlapping labels
     const nonOverlappingLabels: (LabelData & { screenX: number; screenY: number })[] = [];
-    const labelSpacing = 40; // Minimum pixel distance between labels
+    const labelSpacing = 20; // Minimum pixel distance between labels
   
+    // Sort by some criteria, e.g. planets first, then by distance from camera
+    screenLabels.sort((a, b) => {
+        const aData = data.find(d => d.id === a.id);
+        const bData = data.find(d => d.id === b.id);
+        if (aData?.type === 'planet' && bData?.type !== 'planet') return -1;
+        if (aData?.type !== 'planet' && bData?.type === 'planet') return 1;
+        return a.position.distanceTo(stateRef.camera.position) - b.position.distanceTo(stateRef.camera.position);
+    });
+
     for (const label of screenLabels) {
       let overlaps = false;
       for (const existingLabel of nonOverlappingLabels) {
@@ -547,7 +556,7 @@ export function SolarSystem({
     }
   
     return nonOverlappingLabels;
-  }, [labels, stateRef.camera]);
+  }, [labels, stateRef.camera, data]);
 
 
   return (
@@ -556,10 +565,12 @@ export function SolarSystem({
         {displayedLabels.map((label) => (
           <div
             key={label.id}
-            className={`absolute p-1 rounded-sm transition-colors duration-300 pointer-events-auto cursor-pointer uppercase tracking-wider text-xs ${
+            className={`absolute p-1 rounded-sm transition-all duration-300 pointer-events-auto cursor-pointer uppercase tracking-wider text-xs ${
               selectedObjectId === label.id
-                ? 'text-primary bg-background/50'
-                : 'hover:text-primary'
+                ? 'text-white font-bold'
+                : 'text-white/70 hover:text-white'
+            } ${
+                (hoveredObjectId && hoveredObjectId !== label.id) || (selectedObjectId && selectedObjectId !== label.id) ? 'opacity-50' : 'opacity-100'
             }`}
             style={{
               transform: `translate(10px, -50%) translate(${label.screenX}px, ${label.screenY}px)`,
@@ -579,3 +590,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
