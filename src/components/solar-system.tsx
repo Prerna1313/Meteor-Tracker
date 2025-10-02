@@ -69,59 +69,26 @@ const createAsteroidDust = () => {
     }
     const texture = new THREE.CanvasTexture(textureCanvas);
 
-
     const material = new THREE.PointsMaterial({
         color: 0xa9a9a9, // Dark grey for a more realistic rock color
         size: 0.5,
         map: texture,
-        blending: THREE.NormalBlending, // Normal blending instead of additive
+        blending: THREE.NormalBlending,
         depthWrite: false,
         transparent: true,
         sizeAttenuation: true,
     });
     
+    // Position all particles within a single, uniform ring for the main asteroid belt
     const marsOrbit = 125;
     const jupiterOrbit = 200;
-    const saturnOrbit = 280;
-    const neptuneOrbit = 450;
-    
-    // Main Belt (80% of particles)
     const mainBeltInner = marsOrbit + 15;
     const mainBeltOuter = jupiterOrbit - 25;
-    
-    // Jupiter Trojans (15% of particles) - clustered around Jupiter's orbit
-    const trojanAngleSpread = Math.PI / 4; 
-    const trojanLeadingCenter = Math.PI / 3;
-    const trojanTrailingCenter = -Math.PI / 3;
-
-    // Scattered Disc / Kuiper Belt (5% of particles)
-    const scatteredInner = jupiterOrbit + 10;
-    const scatteredOuter = neptuneOrbit + 100;
-
 
     for (let i = 0; i < particles; i++) {
-        const randomValue = Math.random();
-        let dist = 0;
-        let angle = 0;
-        let y = 0;
-
-        if (randomValue < 0.8) { // 80% for Main Belt
-            dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
-            angle = Math.random() * Math.PI * 2;
-            y = THREE.MathUtils.randFloatSpread(8); 
-        } else if (randomValue < 0.95) { // 15% for Trojans
-            dist = jupiterOrbit + THREE.MathUtils.randFloatSpread(20);
-            if (Math.random() > 0.5) {
-                angle = trojanLeadingCenter + THREE.MathUtils.randFloatSpread(trojanAngleSpread);
-            } else {
-                angle = trojanTrailingCenter + THREE.MathUtils.randFloatSpread(trojanAngleSpread);
-            }
-            y = THREE.MathUtils.randFloatSpread(12);
-        } else { // 5% for Scattered Disc
-            dist = THREE.MathUtils.randFloat(scatteredInner, scatteredOuter);
-            angle = Math.random() * Math.PI * 2;
-            y = THREE.MathUtils.randFloatSpread(25);
-        }
+        const dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
+        const angle = Math.random() * Math.PI * 2;
+        const y = THREE.MathUtils.randFloatSpread(8); 
 
         positions[i * 3] = Math.cos(angle) * dist;
         positions[i * 3 + 1] = y;
