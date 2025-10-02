@@ -84,51 +84,6 @@ const createAsteroidBelt = (count: number) => {
   return instancedMesh;
 };
 
-const createAsteroidDust = (count: number, innerRadius: number, outerRadius: number) => {
-    const positions = new Float32Array(count * 3);
-    const dustGeometry = new THREE.BufferGeometry();
-
-    for (let i = 0; i < count; i++) {
-        const dist = THREE.MathUtils.randFloat(innerRadius, outerRadius);
-        const angle = Math.random() * Math.PI * 2;
-        const y = THREE.MathUtils.randFloatSpread(1.5); 
-
-        positions[i * 3] = Math.cos(angle) * dist;
-        positions[i * 3 + 1] = y;
-        positions[i * 3 + 2] = Math.sin(angle) * dist;
-    }
-    dustGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    
-    const canvas = document.createElement('canvas');
-    canvas.width = 64;
-    canvas.height = 64;
-    const context = canvas.getContext('2d');
-    if (!context) return null;
-    
-    const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
-    gradient.addColorStop(0, 'rgba(0, 191, 255, 0.8)');
-    gradient.addColorStop(0.5, 'rgba(0, 191, 255, 0.2)');
-    gradient.addColorStop(1, 'rgba(0, 191, 255, 0)');
-    
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, 64, 64);
-    
-    const texture = new THREE.CanvasTexture(canvas);
-
-    const dustMaterial = new THREE.PointsMaterial({
-        color: 0x00bfff,
-        size: 0.8,
-        map: texture,
-        blending: THREE.AdditiveBlending,
-        transparent: true,
-        depthWrite: false,
-    });
-
-    const dust = new THREE.Points(dustGeometry, dustMaterial);
-    dust.rotation.x = Math.PI / 2;
-    return dust;
-}
-
 
 export function SolarSystem({
   data,
@@ -183,15 +138,6 @@ export function SolarSystem({
       const asteroidBelt = createAsteroidBelt(1500);
       scene.add(asteroidBelt);
       stateRef.clickableObjects.push(asteroidBelt);
-      
-      const marsData = data.find(p => p.id === 'mars');
-      const jupiterData = data.find(p => p.id === 'jupiter');
-      if (marsData && jupiterData) {
-        const asteroidDust = createAsteroidDust(10000, marsData.distance + 20, jupiterData.distance - 20);
-        if (asteroidDust) {
-            scene.add(asteroidDust);
-        }
-      }
     };
 
     if (!stateRef.renderer) {
