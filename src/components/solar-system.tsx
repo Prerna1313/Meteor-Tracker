@@ -234,47 +234,38 @@ export function SolarSystem({
       stateRef.celestialObjects.forEach((objGroup, id) => {
         const objData = objGroup.userData as CelestialObject;
         if (objData.type === 'planet') {
-          // Keplerian elements calculation
-          const a = objData.semiMajorAxis; // semi-major axis
-          const e = objData.eccentricity ?? 0; // eccentricity
-          const i = THREE.MathUtils.degToRad(objData.orbitalInclination ?? 0); // inclination
-          const L = THREE.MathUtils.degToRad(objData.meanLongitude); // mean longitude
-          const varpi = THREE.MathUtils.degToRad(objData.longitudeOfPerihelion); // longitude of perihelion
-          const Omega = THREE.MathUtils.degToRad(objData.longitudeOfAscendingNode); // longitude of ascending node
+          const a = objData.semiMajorAxis;
+          const e = objData.eccentricity ?? 0;
+          const i = THREE.MathUtils.degToRad(objData.orbitalInclination ?? 0);
+          const L = THREE.MathUtils.degToRad(objData.meanLongitude);
+          const varpi = THREE.MathUtils.degToRad(objData.longitudeOfPerihelion);
+          const Omega = THREE.MathUtils.degToRad(objData.longitudeOfAscendingNode);
 
-          const P = objData.orbitalSpeed; // orbital period in years
-          const M0 = L - varpi; // Mean anomaly at J2000
-          const n = 2 * Math.PI / (P * 365.25); // mean motion
+          const P = objData.orbitalSpeed;
+          const M0 = L - varpi;
+          const n = (2 * Math.PI) / (P * 365.25);
           
-          let M = M0 + n * d; // mean anomaly for day d
+          let M = M0 + n * d;
           M = M % (2 * Math.PI);
 
-          // Solve Kepler's equation M = E - e*sin(E) for E (eccentric anomaly)
-          let E = M; // initial guess
-          for (let k = 0; k < 5; k++) { // 5 iterations is usually enough
+          let E = M;
+          for (let k = 0; k < 5; k++) {
               E = M + e * Math.sin(E);
           }
 
-          // True anomaly (nu)
           const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
           
-          // Heliocentric distance (r)
           const r = a * (1 - e * Math.cos(E));
 
-          // Heliocentric coordinates in the orbital plane
-          const x_orb = r * Math.cos(nu);
-          const y_orb = r * Math.sin(nu);
-
-          // Rotate to ecliptic coordinates
           const argOfPeri = varpi - Omega;
-          const x_ecl = r * (Math.cos(Omega) * Math.cos(argOfPeri + nu) - Math.sin(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i));
-          const y_ecl = r * (Math.sin(Omega) * Math.cos(argOfPeri + nu) + Math.cos(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i));
-          const z_ecl = r * (Math.sin(argOfPeri + nu) * Math.sin(i));
+          const x_orb = r * (Math.cos(Omega) * Math.cos(argOfPeri + nu) - Math.sin(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i));
+          const z_orb = r * (Math.sin(Omega) * Math.cos(argOfPeri + nu) + Math.cos(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i));
+          const y_orb = r * (Math.sin(argOfPeri + nu) * Math.sin(i));
 
           objGroup.position.set(
-            x_ecl * AU_SCALE, 
-            z_ecl * AU_SCALE, // In Three.js, Y is up, but our orbital plane is XZ
-            y_ecl * AU_SCALE
+            x_orb * AU_SCALE, 
+            y_orb * AU_SCALE,
+            z_orb * AU_SCALE
           );
         }
         
@@ -401,21 +392,25 @@ export function SolarSystem({
           body.add(rings);
         }
         
-        // Draw Orbit Line
         const a = objData.semiMajorAxis;
         const e = objData.eccentricity ?? 0;
         const i = THREE.MathUtils.degToRad(objData.orbitalInclination ?? 0);
         const Omega = THREE.MathUtils.degToRad(objData.longitudeOfAscendingNode);
         const varpi = THREE.MathUtils.degToRad(objData.longitudeOfPerihelion);
 
-        const semiMinorAxis = a * Math.sqrt(1 - e * e);
-        const focusOffset = e * a;
+        const curvePoints: THREE.Vector3[] = [];
+        for (let j = 0; j <= 200; j++) {
+            const nu = (j / 200) * 2 * Math.PI;
+            const r = a * (1 - e * e) / (1 + e * Math.cos(nu));
 
-        const ellipse = new THREE.EllipseCurve(
-          -focusOffset, 0, a, semiMinorAxis, 0, 2 * Math.PI, false, 0
-        );
-        const points = ellipse.getPoints(200).map(p => new THREE.Vector3(p.x, 0, p.y));
-        const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
+            const argOfPeri = varpi - Omega;
+            const x_orb = r * (Math.cos(Omega) * Math.cos(argOfPeri + nu) - Math.sin(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i));
+            const z_orb = r * (Math.sin(Omega) * Math.cos(argOfPeri + nu) + Math.cos(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i));
+            const y_orb = r * (Math.sin(argOfPeri + nu) * Math.sin(i));
+            curvePoints.push(new THREE.Vector3(x_orb * AU_SCALE, y_orb * AU_SCALE, z_orb * AU_SCALE));
+        }
+        
+        const orbitGeometry = new THREE.BufferGeometry().setFromPoints(curvePoints);
         
         let opacity = 0.5;
         if (ASTEROID_IDS.includes(objData.id)) opacity = 0.2;
@@ -427,17 +422,7 @@ export function SolarSystem({
         });
         const orbitLine = new THREE.Line(orbitGeometry, orbitMaterial);
 
-        const orbitGroup = new THREE.Group();
-        const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, varpi, 0));
-        orbitGroup.applyQuaternion(q);
-        const q2 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, i));
-        orbitGroup.applyQuaternion(q2);
-        const q3 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Omega, 0));
-        orbitGroup.applyQuaternion(q3);
-
-        orbitGroup.scale.set(AU_SCALE, AU_SCALE, AU_SCALE);
-        orbitGroup.add(orbitLine);
-        scene.add(orbitGroup);
+        scene.add(orbitLine);
         
         orbitLines.set(objData.id, orbitLine);
         celestialObj = objectGroup;
