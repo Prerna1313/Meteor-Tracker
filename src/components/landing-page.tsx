@@ -4,26 +4,13 @@ import { ChevronDown } from 'lucide-react';
 
 const MeteorLogo = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
-      viewBox="0 0 100 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
+        viewBox="0 0 100 100"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        {...props}
     >
-      <circle cx="50" cy="50" r="48" stroke="white" strokeWidth="4" />
-      <path
-        d="M30 70C35 50, 45 50, 50 70"
-        stroke="white"
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M50 70C55 50, 65 50, 70 70"
-        stroke="white"
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+        <circle cx="50" cy="50" r="48" stroke="white" strokeWidth="4"/>
+        <path d="M30 70 L40 50 L50 70 L60 50 L70 70" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
 );
 
