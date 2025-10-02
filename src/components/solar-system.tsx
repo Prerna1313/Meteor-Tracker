@@ -228,7 +228,7 @@ export function SolarSystem({
 
       stateRef.celestialObjects.forEach((obj) => {
         const body = obj.children.find((c) => (c as THREE.Mesh).isMesh);
-        if (obj.userData.rotationSpeed > 0 && body && obj.userData.id === 'sun') {
+        if (body && obj.userData.id === 'sun') {
           // body.rotation.y += obj.userData.rotationSpeed / 100;
         }
 

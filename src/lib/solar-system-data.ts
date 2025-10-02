@@ -22,14 +22,15 @@ export type CelestialObject = {
 };
 
 // Using a logarithmic scale for distance for better visualization
-// New distance = 50 * log(real_distance_in_au) + 50
-const scaleFactor = 60;
+const scaleFactor = 40;
 const offset = 40;
 
 const logScale = (au: number) => {
-    if (au <= 0) return offset;
-    return scaleFactor * Math.log(au) + offset;
+    if (au <= 0) return 0;
+    // We add 1 to au to ensure the log is always positive and planets are spaced out.
+    return scaleFactor * Math.log(au + 1) + offset;
 }
+
 
 export const solarSystemData: CelestialObject[] = [
   {
