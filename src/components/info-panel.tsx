@@ -17,7 +17,7 @@ const StatItem = ({ label, value, description }: { label: string; value: React.R
     <div className="flex flex-col py-3">
         <span className="text-white/60 text-sm">{label}</span>
         {description && <span className="text-sm text-white/40">{description}</span>}
-        <span className="text-3xl font-bold mt-1">{value}</span>
+        <span className="text-3xl font-medium mt-1">{value}</span>
     </div>
 );
 
@@ -146,8 +146,8 @@ export function InfoPanel({ object, onClose, solarSystemData }: InfoPanelProps) 
                         {object.type !== 'comet' && object.type !== 'planet' && <AsteroidIcon className="w-8 h-8 opacity-80" />}
                         
                         <div className="flex flex-col">
-                            {object.type !== 'comet' && object.id.match(/\d+/) && <p className="text-2xl font-semibold text-white/80">{object.id.match(/\d+/)?.[0]}</p>}
-                            <h2 className="text-3xl">{object.name}</h2>
+                            {object.type !== 'comet' && object.id.match(/\d+/) && <p className="text-xl font-medium text-white/80">{object.id.match(/\d+/)?.[0]}</p>}
+                            <h2 className="text-2xl">{object.name}</h2>
                         </div>
                     </div>
 
