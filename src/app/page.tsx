@@ -7,15 +7,19 @@ import {
   solarSystemData,
   type CelestialObject,
 } from '@/lib/solar-system-data';
-import { Skeleton } from '@/components/ui/skeleton';
-
+import { InfoPanel } from '@/components/info-panel';
 
 export default function Home() {
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
-  
+
   const handleSelectObject = (id: string | null) => {
     setSelectedObjectId(id);
   };
+
+  const selectedObjectData = useMemo(() => {
+    if (!selectedObjectId) return null;
+    return solarSystemData.find((obj) => obj.id === selectedObjectId) ?? null;
+  }, [selectedObjectId]);
 
   return (
     <main className="relative w-screen h-screen overflow-hidden bg-black">
@@ -27,6 +31,12 @@ export default function Home() {
           selectedObjectId={selectedObjectId}
         />
       </div>
+      {selectedObjectData && (
+        <InfoPanel
+          object={selectedObjectData}
+          onClose={() => handleSelectObject(null)}
+        />
+      )}
     </main>
   );
 }
