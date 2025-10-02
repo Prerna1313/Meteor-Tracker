@@ -183,6 +183,7 @@ export const solarSystemData: CelestialObject[] = [
     rotationSpeed: 0.2,
     eccentricity: 0.43,
     orbitalOffset: 0.2,
+    orbitalInclination: 29,
     description: '9969 Braille is a small and highly elongated main-belt asteroid, classified as a Mars-crosser, that was discovered in 1992. It was visited by the Deep Space 1 spacecraft.',
     diameter: 1,
   },
