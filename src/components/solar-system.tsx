@@ -95,12 +95,12 @@ const createAsteroidDust = () => {
         let dist = 0;
         let y = 0;
 
-        if (zone < 0.65) { // 65% in Main Belt
-            dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
-            y = THREE.MathUtils.randFloatSpread(8); 
-        } else if (zone < 0.95) { // 30% in Inner System
+        if (zone < 0.30) { // 30% in Inner System
             dist = THREE.MathUtils.randFloat(0, mainBeltInner);
             y = THREE.MathUtils.randFloatSpread(4);
+        } else if (zone < 0.95) { // 65% in Main Belt (0.95 - 0.30 = 0.65)
+            dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
+            y = THREE.MathUtils.randFloatSpread(8); 
         } else { // 5% in Outer System
             dist = THREE.MathUtils.randFloat(mainBeltOuter, neptuneOrbit + 50);
             y = THREE.MathUtils.randFloatSpread(20);
