@@ -79,6 +79,7 @@ const createAsteroidDust = () => {
 const createMeteors = () => {
   const meteorCount = 500;
   const meteors = new THREE.Group();
+  meteors.userData = { id: 'asteroid_belt', name: 'Asteroid Belt' };
   const meteorMaterial = new THREE.MeshStandardMaterial({
     color: 0x888888,
     roughness: 1.0,
@@ -321,6 +322,7 @@ export function SolarSystem({
 
     const meteors = createMeteors();
     scene.add(meteors);
+    clickableObjects.push(meteors);
 
     data.forEach((objData) => {
       let celestialObj: THREE.Object3D | null = null;
@@ -407,7 +409,7 @@ export function SolarSystem({
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(curvePoints);
         
         let opacity = 0.4;
-        if (ASTEROID_IDS.includes(objData.id)) opacity = 0.2;
+        if (ASTEROID_IDS.includes(objData.id)) opacity = 0.15;
         if (objData.id === 'earth') opacity = 0.9;
 
         const orbitMaterial = new THREE.LineBasicMaterial({
@@ -442,7 +444,7 @@ export function SolarSystem({
         
         if(line.material instanceof THREE.LineBasicMaterial) {
             let baseOpacity = 0.4;
-            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.2;
+            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.15;
             if (id === 'earth') baseOpacity = 0.9;
             line.material.opacity = isHovered || isSelected ? 1.0 : baseOpacity;
             line.material.needsUpdate = true;
@@ -569,3 +571,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
