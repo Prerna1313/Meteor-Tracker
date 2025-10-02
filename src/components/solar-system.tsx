@@ -501,7 +501,7 @@ export function SolarSystem({
       ) {
          if (isSelected) {
             (meshToHighlight.material as THREE.MeshStandardMaterial).emissive.setHex(0xffffff);
-            (meshToTighlight.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
+            (meshToHighlight.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
         } else {
             const originalColor = obj.userData.type === 'planet' ? obj.userData.color : 0xaaaaaa;
             (meshToHighlight.material as THREE.MeshStandardMaterial).emissive.set(new THREE.Color(originalColor));
