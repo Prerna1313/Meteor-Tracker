@@ -1,32 +1,10 @@
 
 'use client';
 
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import type { CelestialObject, CometData } from '@/lib/solar-system-data';
-import { Button } from './ui/button';
-import { Asterisk } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { generateComet } from '@/ai/flows/generate-comet-flow';
+import type { CelestialObject } from '@/lib/solar-system-data';
 
 type LabelData = {
   id: string;
@@ -38,8 +16,6 @@ type SolarSystemProps = {
   data: CelestialObject[];
   selectedObjectId: string | null;
   onSelectObject: (id: string | null) => void;
-  comets: CometData[];
-  onCometsChange: (comets: CometData[]) => void;
 };
 
 type Stardust = {
@@ -158,88 +134,13 @@ const createAsteroidBelt = (count: number) => {
   return instancedMesh;
 };
 
-const CometGenerator = ({
-  open,
-  onOpenChange,
-  onCometGenerated,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onCometGenerated: (comet: CometData) => void;
-}) => {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const formSchema = z.object({
-    name: z.string().min(2, {
-      message: 'Comet name must be at least 2 characters.',
-    }),
-  });
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-    },
-  });
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsGenerating(true);
-    try {
-      const newComet = await generateComet(values.name);
-      onCometGenerated(newComet);
-      onOpenChange(false);
-      form.reset();
-    } catch (error) {
-      console.error('Failed to generate comet:', error);
-    } finally {
-      setIsGenerating(false);
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Generate a Comet</DialogTitle>
-          <DialogDescription>
-            Create a new comet to add to the solar system. The AI will generate
-            its orbital parameters.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Comet Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Comet Stardust" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={isGenerating}>
-              {isGenerating ? 'Generating...' : 'Generate'}
-            </Button>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
 export function SolarSystem({
   data,
   selectedObjectId,
   onSelectObject,
-  comets,
-  onCometsChange,
 }: SolarSystemProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const [labels, setLabels] = useState<LabelData[]>([]);
-  const [isCometGeneratorOpen, setIsCometGeneratorOpen] = useState(false);
 
   const stateRef = useRef({
     renderer: null as THREE.WebGLRenderer | null,
@@ -251,15 +152,7 @@ export function SolarSystem({
     clickableObjects: [] as THREE.Object3D[],
     celestialObjects: new Map<string, THREE.Object3D>(),
     stardustSystem: null as Stardust | null,
-    cometObjects: new Map<string, THREE.Object3D>(),
   }).current;
-
-  const handleCometGenerated = useCallback(
-    (newComet: CometData) => {
-      onCometsChange([...comets, newComet]);
-    },
-    [comets, onCometsChange]
-  );
 
   useEffect(() => {
     let renderer: THREE.WebGLRenderer;
@@ -393,28 +286,6 @@ export function SolarSystem({
         });
       });
       
-      stateRef.cometObjects.forEach((cometObj) => {
-        const { perihelion, aphelion, inclination, orbitalPeriod } = cometObj.userData.orbital;
-        const semiMajorAxis = (perihelion + aphelion) / 2;
-        const eccentricity = (aphelion - perihelion) / (aphelion + perihelion);
-        const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
-        const angle = (elapsedTime / (orbitalPeriod * 365.25 / 100)) * (Math.PI * 2);
-        const focusOffset = eccentricity * semiMajorAxis;
-
-        const x = Math.cos(angle) * semiMajorAxis - focusOffset;
-        const z = Math.sin(angle) * semiMinorAxis;
-        
-        cometObj.position.set(x, 0, z);
-        cometObj.position.applyAxisAngle(new THREE.Vector3(1, 0, 0), inclination * (Math.PI / 180));
-        
-        const vector = new THREE.Vector3();
-        cometObj.getWorldPosition(vector);
-        const labelPos = vector.clone();
-        labelPos.y += 2; // offset for label
-        
-        newLabels.push({ id: cometObj.userData.id, name: cometObj.userData.name, position: labelPos });
-      });
-
       setLabels(newLabels);
       controls.update();
       renderer.render(stateRef.scene, stateRef.camera);
@@ -429,7 +300,7 @@ export function SolarSystem({
       }
       controls?.dispose();
     };
-  }, [stateRef, onSelectObject, comets, onCometsChange]);
+  }, [stateRef, onSelectObject]);
 
   useEffect(() => {
     const { scene, clickableObjects, celestialObjects } = stateRef;
@@ -543,57 +414,6 @@ export function SolarSystem({
   }, [data, stateRef]);
 
   useEffect(() => {
-    const { scene, clickableObjects, cometObjects } = stateRef;
-
-    // Clear old comets
-    cometObjects.forEach(obj => {
-      scene.remove(obj);
-      const orbit = obj.userData.orbitLine;
-      if (orbit) scene.remove(orbit);
-    });
-    cometObjects.clear();
-    
-    // Filter out old comet objects from clickableObjects
-    stateRef.clickableObjects = stateRef.clickableObjects.filter(obj => !obj.userData.isComet);
-
-
-    comets.forEach(cometData => {
-        const cometGroup = new THREE.Group();
-        const headGeometry = new THREE.IcosahedronGeometry(cometData.size / 4, 3);
-        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 });
-        const head = new THREE.Mesh(headGeometry, headMaterial);
-        cometGroup.add(head);
-
-        const { perihelion, aphelion, inclination } = cometData.orbital;
-        const semiMajorAxis = (perihelion + aphelion) / 2;
-        const eccentricity = (aphelion - perihelion) / (aphelion + perihelion);
-        const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
-        const focusOffset = eccentricity * semiMajorAxis;
-
-        const ellipse = new THREE.EllipseCurve(
-            -focusOffset, 0,
-            semiMajorAxis, semiMinorAxis,
-            0, 2 * Math.PI,
-            false, 0
-        );
-
-        const points = ellipse.getPoints(200);
-        const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
-        const orbitMaterial = new THREE.LineBasicMaterial({ color: 0x66ddff, transparent: true, opacity: 0.5 });
-        const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
-        orbit.rotation.x = Math.PI / 2;
-        orbit.applyAxisAngle(new THREE.Vector3(1, 0, 0), inclination * (Math.PI / 180));
-        scene.add(orbit);
-
-        cometGroup.userData = { ...cometData, isComet: true, orbitLine: orbit };
-        scene.add(cometGroup);
-        cometObjects.set(cometData.id, cometGroup);
-        clickableObjects.push(cometGroup);
-    });
-
-  }, [comets, stateRef]);
-
-  useEffect(() => {
     stateRef.celestialObjects.forEach((obj, id) => {
       const isSelected = id === selectedObjectId;
       const body = obj.children.find((c) => (c as THREE.Mesh).isMesh) as
@@ -617,22 +437,12 @@ export function SolarSystem({
       }
     });
 
-    stateRef.cometObjects.forEach((obj, id) => {
-        const isSelected = id === selectedObjectId;
-        const head = obj.children[0] as THREE.Mesh;
-        if (head && head.material instanceof THREE.MeshStandardMaterial) {
-            head.material.emissive.setHex(isSelected ? 0x66ddff : 0x000000);
-            head.material.emissiveIntensity = isSelected ? 0.8 : 0;
-        }
-    });
-
     const belt = stateRef.scene.getObjectByProperty('userData.id', 'asteroid_belt') as THREE.InstancedMesh;
     if (belt && belt.material instanceof THREE.MeshStandardMaterial) {
         belt.material.color.setHex(selectedObjectId === 'asteroid_belt' ? 0x66ddff : 0xaaaaaa);
     }
 
-
-  }, [selectedObjectId, stateRef.celestialObjects, stateRef.cometObjects, stateRef.scene]);
+  }, [selectedObjectId, stateRef.celestialObjects, stateRef.scene]);
 
   const displayedLabels = useMemo(() => {
     if (!mountRef.current || !stateRef.camera) return [];
@@ -654,20 +464,6 @@ export function SolarSystem({
 
   return (
     <div ref={mountRef} className="absolute top-0 left-0 w-full h-full">
-      {selectedObjectId === 'sun' && (
-        <Button
-          className="fixed top-20 left-4 z-50"
-          onClick={() => setIsCometGeneratorOpen(true)}
-        >
-          <Asterisk className="w-4 h-4 mr-2" />
-          Generate Comet
-        </Button>
-      )}
-      <CometGenerator
-        open={isCometGeneratorOpen}
-        onOpenChange={setIsCometGeneratorOpen}
-        onCometGenerated={handleCometGenerated}
-      />
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         {displayedLabels.map((label) => (
           <div
@@ -692,5 +488,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    

@@ -36,12 +36,12 @@ export function InfoPanel({ object, onClose }: InfoPanelProps) {
                 
                 <div className="space-y-2 pt-4">
                     <h3 className="text-lg font-semibold text-primary/80">Properties</h3>
-                    <StatItem label="Type" value={object.type.charAt(0).toUpperCase() + object.type.slice(1)} />
+                    {object.type && <StatItem label="Type" value={object.type.charAt(0).toUpperCase() + object.type.slice(1)} />}
                     {object.diameter && <StatItem label="Diameter" value={`${object.diameter.toLocaleString()} km`} />}
                     {object.mass && <StatItem label="Mass" value={<span>{object.mass} x 10<sup>24</sup> kg</span>} />}
                     {object.dayLength && <StatItem label="Day Length" value={`${object.dayLength} hours`} />}
-                    <StatItem label="Distance from Sun" value={`${object.distance.toLocaleString()} units`} />
-                    <StatItem label="Orbital Speed" value={`${object.orbitalSpeed}x`} />
+                    {object.distance && <StatItem label="Distance from Sun" value={`${object.distance.toLocaleString()} units`} />}
+                    {object.orbitalSpeed && <StatItem label="Orbital Speed" value={`${object.orbitalSpeed}x`} />}
                 </div>
             </div>
         </ScrollArea>

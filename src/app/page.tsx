@@ -6,13 +6,11 @@ import { Header } from '@/components/header';
 import {
   solarSystemData,
   type CelestialObject,
-  type CometData,
 } from '@/lib/solar-system-data';
 import { InfoPanel } from '@/components/info-panel';
 
 export default function Home() {
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
-  const [comets, setComets] = useState<CometData[]>([]);
 
   const handleSelectObject = (id: string | null) => {
     setSelectedObjectId(id);
@@ -30,9 +28,9 @@ export default function Home() {
         };
     }
 
-    const allObjects: (CelestialObject | CometData)[] = [...solarSystemData, ...comets];
+    const allObjects: CelestialObject[] = solarSystemData;
     return allObjects.find((obj) => obj.id === selectedObjectId) ?? null;
-  }, [selectedObjectId, comets]);
+  }, [selectedObjectId]);
 
 
   return (
@@ -43,8 +41,6 @@ export default function Home() {
           data={solarSystemData}
           onSelectObject={handleSelectObject}
           selectedObjectId={selectedObjectId}
-          comets={comets}
-          onCometsChange={setComets}
         />
       </div>
       {selectedObjectData && (
