@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useMemo, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { CelestialObject } from '@/lib/solar-system-data';
 
-export type LabelData = {
+type LabelData = {
   id: string;
   name: string;
   position: THREE.Vector3;
@@ -13,11 +13,10 @@ export type LabelData = {
 
 type SolarSystemProps = {
   data: CelestialObject[];
-  onSelectObject: (id: string | null) => void;
   selectedObjectId: string | null;
+  onSelectObject: (id: string | null) => void;
 };
 
-// Helper function to create a glowing sprite for the Sun
 const createSunGlow = () => {
   const canvas = document.createElement('canvas');
   canvas.width = 128;
@@ -48,68 +47,10 @@ const createSunGlow = () => {
     transparent: true,
   });
   const sprite = new THREE.Sprite(material);
-  sprite.scale.set(120, 120, 1);
+  sprite.scale.set(150, 150, 1);
   return sprite;
 };
 
-// Function to create the Asteroid Belt
-const createAsteroidBelt = (scene: THREE.Scene, asteroids: any[]) => {
-  const asteroidCount = 10000 + asteroids.length;
-  const particles = new THREE.BufferGeometry();
-  const positions = new Float32Array(asteroidCount * 3);
-  const angles = new Float32Array(asteroidCount);
-  const radii = new Float32Array(asteroidCount);
-  const speeds = new Float32Array(asteroidCount);
-  const colors = new Float32Array(asteroidCount * 3);
-  
-  const innerRadius = 180;
-  const outerRadius = 260;
-  const hazardousColor = new THREE.Color(0xffaa00);
-  const normalColor = new THREE.Color(0xaaaaaa);
-
-  for (let i = 0; i < asteroidCount; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const radius = THREE.MathUtils.randFloat(innerRadius, outerRadius);
-    const x = Math.cos(angle) * radius;
-    const z = Math.sin(angle) * radius;
-    const y = THREE.MathUtils.randFloat(-10, 10);
-
-    positions[i * 3] = x;
-    positions[i * 3 + 1] = y;
-    positions[i * 3 + 2] = z;
-    
-    angles[i] = angle;
-    radii[i] = radius;
-    speeds[i] = THREE.MathUtils.randFloat(0.05, 0.15);
-
-    // Assign color based on whether it's a generated hazardous asteroid
-    const isGeneratedHazardous = i >= 10000 && asteroids[i - 10000]?.is_potentially_hazardous_asteroid;
-    const color = isGeneratedHazardous ? hazardousColor : normalColor;
-    colors[i * 3] = color.r;
-    colors[i * 3 + 1] = color.g;
-    colors[i * 3 + 2] = color.b;
-  }
-
-  particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  particles.setAttribute('angle', new THREE.BufferAttribute(angles, 1));
-  particles.setAttribute('radius', new THREE.BufferAttribute(radii, 1));
-  particles.setAttribute('speed', new THREE.BufferAttribute(speeds, 1));
-  particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-  const particleMaterial = new THREE.PointsMaterial({
-    size: 0.3,
-    transparent: true,
-    opacity: 0.8,
-    vertexColors: true,
-  });
-
-  const asteroidBelt = new THREE.Points(particles, particleMaterial);
-  asteroidBelt.userData = { id: 'asteroid-belt', type: 'asteroid-belt' };
-  scene.add(asteroidBelt);
-  return asteroidBelt;
-};
-
-// Function to create the stardust background
 const createStardust = (scene: THREE.Scene) => {
   const starCount = 50000;
   const particles = new THREE.BufferGeometry();
@@ -130,7 +71,7 @@ const createStardust = (scene: THREE.Scene) => {
     color: 0xffffff,
     size: 1.5,
     transparent: true,
-    opacity: 0.8,
+    opacity: 0.7,
   });
 
   const stardust = new THREE.Points(particles, particleMaterial);
@@ -139,39 +80,36 @@ const createStardust = (scene: THREE.Scene) => {
 };
 
 
-export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSystemProps) {
+export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSystemProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const [labels, setLabels] = useState<LabelData[]>([]);
+  
   const stateRef = useRef({
+    renderer: null as THREE.WebGLRenderer | null,
     scene: new THREE.Scene(),
     camera: new THREE.PerspectiveCamera(75, 1, 0.1, 20000),
-    renderer: null as THREE.WebGLRenderer | null,
     controls: null as OrbitControls | null,
+    raycaster: new THREE.Raycaster(),
+    textureLoader: new THREE.TextureLoader(),
     clickableObjects: [] as THREE.Object3D[],
     celestialObjects: new Map<string, THREE.Object3D>(),
-    asteroidBelt: null as THREE.Points | null,
-    stardust: null as THREE.Points | null,
-    textureLoader: new THREE.TextureLoader(),
-    textures: new Map<string, THREE.Texture>(),
   }).current;
-  
-  const raycaster = useMemo(() => new THREE.Raycaster(), []);
-  
+
   useEffect(() => {
-    if (!mountRef.current || stateRef.renderer) return;
+    if (!mountRef.current || stateRef.renderer) return; // Initialize once
 
     const { scene, camera } = stateRef;
 
+    // --- Renderer and Controls Setup ---
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setClearColor(0x000000, 0);
     mountRef.current.appendChild(renderer.domElement);
     stateRef.renderer = renderer;
 
     camera.aspect = mountRef.current.clientWidth / mountRef.current.clientHeight;
-    camera.position.set(0, 150, 350);
-    camera.lookAt(0,0,0);
+    camera.position.set(0, 150, 400);
+    camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -181,222 +119,37 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     controls.maxDistance = 10000;
     stateRef.controls = controls;
 
+    // --- Scene Lighting and Background ---
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-    stateRef.stardust = createStardust(scene);
+    createStardust(scene);
 
+    // --- Object Creation ---
+    const textures = new Map<string, THREE.Texture>();
 
-    const handleClick = (event: MouseEvent) => {
-        if (!mountRef.current) return;
-        const mouse = new THREE.Vector2();
-        const rect = mountRef.current.getBoundingClientRect();
-        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-        
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(stateRef.clickableObjects, true);
+    data.forEach(objData => {
+        let celestialObj: THREE.Object3D | null = null;
+        if (objData.textureUrl && !textures.has(objData.id)) {
+            textures.set(objData.id, stateRef.textureLoader.load(objData.textureUrl));
+        }
+        if (objData.rings?.textureUrl && !textures.has(`${objData.id}-ring`)) {
+            textures.set(`${objData.id}-ring`, stateRef.textureLoader.load(objData.rings.textureUrl));
+        }
 
-        if (intersects.length > 0) {
-            const firstIntersect = intersects[0].object;
-            let objectId = firstIntersect.userData.id;
-
-            // Traverse up to find parent group if it's part of a composite object (like Saturn's rings)
-            let currentObject = firstIntersect;
-            while (currentObject.parent && !currentObject.userData.id) {
-              currentObject = currentObject.parent;
-            }
-            objectId = currentObject.userData.id;
+        if (objData.type === 'star') {
+            const starGroup = new THREE.Group();
+            const glow = createSunGlow();
+            if (glow) starGroup.add(glow);
             
-            if (objectId) {
-              onSelectObject(objectId);
-            } else {
-              onSelectObject(null);
-            }
-
-        } else {
-            onSelectObject(null);
-        }
-    };
-    renderer.domElement.addEventListener('click', handleClick);
-
-    const handleResize = () => {
-      if (!mountRef.current || !stateRef.renderer) return;
-      camera.aspect = mountRef.current.clientWidth / mountRef.current.clientHeight;
-      camera.updateProjectionMatrix();
-      stateRef.renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
-    };
-    window.addEventListener('resize', handleResize);
-
-    const clock = new THREE.Clock();
-    const animate = () => {
-      if (!stateRef.renderer) return;
-      requestAnimationFrame(animate);
-      const elapsedTime = clock.getElapsedTime();
-      const newLabels: LabelData[] = [];
-
-      stateRef.celestialObjects.forEach(obj => {
-        const { type, orbitalSpeed, rotationSpeed } = obj.userData;
-        const planetBody = obj.children.find(c => c.userData.isPlanetBody || c.userData.isCometBody);
-
-        if (obj.userData.id !== 'sun') {
-             const { distance, eccentricity = 0, inclination = 0 } = obj.userData;
-             if ((type === 'planet' || type === 'comet') && orbitalSpeed > 0) {
-              const semiMajorAxis = distance;
-              const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
-              const angle = elapsedTime * (orbitalSpeed / 50);
-              
-              const x = Math.cos(angle) * semiMajorAxis;
-              const z = Math.sin(angle) * semiMinorAxis;
-              
-              const y = Math.sin(angle) * semiMajorAxis * Math.sin(THREE.MathUtils.degToRad(inclination));
-
-              obj.position.set(x, y, z);
-            }
-        }
-            
-        if (rotationSpeed > 0 && planetBody) {
-          planetBody.rotation.y += rotationSpeed / 100;
-        }
-        
-        if (type === 'planet' || type === 'star' || type === 'comet') {
-          const vector = new THREE.Vector3();
-          obj.getWorldPosition(vector);
-          vector.project(camera);
-          newLabels.push({ id: obj.userData.id, name: obj.userData.name, position: vector });
-        }
-      });
-
-      setLabels(newLabels);
-
-
-      if (stateRef.asteroidBelt) {
-        const positions = stateRef.asteroidBelt.geometry.getAttribute('position');
-        const angles = stateRef.asteroidBelt.geometry.getAttribute('angle');
-        const radii = stateRef.asteroidBelt.geometry.getAttribute('radius');
-        const speeds = stateRef.asteroidBelt.geometry.getAttribute('speed');
-
-        for (let i = 0; i < positions.count; i++) {
-          let currentAngle = angles.getX(i);
-          currentAngle += speeds.getX(i) * 0.01;
-          const radius = radii.getX(i);
-          positions.setX(i, Math.cos(currentAngle) * radius);
-          positions.setZ(i, Math.sin(currentAngle) * radius);
-          angles.setX(i, currentAngle);
-        }
-        positions.needsUpdate = true;
-        angles.needsUpdate = true;
-      }
-      
-      if (stateRef.controls) stateRef.controls.update();
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (stateRef.controls) stateRef.controls.dispose();
-      if (stateRef.renderer) renderer.domElement.removeEventListener('click', handleClick);
-      if (mountRef.current && stateRef.renderer?.domElement) {
-        mountRef.current.removeChild(stateRef.renderer.domElement);
-      }
-      if (stateRef.renderer) stateRef.renderer.dispose();
-      stateRef.renderer = null;
-    };
-  }, [onSelectObject, raycaster, stateRef]);
-
-  // Update scene when data changes
-  useEffect(() => {
-    const { scene, celestialObjects, textureLoader, textures } = stateRef;
-
-    const textureUrls: { [key: string]: string } = {
-        mercury: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/mercury.jpg',
-        venus: 'https://raw.githubusercontent.com/mrdoob/three.js_old/master/examples/textures/planets/venus_surface.jpg',
-        earth: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
-        mars: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/mars_1k_color.jpg',
-        jupiter: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/jupiter.jpg',
-        saturn: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/saturn.jpg',
-        uranus: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/uranus.jpg',
-        neptune: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/neptune.jpg',
-        saturn_ring: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/saturn_ring.png',
-    };
-
-    Object.entries(textureUrls).forEach(([key, url]) => {
-        if (!textures.has(key)) {
-            textures.set(key, textureLoader.load(url));
-        }
-    });
-    
-    // --- Combine all objects to render ---
-    const allObjects = [...data];
-    const sun = data.find(d => d.type === 'star');
-    if (sun && sun.comets) {
-      sun.comets.forEach(comet => {
-        allObjects.push({
-          ...comet,
-          id: comet.id,
-          name: comet.name,
-          type: 'comet',
-          size: comet.size / 100, // Scale down for visualization
-          distance: (comet.orbitalPeriod / 2) + 100, // Approximate distance
-          color: '#FFFFFF',
-          orbitalSpeed: 10 / Math.sqrt(comet.orbitalPeriod),
-          rotationSpeed: 0,
-          meteors: [],
-          eccentricity: Math.random() * 0.5 + 0.2, // Random eccentricity
-          inclination: Math.random() * 30, // Random inclination
-        });
-      });
-    }
-
-    // --- Cleanup previous objects ---
-    celestialObjects.forEach(obj => {
-        obj.traverse(child => {
-            if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
-                if(child.geometry) child.geometry.dispose();
-                if (Array.isArray(child.material)) {
-                    child.material.forEach(m => { if(m.map) m.map.dispose(); m.dispose() });
-                } else if (child.material) {
-                    if(child.material.map) child.material.map.dispose();
-                    child.material.dispose();
-                }
-            } else if (child instanceof THREE.Sprite) {
-                if(child.material.map) child.material.map.dispose();
-                child.material.dispose();
-            }
-        });
-        scene.remove(obj);
-    });
-    celestialObjects.clear();
-    stateRef.clickableObjects = [];
-    
-    if (stateRef.asteroidBelt) {
-      scene.remove(stateRef.asteroidBelt);
-      stateRef.asteroidBelt.geometry.dispose();
-      (stateRef.asteroidBelt.material as THREE.Material).dispose();
-      stateRef.asteroidBelt = null;
-    }
-    // --- End Cleanup ---
-
-    allObjects.forEach(objData => {
-      let celestialObj: THREE.Object3D | null = null;
-      
-      if (objData.type === 'star') {
-        const starGroup = new THREE.Group();
-        const glow = createSunGlow();
-        if (glow) starGroup.add(glow);
-        
-        const pointLight = new THREE.PointLight(0xFFFFFF, 3, 4000);
-        starGroup.add(pointLight);
-
-        celestialObj = starGroup;
-      } else if (objData.type === 'planet' || objData.type === 'comet') {
-        const objectGroup = new THREE.Group();
-        let body: THREE.Mesh;
-
-        if (objData.type === 'planet') {
+            const pointLight = new THREE.PointLight(0xFFFFFF, 3.5, 4000);
+            starGroup.add(pointLight);
+            celestialObj = starGroup;
+        } else if (objData.type === 'planet') {
+            const objectGroup = new THREE.Group();
             const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
-            const material = new THREE.MeshStandardMaterial({ map: textures.get(objData.id), roughness: 0.8 });
-            body = new THREE.Mesh(geometry, material);
+            const material = new THREE.MeshStandardMaterial({ map: textures.get(objData.id), roughness: 0.9 });
+            const body = new THREE.Mesh(geometry, material);
             body.userData.isPlanetBody = true;
+            objectGroup.add(body);
 
             if (objData.rings) {
                 const ringGeometry = new THREE.RingGeometry(objData.rings.innerRadius, objData.rings.outerRadius, 64);
@@ -407,142 +160,176 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
                     (ringGeometry.attributes.uv as THREE.BufferAttribute).setXY(i, v3.length() < objData.rings.innerRadius + 1 ? 0 : 1, 1);
                 }
                 const ringMaterial = new THREE.MeshBasicMaterial({
-                    map: textures.get('saturn_ring'),
+                    map: textures.get(`${objData.id}-ring`),
                     side: THREE.DoubleSide,
                     transparent: true,
-                    opacity: 0.7
+                    opacity: 0.8
                 });
                 const rings = new THREE.Mesh(ringGeometry, ringMaterial);
                 rings.rotation.x = Math.PI / 2;
                 body.add(rings);
             }
-        } else { // comet
-            const geometry = new THREE.SphereGeometry(objData.size, 16, 16);
-            const material = new THREE.MeshBasicMaterial({ color: objData.color });
-            body = new THREE.Mesh(geometry, material);
-            body.userData.isCometBody = true;
+            
+            const semiMajorAxis = objData.distance;
+            const eccentricity = objData.eccentricity ?? 0;
+            const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
+            const ellipse = new THREE.EllipseCurve(
+                -eccentricity * semiMajorAxis, 0,
+                semiMajorAxis, semiMinorAxis,
+                0, 2 * Math.PI,
+                false, 0
+            );
+
+            const points = ellipse.getPoints(200);
+            const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
+            const orbitMaterial = new THREE.LineBasicMaterial({ color: 0xEEEEEE, transparent: true, opacity: 0.3 });
+            const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
+            orbit.rotation.x = Math.PI / 2;
+            scene.add(orbit);
+
+            celestialObj = objectGroup;
         }
 
-        objectGroup.add(body);
-        
-        const orbitGroup = new THREE.Group();
-        // Orbit line
-        const semiMajorAxis = objData.distance;
-        const eccentricity = objData.eccentricity ?? 0;
-        const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
-        const ellipse = new THREE.EllipseCurve(
-            -eccentricity * semiMajorAxis, 0, // ax, aY
-            semiMajorAxis, semiMinorAxis,     // xRadius, yRadius
-            0, 2 * Math.PI,                   // aStartAngle, aEndAngle
-            false, 0                          // aClockwise, aRotation
-        );
-
-        const points = ellipse.getPoints(200);
-        const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
-        const orbitMaterial = new THREE.LineBasicMaterial({
-            color: objData.type === 'comet' ? 0x888888 : 0xEEEEEE,
-            transparent: true,
-            opacity: objData.type === 'comet' ? 0.4 : 0.2
-        });
-        const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
-        orbit.rotation.x = Math.PI / 2;
-        orbitGroup.add(orbit);
-        orbitGroup.rotation.z = THREE.MathUtils.degToRad(objData.inclination ?? 0);
-        
-        scene.add(orbitGroup);
-        celestialObj = objectGroup;
-
-      } else if (objData.type === 'asteroid-belt') {
-        stateRef.asteroidBelt = createAsteroidBelt(scene, objData.asteroids || []);
-      }
-
-      if (celestialObj) {
-        celestialObj.userData = { ...objData, originalColor: new THREE.Color(objData.color) };
-        scene.add(celestialObj);
-        celestialObjects.set(objData.id, celestialObj);
-        
-        if (objData.type !== 'asteroid-belt') {
-          celestialObj.traverse(child => {
-            stateRef.clickableObjects.push(child);
-          });
+        if (celestialObj) {
+            celestialObj.userData = { ...objData };
+            scene.add(celestialObj);
+            stateRef.celestialObjects.set(objData.id, celestialObj);
+            celestialObj.traverse(child => stateRef.clickableObjects.push(child));
         }
-      }
     });
-    
-    if (stateRef.asteroidBelt) {
-        stateRef.clickableObjects.push(stateRef.asteroidBelt);
-    }
 
 
-  }, [data, stateRef]);
-  
-  // Highlight selected object
+    // --- Event Listeners ---
+    const handleClick = (event: MouseEvent) => {
+        if (!mountRef.current) return;
+        const mouse = new THREE.Vector2();
+        const rect = mountRef.current.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        
+        stateRef.raycaster.setFromCamera(mouse, camera);
+        const intersects = stateRef.raycaster.intersectObjects(stateRef.clickableObjects, true);
+
+        if (intersects.length > 0) {
+            let currentObject = intersects[0].object;
+            while (currentObject.parent && !currentObject.userData.id) {
+              currentObject = currentObject.parent;
+            }
+            onSelectObject(currentObject.userData.id || null);
+        } else {
+            onSelectObject(null);
+        }
+    };
+    renderer.domElement.addEventListener('click', handleClick, false);
+
+    const handleResize = () => {
+        if (!mountRef.current || !stateRef.renderer) return;
+        camera.aspect = mountRef.current.clientWidth / mountRef.current.clientHeight;
+        camera.updateProjectionMatrix();
+        stateRef.renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
+    };
+    window.addEventListener('resize', handleResize);
+
+    // --- Animation Loop ---
+    const clock = new THREE.Clock();
+    const animate = () => {
+      if (!stateRef.renderer) return;
+      requestAnimationFrame(animate);
+      const elapsedTime = clock.getElapsedTime();
+      const newLabels: LabelData[] = [];
+
+      stateRef.celestialObjects.forEach(obj => {
+        const { id, type, orbitalSpeed, rotationSpeed, distance, eccentricity = 0 } = obj.userData;
+        const planetBody = obj.children.find(c => c.userData.isPlanetBody);
+
+        if (id !== 'sun' && type === 'planet' && orbitalSpeed > 0) {
+            const semiMajorAxis = distance;
+            const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
+            const angle = elapsedTime * (orbitalSpeed / 50);
+            
+            const x = Math.cos(angle) * semiMajorAxis;
+            const z = Math.sin(angle) * semiMinorAxis;
+            obj.position.set(x, 0, z);
+        }
+            
+        if (rotationSpeed > 0 && planetBody) {
+          planetBody.rotation.y += rotationSpeed / 100;
+        }
+
+        const vector = new THREE.Vector3();
+        obj.getWorldPosition(vector);
+        const labelPos = vector.clone();
+        
+        // Adjust label position to be above the object
+        const objSize = obj.userData.size || 0;
+        labelPos.y += objSize;
+
+        newLabels.push({ id: obj.userData.id, name: obj.userData.name, position: labelPos });
+      });
+
+      setLabels(newLabels);
+      controls.update();
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    // --- Cleanup ---
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      renderer.domElement.removeEventListener('click', handleClick);
+      controls.dispose();
+      if (mountRef.current && renderer.domElement) {
+        mountRef.current.removeChild(renderer.domElement);
+      }
+      renderer.dispose();
+      stateRef.renderer = null;
+    };
+  }, [data, onSelectObject, stateRef]);
+
+  // --- Highlight Effect ---
   useEffect(() => {
     stateRef.celestialObjects.forEach((obj, id) => {
         const isSelected = id === selectedObjectId;
-        
         const body = obj.children.find(c => (c as THREE.Mesh).isMesh) as THREE.Mesh | undefined;
-        let meshToHighlight = obj.userData.type === 'star' ? (obj as THREE.Mesh) : body;
+        let meshToHighlight = obj.userData.type === 'star' ? undefined : body;
 
-        if (meshToHighlight && meshToHighlight.material) {
-            const material = meshToHighlight.material as THREE.MeshStandardMaterial | THREE.MeshBasicMaterial;
-
-            // Handle emissive for selectable planets/comets
-            if (material instanceof THREE.MeshStandardMaterial || (material instanceof THREE.MeshBasicMaterial && obj.userData.type === 'comet')) {
-                if (isSelected) {
-                    material.emissive?.setHex(0x7DF9FF); // Accent color
-                    if (material instanceof THREE.MeshStandardMaterial) {
-                        material.emissiveIntensity = 0.5;
-                    }
-                } else {
-                    material.emissive?.setHex(0x000000);
-                }
-            }
+        if (meshToHighlight && meshToHighlight.material instanceof THREE.MeshStandardMaterial) {
+            meshToHighlight.material.emissive.setHex(isSelected ? 0x7DF9FF : 0x000000);
+            meshToHighlight.material.emissiveIntensity = isSelected ? 0.6 : 0;
         }
-
-        // Handle sun glow
+        
         if (obj.userData.type === 'star') {
             const glow = obj.children.find(c => c instanceof THREE.Sprite);
             if (glow) {
-                (glow as THREE.Sprite).material.opacity = isSelected ? 1 : 0.5;
+                (glow as THREE.Sprite).material.opacity = isSelected ? 1 : 0.7;
             }
         }
     });
+  }, [selectedObjectId, stateRef.celestialObjects]);
 
-    // Handle asteroid belt selection
-    if (stateRef.asteroidBelt) {
-        const isSelected = selectedObjectId === 'asteroid-belt';
-        const material = stateRef.asteroidBelt.material as THREE.PointsMaterial;
-        material.opacity = isSelected ? 1.0 : 0.6;
-    }
-
-  }, [selectedObjectId, stateRef.celestialObjects, stateRef.asteroidBelt]);
 
   return (
     <div ref={mountRef} className="absolute top-0 left-0 w-full h-full">
-      {/* Labels are rendered here as HTML elements on top of the canvas */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         {labels.map(label => {
-          if (!mountRef.current) return null;
-          // Hide labels that are behind the camera (or too far to the side)
-          if (label.position.z > 1 || Math.abs(label.position.x) > 1.1 || Math.abs(label.position.y) > 1.1) return null;
+          if (!mountRef.current || !stateRef.camera) return null;
+          
+          const vector = label.position.clone().project(stateRef.camera);
+          if (vector.z > 1) return null; // Hide if behind camera
 
-          // Convert normalized device coordinates to screen coordinates
-          const screenX = (label.position.x + 1) / 2 * mountRef.current.clientWidth;
-          const screenY = (-label.position.y + 1) / 2 * mountRef.current.clientHeight;
+          const screenX = (vector.x + 1) / 2 * mountRef.current.clientWidth;
+          const screenY = (-vector.y + 1) / 2 * mountRef.current.clientHeight;
 
           return (
             <div
               key={label.id}
               className={`absolute text-xs p-1 rounded-sm transition-colors duration-300 pointer-events-auto cursor-pointer ${
                 selectedObjectId === label.id
-                  ? 'text-primary bg-background/50'
+                  ? 'text-primary bg-background/50 font-bold'
                   : 'text-white/80 hover:text-primary'
               }`}
               style={{
                 transform: `translate(10px, -50%) translate(${screenX}px, ${screenY}px)`,
-                left: 0,
-                top: 0,
               }}
               onClick={(e) => {
                 e.stopPropagation();

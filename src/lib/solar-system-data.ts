@@ -1,50 +1,19 @@
-export type MeteorData = {
-  id: string;
-  size: number;
-  trajectory: string;
-  composition: string;
-};
-
-export type CometData = {
-  id: string;
-  name: string;
-  size: number; // radius in km
-  composition: string;
-  orbitalPeriod: number; // in years
-  trajectory: string;
-};
-
-export type AsteroidData = {
-    id: string;
-    name: string;
-    estimated_diameter_km_min: number;
-    estimated_diameter_km_max: number;
-    is_potentially_hazardous_asteroid: boolean;
-    orbital_period_days: number;
-    relative_velocity_kps: number;
-    miss_distance_au: number;
-};
 
 export type CelestialObject = {
   id: string;
   name: string;
-  type: 'star' | 'planet' | 'asteroid-belt' | 'comet';
+  type: 'star' | 'planet';
   size: number; // radius in arbitrary units
   distance: number; // distance from sun in arbitrary units
   color: string; // hex color
   orbitalSpeed: number; // arbitrary speed factor
   rotationSpeed: number; // arbitrary speed factor
-  meteors: MeteorData[];
-  comets?: CometData[];
-  asteroids?: AsteroidData[];
-  rings?: { innerRadius: number; outerRadius: number };
-  // Comet specific properties
-  orbitalPeriod?: number; 
+  textureUrl?: string;
+  rings?: { innerRadius: number; outerRadius: number; textureUrl: string; };
   eccentricity?: number;
-  inclination?: number;
 };
 
-export const initialSolarSystemData: CelestialObject[] = [
+export const solarSystemData: CelestialObject[] = [
   {
     id: 'sun',
     name: 'Sun',
@@ -54,8 +23,6 @@ export const initialSolarSystemData: CelestialObject[] = [
     color: '#FFFF8F',
     orbitalSpeed: 0,
     rotationSpeed: 0.05,
-    meteors: [],
-    comets: [],
   },
   {
     id: 'mercury',
@@ -66,7 +33,8 @@ export const initialSolarSystemData: CelestialObject[] = [
     color: '#A9A9A9',
     orbitalSpeed: 1.6,
     rotationSpeed: 0.1,
-    meteors: [],
+    textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/mercury.jpg',
+    eccentricity: 0.206
   },
   {
     id: 'venus',
@@ -77,7 +45,8 @@ export const initialSolarSystemData: CelestialObject[] = [
     color: '#FFA500',
     orbitalSpeed: 1.2,
     rotationSpeed: 0.08,
-    meteors: [],
+    textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js_old/master/examples/textures/planets/venus_surface.jpg',
+    eccentricity: 0.007
   },
   {
     id: 'earth',
@@ -88,7 +57,8 @@ export const initialSolarSystemData: CelestialObject[] = [
     color: '#4682B4',
     orbitalSpeed: 1,
     rotationSpeed: 0.5,
-    meteors: [],
+    textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
+    eccentricity: 0.017
   },
   {
     id: 'mars',
@@ -99,19 +69,8 @@ export const initialSolarSystemData: CelestialObject[] = [
     color: '#FF4500',
     orbitalSpeed: 0.8,
     rotationSpeed: 0.45,
-    meteors: [],
-  },
-  {
-    id: 'asteroid-belt',
-    name: 'Asteroid Belt',
-    type: 'asteroid-belt',
-    size: 0.1, 
-    distance: 220, // Average distance
-    color: '#FFFFFF',
-    orbitalSpeed: 0,
-    rotationSpeed: 0,
-    meteors: [],
-    asteroids: [],
+    textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/mars_1k_color.jpg',
+    eccentricity: 0.093
   },
   {
     id: 'jupiter',
@@ -122,7 +81,8 @@ export const initialSolarSystemData: CelestialObject[] = [
     color: '#D2B48C',
     orbitalSpeed: 0.4,
     rotationSpeed: 0.8,
-    meteors: [],
+    textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/jupiter.jpg',
+    eccentricity: 0.048
   },
   {
     id: 'saturn',
@@ -133,8 +93,9 @@ export const initialSolarSystemData: CelestialObject[] = [
     color: '#F0E68C',
     orbitalSpeed: 0.32,
     rotationSpeed: 0.75,
-    meteors: [],
-    rings: { innerRadius: 12, outerRadius: 20 },
+    textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/saturn.jpg',
+    rings: { innerRadius: 12, outerRadius: 20, textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/saturn_ring.png' },
+    eccentricity: 0.054
   },
   {
     id: 'uranus',
@@ -145,7 +106,8 @@ export const initialSolarSystemData: CelestialObject[] = [
     color: '#AFEEEE',
     orbitalSpeed: 0.22,
     rotationSpeed: 0.6,
-    meteors: [],
+    textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/uranus.jpg',
+    eccentricity: 0.047
   },
   {
     id: 'neptune',
@@ -156,6 +118,7 @@ export const initialSolarSystemData: CelestialObject[] = [
     color: '#3F51B5',
     orbitalSpeed: 0.18,
     rotationSpeed: 0.55,
-    meteors: [],
+    textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/neptune.jpg',
+    eccentricity: 0.009
   },
 ];
