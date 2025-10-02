@@ -296,7 +296,7 @@ export const solarSystemData: CelestialObject[] = [
     id: 'jupiter',
     name: 'Jupiter',
     type: 'planet',
-    size: 5,
+    size: 4,
     distance: 10 * AU_SCALE,
     color: '#E28B33',
     orbitalSpeed: 11.86,
