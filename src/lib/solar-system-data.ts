@@ -343,8 +343,8 @@ export const solarSystemData: CelestialObject[] = [
     diameter: 140,
     semiMajorAxis: 5.226,
     eccentricity: 0.138,
-    orbitalInclination: 22.04,
-    meanLongitude: 126.8,
+    orbitalInclination: 24,
+    meanLongitude: 329.8,
     longitudeOfPerihelion: -39.1,
     longitudeOfAscendingNode: 43.8,
   },
@@ -446,5 +446,3 @@ export const solarSystemData: CelestialObject[] = [
     longitudeOfAscendingNode: 131.72,
   },
 ];
-
-    
