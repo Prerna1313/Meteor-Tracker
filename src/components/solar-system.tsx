@@ -53,7 +53,7 @@ const createSunGlow = () => {
 };
 
 const createAsteroidDust = () => {
-    const particles = 10000;
+    const particles = 15000;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particles * 3);
 
@@ -81,19 +81,50 @@ const createAsteroidDust = () => {
         sizeAttenuation: true,
     });
     
-    // Position particles between Mars and Jupiter's new scaled orbits
-    // These values are based on the new logarithmic scale in solar-system-data.ts
+    // Solar system scaled distances from solar-system-data.ts
     const marsOrbit = 125;
     const jupiterOrbit = 200;
-    const beltInnerRadius = marsOrbit + 10;
-    const beltOuterRadius = jupiterOrbit - 20;
+    const saturnOrbit = 280;
+    const neptuneOrbit = 450;
+    
+    // Main Belt (70% of particles)
+    const mainBeltInner = marsOrbit + 10;
+    const mainBeltOuter = jupiterOrbit - 20;
+    
+    // Jupiter Trojans (20% of particles) - clustered around Jupiter's orbit
+    const trojanAngleSpread = Math.PI / 6; // 30 degrees spread
+    const trojanLeadingCenter = Math.PI / 3; // 60 degrees ahead
+    const trojanTrailingCenter = -Math.PI / 3; // 60 degrees behind
+
+    // Scattered Disc / Kuiper Belt (10% of particles)
+    const scatteredInner = saturnOrbit;
+    const scatteredOuter = neptuneOrbit + 50;
 
 
     for (let i = 0; i < particles; i++) {
-        const dist = THREE.MathUtils.randFloat(beltInnerRadius, beltOuterRadius);
-        const angle = Math.random() * Math.PI * 2;
-        // Keep it relatively flat
-        const y = THREE.MathUtils.randFloatSpread(5); 
+        const randomValue = Math.random();
+        let dist = 0;
+        let angle = 0;
+        let y = 0;
+
+        if (randomValue < 0.7) { // 70% for Main Belt
+            dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
+            angle = Math.random() * Math.PI * 2;
+            y = THREE.MathUtils.randFloatSpread(5); 
+        } else if (randomValue < 0.9) { // 20% for Trojans
+            dist = jupiterOrbit + THREE.MathUtils.randFloatSpread(15);
+            // Place in one of the two Trojan groups
+            if (Math.random() > 0.5) {
+                angle = trojanLeadingCenter + THREE.MathUtils.randFloatSpread(trojanAngleSpread);
+            } else {
+                angle = trojanTrailingCenter + THREE.MathUtils.randFloatSpread(trojanAngleSpread);
+            }
+            y = THREE.MathUtils.randFloatSpread(10);
+        } else { // 10% for Scattered Disc
+            dist = THREE.MathUtils.randFloat(scatteredInner, scatteredOuter);
+            angle = Math.random() * Math.PI * 2;
+            y = THREE.MathUtils.randFloatSpread(20);
+        }
 
         positions[i * 3] = Math.cos(angle) * dist;
         positions[i * 3 + 1] = y;
@@ -313,8 +344,10 @@ export function SolarSystem({
       } else if (objData.type === 'planet') {
         const objectGroup = new THREE.Group();
         const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
-        const material = new THREE.MeshBasicMaterial({
+        const material = new THREE.MeshStandardMaterial({
           color: new THREE.Color(objData.color),
+          emissive: new THREE.Color(objData.color),
+          emissiveIntensity: 0.6,
         });
         const body = new THREE.Mesh(geometry, material);
         body.userData.isPlanetBody = true;
@@ -395,12 +428,14 @@ export function SolarSystem({
 
       if (
         meshToHighlight &&
-        meshToHighlight.material instanceof THREE.MeshBasicMaterial
+        meshToHighlight.material instanceof THREE.MeshStandardMaterial
       ) {
          if (isSelected) {
-            (meshToHighlight.material as THREE.MeshBasicMaterial).color.set(0xffffff);
+            (meshToHighlight.material as THREE.MeshStandardMaterial).emissive.setHex(0xffffff);
+            (meshToHighlight.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
         } else {
-            (meshToHighlight.material as THREE.MeshBasicMaterial).color.set(new THREE.Color(obj.userData.color));
+            (meshToHighlight.material as THREE.MeshStandardMaterial).emissive.set(new THREE.Color(obj.userData.color));
+            (meshToHighlight.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.6;
         }
       }
 
@@ -468,3 +503,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
