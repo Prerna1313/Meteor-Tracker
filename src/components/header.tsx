@@ -14,7 +14,6 @@ const MeteorLogo = (props: React.SVGProps<SVGSVGElement>) => (
         <path d="M11.5 21.5a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" fill="#fff"/>
         <path stroke="#000" strokeWidth="1.5" d="M15.52 12.53a4.5 4.5 0 0 1-6.04-6.06 4.5 4.5 0 0 1 6.04 6.06Z" />
         <path stroke="#000" strokeWidth="1.5" d="M12.5 9.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
-        <path d="m2 2 20 6-3 1-4-4-3 4-4-2z" fill="#fff" />
     </svg>
 );
 
