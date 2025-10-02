@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
+import Image from 'next/image';
 
 const NasaLogo = (props: React.SVGProps<SVGSVGElement>) => (
     <svg 
@@ -15,7 +16,6 @@ const NasaLogo = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-
 type LandingPageProps = {
   isExiting: boolean;
 };
@@ -27,20 +27,33 @@ export function LandingPage({ isExiting }: LandingPageProps) {
         isExiting ? 'opacity-0' : 'opacity-100'
       }`}
     >
+      <div className="stars"></div>
       <div className="absolute top-10">
          <NasaLogo className="h-20 w-20 opacity-80" />
       </div>
 
-      <div className="text-center my-16">
-        <h1 className="text-5xl font-light tracking-[0.4em] text-white/80">EYES</h1>
-        <h2 className="mt-2 text-lg font-light tracking-[0.7em] text-white/60">ON</h2>
-        <h1 className="mt-2 text-6xl font-medium tracking-[0.2em] text-white">METEORS</h1>
+      <div className="relative text-center -mt-16">
+        <div className="relative w-48 h-48 mx-auto mb-[-80px] z-10">
+          <Image 
+            src="https://picsum.photos/seed/asteroid1/200/200" 
+            alt="Asteroid" 
+            width={192}
+            height={192}
+            className="rounded-full object-cover grayscale brightness-50"
+            data-ai-hint="asteroid"
+          />
+        </div>
+        <div className="relative z-20 pt-4">
+            <h1 className="text-3xl font-light tracking-[0.3em] text-white/70">EYES</h1>
+            <h2 className="mt-1 text-md font-light tracking-[0.4em] text-white/50">ON</h2>
+        </div>
       </div>
       
-      <div 
-        className="absolute -bottom-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,_#4a4a4a_0%,_#3a3a3a_30%,_#1a1a1a_60%,_black_80%)] rounded-full blur-2xl"
-      />
+      <h1 className="mt-4 text-5xl font-medium tracking-[0.4em] text-white">METEORS</h1>
 
+      <div 
+        className="absolute bottom-[-250px] left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[radial-gradient(ellipse_at_top,_rgba(100,100,100,0.2)_0%,_transparent_70%)]"
+      />
 
       <div className="absolute bottom-10 flex flex-col items-center space-y-2 z-10">
         <span className="text-sm font-light tracking-widest text-white/50">Scroll to enter</span>

@@ -57,3 +57,26 @@ body {
 .animate-chevron {
   animation: animate-chevron 2s ease-in-out infinite;
 }
+
+@keyframes stars {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-100vh); }
+}
+
+.stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 200vh;
+  background-image: 
+    radial-gradient(1px 1px at 20% 20%, white, transparent),
+    radial-gradient(1px 1px at 80% 10%, white, transparent),
+    radial-gradient(1px 1px at 50% 70%, white, transparent),
+    radial-gradient(1px 1px at 90% 60%, white, transparent),
+    radial-gradient(1px 1px at 10% 90%, white, transparent),
+    radial-gradient(1px 1px at 40% 40%, white, transparent),
+    radial-gradient(1px 1px at 70% 30%, white, transparent),
+    radial-gradient(1px 1px at 30% 80%, white, transparent);
+  animation: stars 120s linear infinite;
+}
