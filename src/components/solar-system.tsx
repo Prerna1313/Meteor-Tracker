@@ -24,42 +24,43 @@ type SolarSystemProps = {
 const AU_SCALE = 15;
 
 const createAsteroidDust = () => {
-    const particles = 25000; // Increased particle count for density
+    const particles = 25000;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particles * 3);
 
     const material = new THREE.PointsMaterial({
         color: 0x00bfff,
-        size: 0.07, // Increased size for brightness
+        size: 0.07,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         transparent: true,
-        opacity: 0.6, // a lil more bright
+        opacity: 0.6,
     });
     
     const marsOrbit = 1.524 * AU_SCALE;
     const jupiterOrbit = 5.203 * AU_SCALE;
+    const neptuneOrbit = 30.07 * AU_SCALE;
     
     const mainBeltInner = marsOrbit + 0.5 * AU_SCALE;
     const mainBeltOuter = jupiterOrbit - 0.5 * AU_SCALE;
+    const kuiperBeltInner = neptuneOrbit - 5 * AU_SCALE;
+    const kuiperBeltOuter = neptuneOrbit + 10 * AU_SCALE;
 
     for (let i = 0; i < particles; i++) {
         const zone = Math.random();
         let dist = 0;
         let y = 0;
 
-        // Concentrate more particles in the Main Belt
-        if (zone < 0.10) { // 10% in Inner System (less dense)
+        if (zone < 0.10) { // 10% in Inner System
             dist = THREE.MathUtils.randFloat(0, mainBeltInner);
             y = THREE.MathUtils.randFloatSpread(2);
-        } else if (zone < 0.99) { // 89% in Main Belt (more dense)
-            // Skew distribution towards the inner part of the belt
+        } else if (zone < 0.95) { // 85% in Main Belt (more dense)
             const innerBias = Math.pow(Math.random(), 2);
             dist = mainBeltInner + innerBias * (mainBeltOuter - mainBeltInner);
             y = THREE.MathUtils.randFloatSpread(10); 
-        } else { // 1% in Outer System (sparse)
-            dist = THREE.MathUtils.randFloat(mainBeltOuter, mainBeltOuter + 20 * AU_SCALE);
-            y = THREE.MathUtils.randFloatSpread(25);
+        } else { // 5% in Kuiper Belt region
+            dist = THREE.MathUtils.randFloat(kuiperBeltInner, kuiperBeltOuter);
+            y = THREE.MathUtils.randFloatSpread(40);
         }
 
         const angle = Math.random() * Math.PI * 2;
