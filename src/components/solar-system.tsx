@@ -47,17 +47,19 @@ const createAsteroidDust = () => {
         const zone = Math.random();
         let dist = 0;
         let y = 0;
+        const verticalSpread = 50;
 
         if (zone < 0.05) { // 5% in Inner System
             dist = THREE.MathUtils.randFloat(0, mainBeltInner);
-            y = THREE.MathUtils.randFloatSpread(5);
+            y = (Math.random() - 0.5) * Math.random() * verticalSpread * 0.1;
         } else if (zone < 0.98) { // 93% in Main Belt (more dense)
             const innerBias = Math.pow(Math.random(), 0.5); 
             dist = mainBeltInner + innerBias * (mainBeltOuter - mainBeltInner);
-            y = THREE.MathUtils.randFloatSpread(50); 
+            // Non-uniform vertical distribution
+            y = (Math.random() - 0.5) * Math.pow(Math.random(), 2) * verticalSpread;
         } else { // 2% in Kuiper Belt region (up to Neptune)
             dist = THREE.MathUtils.randFloat(jupiterOrbit, neptuneOrbit);
-            y = THREE.MathUtils.randFloatSpread(60);
+             y = (Math.random() - 0.5) * Math.random() * verticalSpread * 1.2;
         }
 
         const angle = Math.random() * Math.PI * 2;
@@ -242,9 +244,12 @@ export function SolarSystem({
 
           const argOfPeri = varpi - Omega;
 
-          const x_3d = (Math.cos(Omega) * Math.cos(argOfPeri + nu) - Math.sin(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i)) * r;
-          const z_3d = (Math.sin(Omega) * Math.cos(argOfPeri + nu) + Math.cos(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i)) * r;
-          const y_3d = (Math.sin(argOfPeri + nu) * Math.sin(i)) * r;
+          const x_ecl = r * Math.cos(nu);
+          const y_ecl = r * Math.sin(nu);
+
+          const x_3d = (Math.cos(Omega) * Math.cos(argOfPeri) - Math.sin(Omega) * Math.sin(argOfPeri) * Math.cos(i)) * x_ecl + (-Math.cos(Omega) * Math.sin(argOfPeri) - Math.sin(Omega) * Math.cos(argOfPeri) * Math.cos(i)) * y_ecl;
+          const z_3d = (Math.sin(Omega) * Math.cos(argOfPeri) + Math.cos(Omega) * Math.sin(argOfPeri) * Math.cos(i)) * x_ecl + (-Math.sin(Omega) * Math.sin(argOfPeri) + Math.cos(Omega) * Math.cos(argOfPeri) * Math.cos(i)) * y_ecl;
+          const y_3d = (Math.sin(argOfPeri) * Math.sin(i)) * x_ecl + (Math.cos(argOfPeri) * Math.sin(i)) * y_ecl;
 
           objGroup.position.set(
             x_3d * AU_SCALE, 
@@ -393,9 +398,12 @@ export function SolarSystem({
             const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
             const r = a * (1 - e * Math.cos(E));
             
-            const x_3d = (Math.cos(Omega) * Math.cos(argOfPeri + nu) - Math.sin(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i)) * r;
-            const z_3d = (Math.sin(Omega) * Math.cos(argOfPeri + nu) + Math.cos(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i)) * r;
-            const y_3d = (Math.sin(argOfPeri + nu) * Math.sin(i)) * r;
+            const x_ecl = r * Math.cos(nu);
+            const y_ecl = r * Math.sin(nu);
+
+            const x_3d = (Math.cos(Omega) * Math.cos(argOfPeri) - Math.sin(Omega) * Math.sin(argOfPeri) * Math.cos(i)) * x_ecl + (-Math.cos(Omega) * Math.sin(argOfPeri) - Math.sin(Omega) * Math.cos(argOfPeri) * Math.cos(i)) * y_ecl;
+            const z_3d = (Math.sin(Omega) * Math.cos(argOfPeri) + Math.cos(Omega) * Math.sin(argOfPeri) * Math.cos(i)) * x_ecl + (-Math.sin(Omega) * Math.sin(argOfPeri) + Math.cos(Omega) * Math.cos(argOfPeri) * Math.cos(i)) * y_ecl;
+            const y_3d = (Math.sin(argOfPeri) * Math.sin(i)) * x_ecl + (Math.cos(argOfPeri) * Math.sin(i)) * y_ecl;
 
             curvePoints.push(new THREE.Vector3(x_3d * AU_SCALE, y_3d * AU_SCALE, z_3d * AU_SCALE));
         }
@@ -403,7 +411,7 @@ export function SolarSystem({
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(curvePoints);
         
         let opacity = 0.8;
-        if (ASTEROID_IDS.includes(objData.id)) opacity = 0.7;
+        if (ASTEROID_IDS.includes(objData.id)) opacity = 0.9;
         if (objData.id === 'earth') opacity = 1.0;
 
         const orbitMaterial = new THREE.LineBasicMaterial({
@@ -438,7 +446,7 @@ export function SolarSystem({
         
         if(line.material instanceof THREE.LineBasicMaterial) {
             let baseOpacity = 0.4;
-            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.7;
+            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.9;
             if (id === 'earth') baseOpacity = 0.9;
             line.material.opacity = isHovered || isSelected ? 1.0 : baseOpacity;
             line.material.needsUpdate = true;
