@@ -30,10 +30,12 @@ const createAsteroidDust = () => {
 
     const material = new THREE.PointsMaterial({
         color: 0x007BA7, // Bright Cerulean
-        size: 0.07,
+        size: 0.05,
         depthWrite: false,
         transparent: true,
         opacity: 0.45,
+        blending: THREE.AdditiveBlending,
+        alphaTest: 0.02,
     });
     
     const marsOrbit = 1.524 * AU_SCALE;
@@ -244,17 +246,14 @@ export function SolarSystem({
 
           const argOfPeri = varpi - Omega;
 
-          const x_ecl = r * Math.cos(nu);
-          const y_ecl = r * Math.sin(nu);
-
-          const x_3d = (Math.cos(Omega) * Math.cos(argOfPeri) - Math.sin(Omega) * Math.sin(argOfPeri) * Math.cos(i)) * x_ecl + (-Math.cos(Omega) * Math.sin(argOfPeri) - Math.sin(Omega) * Math.cos(argOfPeri) * Math.cos(i)) * y_ecl;
-          const z_3d = (Math.sin(Omega) * Math.cos(argOfPeri) + Math.cos(Omega) * Math.sin(argOfPeri) * Math.cos(i)) * x_ecl + (-Math.sin(Omega) * Math.sin(argOfPeri) + Math.cos(Omega) * Math.cos(argOfPeri) * Math.cos(i)) * y_ecl;
-          const y_3d = (Math.sin(argOfPeri) * Math.sin(i)) * x_ecl + (Math.cos(argOfPeri) * Math.sin(i)) * y_ecl;
+          const x_ecl = r * (Math.cos(Omega) * Math.cos(nu + argOfPeri) - Math.sin(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i));
+          const z_ecl = r * (Math.sin(Omega) * Math.cos(nu + argOfPeri) + Math.cos(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i));
+          const y_ecl = r * (Math.sin(nu + argOfPeri) * Math.sin(i));
 
           objGroup.position.set(
-            x_3d * AU_SCALE, 
-            y_3d * AU_SCALE,
-            z_3d * AU_SCALE
+            x_ecl * AU_SCALE, 
+            y_ecl * AU_SCALE,
+            z_ecl * AU_SCALE
           );
         }
         
@@ -398,21 +397,19 @@ export function SolarSystem({
             const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
             const r = a * (1 - e * Math.cos(E));
             
-            const x_ecl = r * Math.cos(nu);
-            const y_ecl = r * Math.sin(nu);
+            const x_ecl = r * (Math.cos(Omega) * Math.cos(nu + argOfPeri) - Math.sin(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i));
+            const z_ecl = r * (Math.sin(Omega) * Math.cos(nu + argOfPeri) + Math.cos(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i));
+            const y_ecl = r * (Math.sin(nu + argOfPeri) * Math.sin(i));
 
-            const x_3d = (Math.cos(Omega) * Math.cos(argOfPeri) - Math.sin(Omega) * Math.sin(argOfPeri) * Math.cos(i)) * x_ecl + (-Math.cos(Omega) * Math.sin(argOfPeri) - Math.sin(Omega) * Math.cos(argOfPeri) * Math.cos(i)) * y_ecl;
-            const z_3d = (Math.sin(Omega) * Math.cos(argOfPeri) + Math.cos(Omega) * Math.sin(argOfPeri) * Math.cos(i)) * x_ecl + (-Math.sin(Omega) * Math.sin(argOfPeri) + Math.cos(Omega) * Math.cos(argOfPeri) * Math.cos(i)) * y_ecl;
-            const y_3d = (Math.sin(argOfPeri) * Math.sin(i)) * x_ecl + (Math.cos(argOfPeri) * Math.sin(i)) * y_ecl;
 
-            curvePoints.push(new THREE.Vector3(x_3d * AU_SCALE, y_3d * AU_SCALE, z_3d * AU_SCALE));
+            curvePoints.push(new THREE.Vector3(x_ecl * AU_SCALE, y_ecl * AU_SCALE, z_ecl * AU_SCALE));
         }
         
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(curvePoints);
         
-        let opacity = 0.8;
+        let opacity = 0.4;
         if (ASTEROID_IDS.includes(objData.id)) opacity = 0.9;
-        if (objData.id === 'earth') opacity = 1.0;
+        if (objData.id === 'earth') opacity = 0.9;
 
         const orbitMaterial = new THREE.LineBasicMaterial({
           color: ASTEROID_IDS.includes(objData.id) ? new THREE.Color(0xffffff) : new THREE.Color(objData.color),
