@@ -58,22 +58,25 @@ const createAsteroidDust = () => {
     const positions = new Float32Array(particles * 3);
 
     const textureCanvas = document.createElement('canvas');
-    textureCanvas.width = 16;
-    textureCanvas.height = 16;
+    textureCanvas.width = 32;
+    textureCanvas.height = 32;
     const context = textureCanvas.getContext('2d');
     if(context) {
-        context.beginPath();
-        context.arc(8, 8, 8, 0, 2 * Math.PI);
-        context.fillStyle = 'white';
-        context.fill();
+        const gradient = context.createRadialGradient(16, 16, 0, 16, 16, 16);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        gradient.addColorStop(0.2, 'rgba(200, 255, 255, 1)');
+        gradient.addColorStop(0.7, 'rgba(0, 255, 255, 0.5)');
+        gradient.addColorStop(1, 'rgba(0, 150, 150, 0)');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, 32, 32);
     }
     const texture = new THREE.CanvasTexture(textureCanvas);
 
     const material = new THREE.PointsMaterial({
-        color: 0xa9a9a9, // Dark grey for a more realistic rock color
-        size: 0.5,
+        color: 0x00bfff,
+        size: 1.5,
         map: texture,
-        blending: THREE.NormalBlending,
+        blending: THREE.AdditiveBlending,
         depthWrite: false,
         transparent: true,
         sizeAttenuation: true,
@@ -415,7 +418,7 @@ export function SolarSystem({
     const belt = stateRef.scene.getObjectsByProperty('userData.id', 'asteroid_belt');
     belt.forEach(obj => {
         if(obj instanceof THREE.Points && obj.material instanceof THREE.PointsMaterial) {
-             obj.material.color.setHex(isBeltSelected ? 0xffffff : 0xa9a9a9);
+             obj.material.color.setHex(isBeltSelected ? 0xffffff : 0x00bfff);
         }
     });
 
