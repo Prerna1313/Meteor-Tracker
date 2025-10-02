@@ -1,19 +1,19 @@
 'use client';
 
 const MeteorLogo = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        {...props}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
     >
-        <path d="M11.5 21.5a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" fill="#fff"/>
-        <path stroke="#000" strokeWidth="1.5" d="M15.52 12.53a4.5 4.5 0 0 1-6.04-6.06 4.5 4.5 0 0 1 6.04 6.06Z" />
-        <path stroke="#000" strokeWidth="1.5" d="M12.5 9.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+        <path d="M15.5 21.5a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" fill="white" />
+        <path d="m9.06 9.9 2.12-2.12 6.37-6.36" stroke="black" strokeWidth="1.5"/>
+        <path d="M11.18 12.02 9.06 9.9" stroke="black" strokeWidth="1.5"/>
     </svg>
 );
 
