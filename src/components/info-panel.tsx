@@ -98,3 +98,5 @@ export function InfoPanel({ object, onClose }: InfoPanelProps) {
     </div>
   );
 }
+
+    
