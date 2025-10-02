@@ -34,9 +34,9 @@ const createAsteroidDust = () => {
     const context = textureCanvas.getContext('2d');
     if(context) {
         const gradient = context.createRadialGradient(16, 16, 0, 16, 16, 16);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        gradient.addColorStop(0.2, 'rgba(200, 255, 255, 1)');
-        gradient.addColorStop(0.7, 'rgba(0, 255, 255, 0.5)');
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+        gradient.addColorStop(0.2, 'rgba(200, 255, 255, 0.6)');
+        gradient.addColorStop(0.7, 'rgba(0, 255, 255, 0.3)');
         gradient.addColorStop(1, 'rgba(0, 150, 150, 0)');
         context.fillStyle = gradient;
         context.fillRect(0, 0, 32, 32);
@@ -45,11 +45,12 @@ const createAsteroidDust = () => {
 
     const material = new THREE.PointsMaterial({
         color: 0x00bfff,
-        size: 0.5,
+        size: 0.3,
         map: texture,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         transparent: true,
+        opacity: 0.5,
         sizeAttenuation: true,
     });
     
@@ -412,8 +413,9 @@ export function SolarSystem({
         
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(curvePoints);
         
-        let opacity = 0.5;
-        if (ASTEROID_IDS.includes(objData.id)) opacity = 0.2;
+        let opacity = 0.8; // Bolder orbits for planets
+        if (ASTEROID_IDS.includes(objData.id)) opacity = 0.3;
+        if (objData.id === 'earth') opacity = 1.0;
 
         const orbitMaterial = new THREE.LineBasicMaterial({
           color: ASTEROID_IDS.includes(objData.id) ? new THREE.Color(0xffffff) : new THREE.Color(objData.color),
@@ -446,10 +448,10 @@ export function SolarSystem({
         const isSelected = id === selectedObjectId;
         
         if(line.material instanceof THREE.LineBasicMaterial) {
-            let baseOpacity = 0.5;
-            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.2;
-            if (id === 'earth') baseOpacity = 0.9;
-            line.material.opacity = isHovered || isSelected ? 0.9 : baseOpacity;
+            let baseOpacity = 0.8;
+            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.3;
+            if (id === 'earth') baseOpacity = 1.0;
+            line.material.opacity = isHovered || isSelected ? 1.0 : baseOpacity;
             line.material.needsUpdate = true;
         }
     });
@@ -488,6 +490,7 @@ export function SolarSystem({
     belt.forEach(obj => {
         if(obj instanceof THREE.Points && obj.material instanceof THREE.PointsMaterial) {
              obj.material.color.setHex(isBeltSelected ? 0xffffff : 0x00bfff);
+             obj.material.opacity = isBeltSelected ? 0.8 : 0.5;
         }
     });
 
@@ -576,3 +579,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
