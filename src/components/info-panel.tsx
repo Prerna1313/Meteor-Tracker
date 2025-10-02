@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, Info } from 'lucide-react';
+import { ChevronLeft, Info, Globe, Gem } from 'lucide-react';
 import type { CelestialObject } from '@/lib/solar-system-data';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,6 +16,35 @@ const StatItem = ({ label, value }: { label: string; value: React.ReactNode }) =
         <span className="text-sm text-white/60">{label}</span>
         <span className="text-lg font-medium">{value}</span>
     </div>
+);
+
+const CometIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="M24 4C12.95 4 4 12.95 4 24C4 35.05 12.95 44 24 44C35.05 44 44 35.05 44 24C44 12.95 35.05 4 24 4Z"
+        fill="currentColor"
+        fillOpacity="0.1"
+      />
+      <path
+        d="M17.5 17.5L20 15L22.5 17.5L25 15L27.5 17.5"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M15 25C15 25 18.5 28.5 24 28.5C29.5 28.5 33 25 33 25"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
 );
 
 const AsteroidIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -35,28 +64,42 @@ const AsteroidIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+
+const PlanetIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg 
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M2 12h20" />
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    </svg>
+);
+
 export function InfoPanel({ object, onClose }: InfoPanelProps) {
   return (
     <div className="relative h-auto max-h-[calc(100vh-8rem)] w-[350px] bg-zinc-900/80 text-white rounded-lg shadow-2xl flex flex-col p-6 backdrop-blur-md">
-        <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-4 left-4 h-10 w-10 text-white/60 hover:text-white">
+        <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-4 right-4 h-10 w-10 text-white/60 hover:text-white bg-white/10 rounded-full">
             <ChevronLeft className="w-5 h-5" />
             <span className="sr-only">Close</span>
         </Button>
 
-        <div className="flex-1 mt-10 overflow-hidden">
+        <div className="flex-1 mt-4 overflow-hidden">
              <ScrollArea className="h-full pr-4">
                 <div className="flex flex-col h-full">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <AsteroidIcon className="w-7 h-7 opacity-80" />
-                            <div>
-                                {object.type !== 'comet' && object.id.match(/\d+/) && <p className="text-2xl font-semibold text-white/80">{object.id.match(/\d+/)?.[0]}</p>}
-                                <h2 className="text-3xl font-bold">{object.name}</h2>
-                            </div>
+                    <div className="flex items-center gap-4">
+                        {object.type === 'comet' && <CometIcon className="w-10 h-10 opacity-80" />}
+                        {object.type === 'planet' && <PlanetIcon className="w-8 h-8 opacity-80" />}
+                        {object.type !== 'comet' && object.type !== 'planet' && <AsteroidIcon className="w-8 h-8 opacity-80" />}
+                        
+                        <div>
+                            {object.type !== 'comet' && object.id.match(/\d+/) && <p className="text-2xl font-semibold text-white/80">{object.id.match(/\d+/)?.[0]}</p>}
+                            <h2 className="text-3xl font-bold">{object.name}</h2>
                         </div>
-                        <Button variant="ghost" size="icon" className="w-8 h-8 text-white/80 hover:text-white">
-                            <Info className="w-5 h-5" />
-                        </Button>
                     </div>
 
                     <Tabs defaultValue="stats" className="w-full mt-6">
