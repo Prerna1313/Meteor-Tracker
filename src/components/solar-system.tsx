@@ -24,13 +24,13 @@ type SolarSystemProps = {
 const AU_SCALE = 15;
 
 const createAsteroidDust = () => {
-    const particles = 75000;
+    const particles = 150000;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particles * 3);
 
     const material = new THREE.PointsMaterial({
         color: 0x007BA7, // Bright Cerulean
-        size: 0.05,
+        size: 0.02,
         depthWrite: false,
         transparent: true,
         opacity: 0.45,
