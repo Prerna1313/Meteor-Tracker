@@ -53,7 +53,7 @@ const createSunGlow = () => {
 };
 
 const createAsteroidDust = () => {
-    const particles = 15000;
+    const particles = 50000;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particles * 3);
 
@@ -62,43 +62,41 @@ const createAsteroidDust = () => {
     textureCanvas.height = 16;
     const context = textureCanvas.getContext('2d');
     if(context) {
-        const gradient = context.createRadialGradient(8, 8, 0, 8, 8, 8);
-        gradient.addColorStop(0, 'rgba(255,255,255,1)');
-        gradient.addColorStop(1, 'rgba(255,255,255,0)');
-        context.fillStyle = gradient;
-        context.fillRect(0,0,16,16);
+        context.beginPath();
+        context.arc(8, 8, 8, 0, 2 * Math.PI);
+        context.fillStyle = 'white';
+        context.fill();
     }
     const texture = new THREE.CanvasTexture(textureCanvas);
 
 
     const material = new THREE.PointsMaterial({
-        color: 0x00bfff,
-        size: 1.5,
+        color: 0xa9a9a9, // Dark grey for a more realistic rock color
+        size: 0.5,
         map: texture,
-        blending: THREE.AdditiveBlending,
+        blending: THREE.NormalBlending, // Normal blending instead of additive
         depthWrite: false,
         transparent: true,
         sizeAttenuation: true,
     });
     
-    // Solar system scaled distances from solar-system-data.ts
     const marsOrbit = 125;
     const jupiterOrbit = 200;
     const saturnOrbit = 280;
     const neptuneOrbit = 450;
     
-    // Main Belt (70% of particles)
-    const mainBeltInner = marsOrbit + 10;
-    const mainBeltOuter = jupiterOrbit - 20;
+    // Main Belt (80% of particles)
+    const mainBeltInner = marsOrbit + 15;
+    const mainBeltOuter = jupiterOrbit - 25;
     
-    // Jupiter Trojans (20% of particles) - clustered around Jupiter's orbit
-    const trojanAngleSpread = Math.PI / 6; // 30 degrees spread
-    const trojanLeadingCenter = Math.PI / 3; // 60 degrees ahead
-    const trojanTrailingCenter = -Math.PI / 3; // 60 degrees behind
+    // Jupiter Trojans (15% of particles) - clustered around Jupiter's orbit
+    const trojanAngleSpread = Math.PI / 4; 
+    const trojanLeadingCenter = Math.PI / 3;
+    const trojanTrailingCenter = -Math.PI / 3;
 
-    // Scattered Disc / Kuiper Belt (10% of particles)
-    const scatteredInner = saturnOrbit;
-    const scatteredOuter = neptuneOrbit + 50;
+    // Scattered Disc / Kuiper Belt (5% of particles)
+    const scatteredInner = jupiterOrbit + 10;
+    const scatteredOuter = neptuneOrbit + 100;
 
 
     for (let i = 0; i < particles; i++) {
@@ -107,23 +105,22 @@ const createAsteroidDust = () => {
         let angle = 0;
         let y = 0;
 
-        if (randomValue < 0.7) { // 70% for Main Belt
+        if (randomValue < 0.8) { // 80% for Main Belt
             dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
             angle = Math.random() * Math.PI * 2;
-            y = THREE.MathUtils.randFloatSpread(5); 
-        } else if (randomValue < 0.9) { // 20% for Trojans
-            dist = jupiterOrbit + THREE.MathUtils.randFloatSpread(15);
-            // Place in one of the two Trojan groups
+            y = THREE.MathUtils.randFloatSpread(8); 
+        } else if (randomValue < 0.95) { // 15% for Trojans
+            dist = jupiterOrbit + THREE.MathUtils.randFloatSpread(20);
             if (Math.random() > 0.5) {
                 angle = trojanLeadingCenter + THREE.MathUtils.randFloatSpread(trojanAngleSpread);
             } else {
                 angle = trojanTrailingCenter + THREE.MathUtils.randFloatSpread(trojanAngleSpread);
             }
-            y = THREE.MathUtils.randFloatSpread(10);
-        } else { // 10% for Scattered Disc
+            y = THREE.MathUtils.randFloatSpread(12);
+        } else { // 5% for Scattered Disc
             dist = THREE.MathUtils.randFloat(scatteredInner, scatteredOuter);
             angle = Math.random() * Math.PI * 2;
-            y = THREE.MathUtils.randFloatSpread(20);
+            y = THREE.MathUtils.randFloatSpread(25);
         }
 
         positions[i * 3] = Math.cos(angle) * dist;
@@ -309,7 +306,7 @@ export function SolarSystem({
     while (scene.children.length > 0) {
       const child = scene.children[0];
       scene.remove(child);
-      if (child instanceof THREE.Mesh) {
+      if (child instanceof THREE.Mesh || child instanceof THREE.Points) {
           child.geometry.dispose();
           // material can be an array
           if (Array.isArray(child.material)) {
@@ -451,7 +448,7 @@ export function SolarSystem({
     const belt = stateRef.scene.getObjectsByProperty('userData.id', 'asteroid_belt');
     belt.forEach(obj => {
         if(obj instanceof THREE.Points && obj.material instanceof THREE.PointsMaterial) {
-             obj.material.color.setHex(isBeltSelected ? 0xffffff : 0x00bfff);
+             obj.material.color.setHex(isBeltSelected ? 0xffffff : 0xa9a9a9);
         }
     });
 
