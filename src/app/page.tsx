@@ -12,6 +12,7 @@ import {
   type AsteroidData,
 } from '@/lib/solar-system-data';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TimelineControls } from '@/components/timeline-controls';
 
 
 export default function Home() {
@@ -103,6 +104,7 @@ export default function Home() {
             onUpdateComets={handleUpdateComets}
             onUpdateAsteroids={handleUpdateAsteroids}
           />
+           <TimelineControls />
         </>
       ) : (
         <div className="w-full h-full flex items-center justify-center">
