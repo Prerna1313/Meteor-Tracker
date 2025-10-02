@@ -8,7 +8,6 @@ export type CelestialObject = {
   color?: string;
   orbitalSpeed?: number;
   rotationSpeed?: number;
-  textureUrl?: string;
   rings?: { innerRadius: number; outerRadius: number; textureUrl: string; };
   eccentricity?: number;
   description?: string;
@@ -37,7 +36,7 @@ export const solarSystemData: CelestialObject[] = [
     type: 'planet',
     size: 2,
     distance: 40,
-    color: '#FFD700',
+    color: '#9C27B0', // Purple
     orbitalSpeed: 1.6,
     rotationSpeed: 0.1,
     eccentricity: 0.206,
@@ -52,7 +51,7 @@ export const solarSystemData: CelestialObject[] = [
     type: 'planet',
     size: 4,
     distance: 70,
-    color: '#FFD700',
+    color: '#FFC107', // Dark Yellow
     orbitalSpeed: 1.2,
     rotationSpeed: 0.08,
     eccentricity: 0.007,
@@ -67,7 +66,7 @@ export const solarSystemData: CelestialObject[] = [
     type: 'planet',
     size: 5,
     distance: 100,
-    color: '#FFD700',
+    color: '#2196F3', // Shiny Blue
     orbitalSpeed: 1,
     rotationSpeed: 0.5,
     eccentricity: 0.017,
@@ -82,7 +81,7 @@ export const solarSystemData: CelestialObject[] = [
     type: 'planet',
     size: 3,
     distance: 150,
-    color: '#FFD700',
+    color: '#FF9800', // Light Orange
     orbitalSpeed: 0.8,
     rotationSpeed: 0.45,
     eccentricity: 0.093,
@@ -97,7 +96,7 @@ export const solarSystemData: CelestialObject[] = [
     type: 'planet',
     size: 10,
     distance: 320,
-    color: '#66c2ff',
+    color: '#FF5722', // Dark Orange
     orbitalSpeed: 0.4,
     rotationSpeed: 0.8,
     eccentricity: 0.048,
@@ -112,7 +111,7 @@ export const solarSystemData: CelestialObject[] = [
     type: 'planet',
     size: 9,
     distance: 450,
-    color: '#66c2ff',
+    color: '#FFC107', // Dark Yellow
     orbitalSpeed: 0.32,
     rotationSpeed: 0.75,
     rings: { innerRadius: 12, outerRadius: 20, textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/saturn_ring.png' },
@@ -128,7 +127,7 @@ export const solarSystemData: CelestialObject[] = [
     type: 'planet',
     size: 7,
     distance: 600,
-    color: '#66c2ff',
+    color: '#009688', // Bluish Green
     orbitalSpeed: 0.22,
     rotationSpeed: 0.6,
     eccentricity: 0.047,
@@ -143,7 +142,7 @@ export const solarSystemData: CelestialObject[] = [
     type: 'planet',
     size: 7,
     distance: 750,
-    color: '#66c2ff',
+    color: '#673AB7', // Violet
     orbitalSpeed: 0.18,
     rotationSpeed: 0.55,
     eccentricity: 0.009,
