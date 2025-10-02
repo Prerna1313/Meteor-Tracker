@@ -30,11 +30,11 @@ const createAsteroidDust = () => {
 
     const material = new THREE.PointsMaterial({
         color: 0x00bfff,
-        size: 0.07,
+        size: 0.08, // Slightly larger for more brightness
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.7, // Brighter
     });
     
     const marsOrbit = 1.524 * AU_SCALE;
@@ -53,7 +53,7 @@ const createAsteroidDust = () => {
             dist = THREE.MathUtils.randFloat(0, mainBeltInner);
             y = THREE.MathUtils.randFloatSpread(2);
         } else if (zone < 0.98) { // 93% in Main Belt (more dense)
-            const innerBias = Math.pow(Math.random(), 2);
+            const innerBias = Math.pow(Math.random(), 0.5); // More concentrated towards the inside
             dist = mainBeltInner + innerBias * (mainBeltOuter - mainBeltInner);
             y = THREE.MathUtils.randFloatSpread(10); 
         } else { // 2% in Kuiper Belt region (up to Neptune)
@@ -95,7 +95,7 @@ const createMeteors = () => {
 
     const dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
     const angle = Math.random() * Math.PI * 2;
-    const y = THREE.MathUtils.randFloatSpread(12);
+    const y = THREE.MathUtils.randFloatSpread(20); // Increased vertical spread
 
     meteor.position.set(
       Math.cos(angle) * dist,
@@ -226,30 +226,30 @@ export function SolarSystem({
           const varpi = THREE.MathUtils.degToRad(objData.longitudeOfPerihelion);
           const Omega = THREE.MathUtils.degToRad(objData.longitudeOfAscendingNode);
 
-          const P = objData.orbitalSpeed;
-          const M0 = L - varpi;
-          const n = (2 * Math.PI) / (P * 365.25);
+          const P = objData.orbitalSpeed; // Period in years
+          const M0 = (L - varpi);
+          const n = (2 * Math.PI) / (P * 365.25); // Mean motion
           
-          let M = M0 + n * d;
-          M = M % (2 * Math.PI);
+          let M = (M0 + n * d) % (2 * Math.PI);
 
+          // Solve Kepler's equation for E (Eccentric Anomaly)
           let E = M;
           for (let k = 0; k < 5; k++) {
               E = M + e * Math.sin(E);
           }
 
           const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
-          
           const r = a * (1 - e * Math.cos(E));
 
-          const x_plane = r * Math.cos(nu);
-          const z_plane = r * Math.sin(nu);
+          // Position in orbital plane
+          const x_orb = r * Math.cos(nu);
+          const z_orb = r * Math.sin(nu);
 
           const argOfPeri = varpi - Omega;
 
-          const x_3d = r * ( Math.cos(Omega) * Math.cos(nu + argOfPeri) - Math.sin(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i) );
-          const z_3d = r * ( Math.sin(Omega) * Math.cos(nu + argOfPeri) + Math.cos(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i) );
-          const y_3d = r * Math.sin(nu + argOfPeri) * Math.sin(i);
+          const x_3d = (Math.cos(Omega) * Math.cos(argOfPeri + nu) - Math.sin(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i)) * r;
+          const z_3d = (Math.sin(Omega) * Math.cos(argOfPeri + nu) + Math.cos(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i)) * r;
+          const y_3d = (Math.sin(argOfPeri + nu) * Math.sin(i)) * r;
 
           objGroup.position.set(
             x_3d * AU_SCALE, 
@@ -388,6 +388,7 @@ export function SolarSystem({
         const varpi = THREE.MathUtils.degToRad(objData.longitudeOfPerihelion);
 
         const curvePoints: THREE.Vector3[] = [];
+        const argOfPeri = varpi - Omega;
         for (let j = 0; j <= 200; j++) {
             const M = (j / 200) * 2 * Math.PI;
             let E = M;
@@ -396,12 +397,10 @@ export function SolarSystem({
             }
             const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
             const r = a * (1 - e * Math.cos(E));
-
-            const argOfPeri = varpi - Omega;
-
-            const x_3d = r * ( Math.cos(Omega) * Math.cos(nu + argOfPeri) - Math.sin(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i) );
-            const z_3d = r * ( Math.sin(Omega) * Math.cos(nu + argOfPeri) + Math.cos(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i) );
-            const y_3d = r * Math.sin(nu + argOfPeri) * Math.sin(i);
+            
+            const x_3d = (Math.cos(Omega) * Math.cos(argOfPeri + nu) - Math.sin(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i)) * r;
+            const z_3d = (Math.sin(Omega) * Math.cos(argOfPeri + nu) + Math.cos(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i)) * r;
+            const y_3d = (Math.sin(argOfPeri + nu) * Math.sin(i)) * r;
 
             curvePoints.push(new THREE.Vector3(x_3d * AU_SCALE, y_3d * AU_SCALE, z_3d * AU_SCALE));
         }
@@ -409,7 +408,7 @@ export function SolarSystem({
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(curvePoints);
         
         let opacity = 0.8; // Bolder orbits for planets
-        if (ASTEROID_IDS.includes(objData.id)) opacity = 0.6; // Brighter asteroid orbits
+        if (ASTEROID_IDS.includes(objData.id)) opacity = 0.7;
         if (objData.id === 'earth') opacity = 1.0;
 
         const orbitMaterial = new THREE.LineBasicMaterial({
@@ -444,7 +443,7 @@ export function SolarSystem({
         
         if(line.material instanceof THREE.LineBasicMaterial) {
             let baseOpacity = 0.4;
-            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.5;
+            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.6;
             if (id === 'earth') baseOpacity = 0.9;
             line.material.opacity = isHovered || isSelected ? 1.0 : baseOpacity;
             line.material.needsUpdate = true;
