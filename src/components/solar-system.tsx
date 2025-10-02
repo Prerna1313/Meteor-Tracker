@@ -34,7 +34,7 @@ const createAsteroidDust = () => {
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         transparent: true,
-        opacity: 0.55, // Increased opacity for brightness
+        opacity: 0.6, // a lil more bright
     });
     
     const marsOrbit = 1.524 * AU_SCALE;
@@ -52,12 +52,12 @@ const createAsteroidDust = () => {
         if (zone < 0.10) { // 10% in Inner System (less dense)
             dist = THREE.MathUtils.randFloat(0, mainBeltInner);
             y = THREE.MathUtils.randFloatSpread(2);
-        } else if (zone < 0.98) { // 88% in Main Belt (more dense)
+        } else if (zone < 0.99) { // 89% in Main Belt (more dense)
             // Skew distribution towards the inner part of the belt
             const innerBias = Math.pow(Math.random(), 2);
             dist = mainBeltInner + innerBias * (mainBeltOuter - mainBeltInner);
             y = THREE.MathUtils.randFloatSpread(10); 
-        } else { // 2% in Outer System (sparse)
+        } else { // 1% in Outer System (sparse)
             dist = THREE.MathUtils.randFloat(mainBeltOuter, mainBeltOuter + 20 * AU_SCALE);
             y = THREE.MathUtils.randFloatSpread(25);
         }
