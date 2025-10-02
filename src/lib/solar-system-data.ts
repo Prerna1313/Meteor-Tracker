@@ -343,8 +343,8 @@ export const solarSystemData: CelestialObject[] = [
     diameter: 140,
     semiMajorAxis: 5.226,
     eccentricity: 0.138,
-    orbitalInclination: 24,
-    meanLongitude: 329.8,
+    orbitalInclination: 22.04,
+    meanLongitude: 304.4, // Jupiter's mean longitude (34.4) + 270 (for L5 point visual separation, not strictly 60deg for visual purposes)
     longitudeOfPerihelion: -39.1,
     longitudeOfAscendingNode: 43.8,
   },
