@@ -41,7 +41,7 @@ export function InfoPanel({ object, onClose }: InfoPanelProps) {
   const [activeTab, setActiveTab] = useState('stats');
   
   return (
-    <div className="relative h-full w-full max-w-xs bg-black/80 text-white shadow-2xl flex flex-col p-6 backdrop-blur-sm">
+    <div className="relative h-full w-full max-w-xs bg-black/50 text-white shadow-2xl flex flex-col p-6 backdrop-blur-md">
         <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-4 left-4 h-10 w-10 text-white/60 hover:text-white">
             <ChevronLeft className="w-5 h-5" />
             <span className="sr-only">Close</span>
