@@ -55,8 +55,9 @@ const createSunGlow = () => {
 const createAsteroidBelt = (count: number) => {
   const baseGeometry = new THREE.IcosahedronGeometry(0.5, 0);
   const material = new THREE.MeshStandardMaterial({
-    color: 0x66c2ff,
+    color: 0xaaaaaa, // A neutral grey for the rocks
     roughness: 0.8,
+    flatShading: true,
   });
   const instancedMesh = new THREE.InstancedMesh(baseGeometry, material, count);
   instancedMesh.userData = { id: 'asteroid_belt', name: 'Asteroid Belt' };
@@ -82,6 +83,54 @@ const createAsteroidBelt = (count: number) => {
   instancedMesh.instanceMatrix.needsUpdate = true;
   return instancedMesh;
 };
+
+
+const createAsteroidDust = (count: number) => {
+    const positions = new Float32Array(count * 3);
+    const dustGeometry = new THREE.BufferGeometry();
+
+    for (let i = 0; i < count; i++) {
+        const dist = THREE.MathUtils.randFloat(200, 250);
+        const angle = Math.random() * Math.PI * 2;
+        const y = THREE.MathUtils.randFloatSpread(10); // A bit more spread for the dust
+
+        positions[i * 3] = Math.cos(angle) * dist;
+        positions[i * 3 + 1] = y;
+        positions[i * 3 + 2] = Math.sin(angle) * dist;
+    }
+    dustGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    
+    // Create a texture for the dust particles
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const context = canvas.getContext('2d');
+    if (!context) return null;
+    
+    const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gradient.addColorStop(0, 'rgba(0, 191, 255, 0.8)');
+    gradient.addColorStop(0.5, 'rgba(0, 191, 255, 0.2)');
+    gradient.addColorStop(1, 'rgba(0, 191, 255, 0)');
+    
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, 64, 64);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+
+    const dustMaterial = new THREE.PointsMaterial({
+        color: 0x00bfff, // DeepSkyBlue
+        size: 2,
+        map: texture,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false,
+    });
+
+    const dust = new THREE.Points(dustGeometry, dustMaterial);
+    dust.userData = { id: 'asteroid_belt', name: 'Asteroid Belt' };
+    return dust;
+}
+
 
 export function SolarSystem({
   data,
@@ -136,6 +185,12 @@ export function SolarSystem({
       const asteroidBelt = createAsteroidBelt(1500);
       scene.add(asteroidBelt);
       stateRef.clickableObjects.push(asteroidBelt);
+
+      const dust = createAsteroidDust(10000);
+      if (dust) {
+          scene.add(dust);
+          stateRef.clickableObjects.push(dust);
+      }
     };
 
     if (!stateRef.renderer) {
@@ -255,25 +310,12 @@ export function SolarSystem({
     celestialObjects.clear();
     orbitLines.forEach(line => scene.remove(line));
     orbitLines.length = 0;
-    stateRef.clickableObjects = stateRef.clickableObjects.filter(obj => obj.userData.id === 'asteroid_belt');
+    stateRef.clickableObjects = stateRef.clickableObjects.filter(obj => obj.userData.id === 'asteroid_belt' || obj.userData.id === 'asteroid_dust');
 
 
-    const textures = new Map<string, THREE.Texture>();
     data.forEach((objData) => {
       let celestialObj: THREE.Object3D | null = null;
-      if (objData.textureUrl && !textures.has(objData.id)) {
-        textures.set(
-          objData.id,
-          stateRef.textureLoader.load(objData.textureUrl)
-        );
-      }
-      if (objData.rings?.textureUrl && !textures.has(`${objData.id}-ring`)) {
-        textures.set(
-          `${objData.id}-ring`,
-          stateRef.textureLoader.load(objData.rings.textureUrl)
-        );
-      }
-
+      
       if (objData.type === 'star') {
         const starGroup = new THREE.Group();
         const glow = createSunGlow();
@@ -286,7 +328,7 @@ export function SolarSystem({
         const objectGroup = new THREE.Group();
         const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
         const material = new THREE.MeshBasicMaterial({
-          color: objData.color,
+          color: new THREE.Color(objData.color),
         });
         const body = new THREE.Mesh(geometry, material);
         body.userData.isPlanetBody = true;
@@ -309,7 +351,7 @@ export function SolarSystem({
             );
           }
           const ringMaterial = new THREE.MeshBasicMaterial({
-            map: textures.get(`${objData.id}-ring`),
+            map: stateRef.textureLoader.load(objData.rings.textureUrl),
             side: THREE.DoubleSide,
             transparent: true,
             opacity: 0.8,
@@ -339,7 +381,7 @@ export function SolarSystem({
         const points = ellipse.getPoints(200);
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
         const orbitMaterial = new THREE.LineBasicMaterial({
-          color: objData.color,
+          color: new THREE.Color(objData.color),
           transparent: true,
           opacity: 0.5,
         });
@@ -375,7 +417,7 @@ export function SolarSystem({
          if (isSelected) {
             (meshToHighlight.material as THREE.MeshBasicMaterial).color.set(0xffffff);
         } else {
-            (meshToHighlight.material as THREE.MeshBasicMaterial).color.set(obj.userData.color);
+            (meshToHighlight.material as THREE.MeshBasicMaterial).color.set(new THREE.Color(obj.userData.color));
         }
       }
 
@@ -386,11 +428,16 @@ export function SolarSystem({
         }
       }
     });
+    
+    const isBeltSelected = selectedObjectId === 'asteroid_belt';
 
-    const belt = stateRef.scene.getObjectByProperty('userData.id', 'asteroid_belt') as THREE.InstancedMesh;
-    if (belt && belt.material instanceof THREE.MeshStandardMaterial) {
-        belt.material.color.setHex(selectedObjectId === 'asteroid_belt' ? 0xffffff : 0x66c2ff);
-    }
+    const belt = stateRef.scene.getObjectsByProperty('userData.id', 'asteroid_belt');
+    belt.forEach(obj => {
+        if(obj instanceof THREE.InstancedMesh && obj.material instanceof THREE.MeshStandardMaterial) {
+            obj.material.color.setHex(isBeltSelected ? 0xffffff : 0xaaaaaa);
+        }
+    });
+
 
   }, [selectedObjectId, stateRef.celestialObjects, stateRef.scene]);
 
