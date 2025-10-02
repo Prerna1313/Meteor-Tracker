@@ -4,22 +4,8 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
-
-export const CometDataSchema = z.object({
-  id: z.string().describe('Unique ID for the comet'),
-  name: z.string().describe('Name of the comet'),
-  description: z.string().describe('A brief, interesting description of the comet.'),
-  size: z.number().describe('The diameter of the comet\'s nucleus in kilometers.'),
-  type: z.literal('comet').describe("The object type, always 'comet'"),
-  orbital: z.object({
-    perihelion: z.number().describe('Closest distance to the sun in astronomical units (AU). Should be relatively close, e.g., 0.5 to 2 AU.'),
-    aphelion: z.number().describe('Farthest distance from the sun in astronomical units (AU). Should be very far, e.g., 100 to 5000 AU, to create a highly elliptical orbit.'),
-    inclination: z.number().describe('Orbital inclination in degrees from the solar system\'s main plane. Can be any value from 0 to 180.'),
-    orbitalPeriod: z.number().describe('The time it takes to orbit the sun, in Earth years. Should be a long period, e.g., 75 to 2000 years.'),
-  }),
-});
-
-export type CometData = z.infer<typeof CometDataSchema>;
+import type { CometData } from '@/lib/solar-system-data';
+import { CometDataSchema } from '@/lib/solar-system-data';
 
 const generateCometPrompt = ai.definePrompt({
     name: 'generateCometPrompt',
@@ -61,5 +47,3 @@ export const generateCometFlow = ai.defineFlow(
 export async function generateComet(name: string): Promise<CometData> {
     return await generateCometFlow(name);
 }
-
-    

@@ -1,4 +1,6 @@
 
+import { z } from 'zod';
+
 export type CelestialObject = {
   id: string;
   name: string;
@@ -17,19 +19,22 @@ export type CelestialObject = {
   dayLength?: number; // in hours
 };
 
-export type CometData = {
-  id: string;
-  name: string;
-  description: string;
-  size: number;
-  type: 'comet';
-  orbital: {
-    perihelion: number; // closest point to sun
-    aphelion: number;   // farthest point from sun
-    inclination: number; // angle of orbit relative to solar system plane
-    orbitalPeriod: number; // in Earth years
-  }
-};
+export const CometDataSchema = z.object({
+  id: z.string().describe('Unique ID for the comet'),
+  name: z.string().describe('Name of the comet'),
+  description: z.string().describe('A brief, interesting description of the comet.'),
+  size: z.number().describe("The diameter of the comet's nucleus in kilometers."),
+  type: z.literal('comet').describe("The object type, always 'comet'"),
+  orbital: z.object({
+    perihelion: z.number().describe('Closest distance to the sun in astronomical units (AU). Should be relatively close, e.g., 0.5 to 2 AU.'),
+    aphelion: z.number().describe('Farthest distance from the sun in astronomical units (AU). Should be very far, e.g., 100 to 5000 AU, to create a highly elliptical orbit.'),
+    inclination: z.number().describe('Orbital inclination in degrees from the solar system\'s main plane. Can be any value from 0 to 180.'),
+    orbitalPeriod: z.number().describe('The time it takes to orbit the sun, in Earth years. Should be a long period, e.g., 75 to 2000 years.'),
+  }),
+});
+
+export type CometData = z.infer<typeof CometDataSchema>;
+
 
 export const solarSystemData: CelestialObject[] = [
   {
@@ -175,5 +180,3 @@ export const solarSystemData: CelestialObject[] = [
     dayLength: 16.1
   },
 ];
-
-    
