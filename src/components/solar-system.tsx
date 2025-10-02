@@ -121,7 +121,7 @@ const createMeteors = () => {
   return meteors;
 }
 
-const ASTEROID_IDS = ['eurybates', 'orus', 'mathilde', 'patroclus', 'ceres', 'annefrank'];
+const ASTEROID_IDS = ['eurybates', 'orus', 'mathilde', 'patroclus', 'ceres', 'annefrank', 'leucus'];
 
 export function SolarSystem({
   data,
