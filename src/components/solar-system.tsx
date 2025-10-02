@@ -151,7 +151,7 @@ const createKuiperMeteors = () => {
 }
 
 
-const ASTEROID_IDS = ['eurybates', 'orus', 'mathilde', 'patroclus', 'ceres', 'annefrank', 'leucus', 'itokawa', 'eros', 'bennu', 'ryugu', 'donaldjohanson', 'braille', 'polymele', 'lutetia'];
+const ASTEROID_IDS = ['eurybates', 'orus', 'mathilde', 'patroclus', 'ceres', 'annefrank', 'leucus', 'itokawa', 'eros', 'bennu', 'ryugu', 'donaldjohanson', 'braille', 'polymele', 'lutetia', 'psyche', 'ida', 'gaspra', 'apophis', 'didymos', 'vesta'];
 
 export function SolarSystem({
   data,
