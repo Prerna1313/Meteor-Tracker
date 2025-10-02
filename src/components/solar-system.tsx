@@ -24,7 +24,7 @@ type SolarSystemProps = {
 const AU_SCALE = 15;
 
 const createAsteroidDust = () => {
-    const particles = 150000;
+    const particles = 200000;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particles * 3);
 
@@ -53,14 +53,16 @@ const createAsteroidDust = () => {
         if (zone < 0.05) { // 5% in Inner System
             dist = THREE.MathUtils.randFloat(0, mainBeltInner);
             y = (Math.random() - 0.5) * Math.random() * verticalSpread * 0.1;
-        } else if (zone < 0.98) { // 93% in Main Belt (more dense)
+        } else if (zone < 0.80) { // 75% in Main Belt (more dense)
             const innerBias = Math.pow(Math.random(), 0.5); 
             dist = mainBeltInner + innerBias * (mainBeltOuter - mainBeltInner);
-            // Non-uniform vertical distribution
             y = (Math.random() - 0.5) * Math.pow(Math.random(), 2) * verticalSpread;
-        } else { // 2% in Kuiper Belt region (up to Neptune)
-            dist = THREE.MathUtils.randFloat(jupiterOrbit, neptuneOrbit);
-             y = (Math.random() - 0.5) * Math.random() * verticalSpread * 1.2;
+        } else if (zone < 0.90) { // 10% as Jupiter Trojans
+            dist = THREE.MathUtils.randFloat(jupiterOrbit - 0.5 * AU_SCALE, jupiterOrbit + 0.5 * AU_SCALE);
+            y = (Math.random() - 0.5) * Math.random() * verticalSpread * 1.5;
+        } else { // 10% in Kuiper Belt region (up to Neptune)
+            dist = THREE.MathUtils.randFloat(jupiterOrbit + 1 * AU_SCALE, neptuneOrbit);
+            y = (Math.random() - 0.5) * Math.random() * verticalSpread * 1.2;
         }
 
         const angle = Math.random() * Math.PI * 2;
