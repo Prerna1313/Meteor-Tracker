@@ -10,7 +10,8 @@ const MeteorLogo = (props: React.SVGProps<SVGSVGElement>) => (
         {...props}
     >
         <circle cx="50" cy="50" r="48" stroke="white" strokeWidth="4"/>
-        <path d="M30 70 L40 50 L50 70 L60 50 L70 70" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M25 50 H75" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+        <path d="M35 40 L25 50 L35 60" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
 );
 
@@ -36,7 +37,7 @@ export function LandingPage({ isExiting }: LandingPageProps) {
             <h1 className="text-3xl font-light tracking-[0.3em] text-white/70">EYES</h1>
             <h2 className="mt-1 text-md font-light tracking-[0.4em] text-white/50">ON</h2>
         </div>
-         <h1 className="mt-4 text-5xl font-medium tracking-[0.8em] text-white">METEORS</h1>
+         <h1 className="mt-2 text-4xl font-medium tracking-[0.8em] text-white">METEORS</h1>
       </div>
 
       <div className="absolute bottom-10 flex flex-col items-center space-y-2 z-10">
