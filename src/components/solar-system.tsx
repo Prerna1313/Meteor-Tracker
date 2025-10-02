@@ -322,7 +322,9 @@ export function SolarSystem({
         const material = new THREE.MeshStandardMaterial({
           color: new THREE.Color(objData.color),
           emissive: ASTEROID_IDS.includes(objData.id) ? new THREE.Color(0x000000) : new THREE.Color(objData.color),
-          emissiveIntensity: 0.6,
+          emissiveIntensity: ASTEROID_IDS.includes(objData.id) ? 0 : 0.6,
+          roughness: ASTEROID_IDS.includes(objData.id) ? 1 : 0.5,
+          metalness: 0,
         });
         const body = new THREE.Mesh(geometry, material);
         body.userData.isPlanetBody = true;
@@ -430,15 +432,15 @@ export function SolarSystem({
         | THREE.Mesh
         | undefined;
 
-      if (obj.userData.type === 'planet' && body && body.material instanceof THREE.MeshStandardMaterial) {
-         if (isSelected) {
-            (body.material as THREE.MeshStandardMaterial).emissive.setHex(0xffffff);
-            (body.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
+      if (body?.material instanceof THREE.MeshStandardMaterial) {
+        if (isSelected) {
+          (body.material as THREE.MeshStandardMaterial).emissive.setHex(0xffffff);
+          (body.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
         } else {
             const originalColor = obj.userData.color || 0xaaaaaa;
             const emissiveColor = ASTEROID_IDS.includes(obj.userData.id) ? 0x000000 : new THREE.Color(originalColor);
             (body.material as THREE.MeshStandardMaterial).emissive.set(emissiveColor);
-            (body.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.6;
+            (body.material as THREE.MeshStandardMaterial).emissiveIntensity = ASTEROID_IDS.includes(obj.userData.id) ? 0 : 0.6;
         }
       }
 
