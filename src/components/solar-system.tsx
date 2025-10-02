@@ -399,22 +399,29 @@ export function SolarSystem({
         orbit.rotation.x = Math.PI / 2;
 
         const inclination = THREE.MathUtils.degToRad(objData.orbitalInclination || 0);
-        orbit.rotation.z = inclination; 
-        if (celestialObj) {
-            celestialObj.rotation.z = inclination;
-        }
+        const orbitGroup = new THREE.Group();
+        orbitGroup.add(orbit);
 
-        scene.add(orbit);
+        if (celestialObj) {
+            orbitGroup.add(celestialObj);
+        }
+        orbitGroup.rotation.z = inclination;
+
+        scene.add(orbitGroup);
         orbitLines.set(objData.id, orbit);
       }
 
 
-      if (celestialObj) {
+      if (celestialObj && !celestialObj.parent) {
         if(objData.id === 'sun') {
             celestialObj.position.set(0, 0, 0);
         }
         celestialObj.userData = { ...objData };
         scene.add(celestialObj);
+        celestialObjects.set(objData.id, celestialObj);
+        clickableObjects.push(celestialObj);
+      } else if (celestialObj) {
+        celestialObj.userData = { ...objData };
         celestialObjects.set(objData.id, celestialObj);
         clickableObjects.push(celestialObj);
       }
@@ -429,6 +436,9 @@ export function SolarSystem({
             let baseOpacity = 0.5;
             if (ASTEROID_IDS.includes(id)) {
                 baseOpacity = 0.2;
+            }
+            if (id === 'earth') {
+                baseOpacity = 0.5; 
             }
             line.material.opacity = isHovered || isSelected ? 0.9 : baseOpacity;
             line.material.needsUpdate = true;
@@ -521,3 +531,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
