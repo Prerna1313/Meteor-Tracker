@@ -386,7 +386,7 @@ export function SolarSystem({
         const orbitMaterial = new THREE.LineBasicMaterial({
           color: ASTEROID_IDS.includes(objData.id) ? new THREE.Color(0xffffff) : new THREE.Color(objData.color),
           transparent: true,
-          opacity: 0.3,
+          opacity: 0.5,
         });
         const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
         orbit.rotation.x = Math.PI / 2;
@@ -419,7 +419,7 @@ export function SolarSystem({
         const isHovered = id === hoveredObjectId;
         const isSelected = id === selectedObjectId;
         if(line.material instanceof THREE.LineBasicMaterial) {
-            line.material.opacity = isHovered || isSelected ? 0.8 : 0.3;
+            line.material.opacity = isHovered || isSelected ? 0.9 : 0.5;
             line.material.needsUpdate = true;
         }
     });
