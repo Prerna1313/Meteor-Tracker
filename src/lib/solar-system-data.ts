@@ -298,7 +298,7 @@ export const solarSystemData: CelestialObject[] = [
     type: 'planet',
     size: 5,
     distance: 10 * AU_SCALE,
-    color: '#D8BBA2',
+    color: '#E28B33',
     orbitalSpeed: 11.86,
     rotationSpeed: 0.8,
     description: 'Jupiter is the fifth planet from the Sun and the largest in the Solar System. It is a gas giant with a mass more than two and a half times that of all the other planets in the Solar System combined, but slightly less than one-thousandth the mass of the Sun.',
