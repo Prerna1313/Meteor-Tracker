@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Info } from 'lucide-react';
+import { ChevronLeft, Info } from 'lucide-react';
 import type { CelestialObject } from '@/lib/solar-system-data';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type InfoPanelProps = {
   object: CelestialObject;
@@ -43,67 +44,59 @@ export function InfoPanel({ object, onClose }: InfoPanelProps) {
     <div className="relative h-full w-full max-w-sm bg-black/80 text-white shadow-2xl flex flex-col p-6 backdrop-blur-sm">
         <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-4 left-4 h-10 w-10 text-white/60 hover:text-white">
             <ChevronLeft className="w-5 h-5" />
-            <span className="ml-2">See all asteroids</span>
+            <span className="sr-only">Close</span>
         </Button>
 
-        <div className="flex flex-col mt-20">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <AsteroidIcon className="w-7 h-7 opacity-80" />
-                    <div>
-                        {object.id.match(/\d+/) && <p className="text-2xl font-semibold text-white/80">{object.id.match(/\d+/)?.[0]}</p>}
-                        <h2 className="text-3xl font-bold">{object.name}</h2>
+        <div className="flex-1 mt-20 overflow-y-auto">
+          <ScrollArea className="h-full">
+            <div className="flex flex-col">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <AsteroidIcon className="w-7 h-7 opacity-80" />
+                        <div>
+                            {object.id.match(/\d+/) && <p className="text-2xl font-semibold text-white/80">{object.id.match(/\d+/)?.[0]}</p>}
+                            <h2 className="text-3xl font-bold">{object.name}</h2>
+                        </div>
                     </div>
+                    <Button variant="ghost" size="icon" className="w-8 h-8 text-white/80 hover:text-white">
+                        <Info className="w-5 h-5" />
+                    </Button>
                 </div>
-                <Button variant="ghost" size="icon" className="w-8 h-8 text-white/80 hover:text-white">
-                    <Info className="w-5 h-5" />
-                </Button>
-            </div>
 
-            <Tabs defaultValue="orbital-path" className="w-full mt-6">
-                <TabsList className="grid w-full grid-cols-2 bg-transparent p-0 mb-4">
-                    <TabsTrigger value="stats" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-white rounded-none text-white/60 data-[state=active]:text-white">
-                        Essential Stats
-                    </TabsTrigger>
-                    <TabsTrigger value="orbital-path" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-white rounded-none text-white/60 data-[state=active]:text-white">
-                        Orbital Path
-                    </TabsTrigger>
-                </TabsList>
-                <TabsContent value="stats">
-                     <div className="space-y-2 mt-4">
-                        <p className="text-sm text-white/80 leading-relaxed mb-4">
-                            {object.description}
-                        </p>
-                        {object.type && <StatItem label="Type" value={object.type.charAt(0).toUpperCase() + object.type.slice(1)} />}
-                        {object.diameter && <StatItem label="Diameter" value={`${object.diameter.toLocaleString()} km`} />}
-                        {object.mass && <StatItem label="Mass" value={<span>{object.mass} x 10<sup>24</sup> kg</span>} />}
-                        {object.dayLength && <StatItem label="Day Length" value={`${object.dayLength} hours`} />}
-                    </div>
-                </TabsContent>
-                <TabsContent value="orbital-path">
-                    <div className="space-y-4 mt-6">
-                        {object.orbitalSpeed && object.type !== 'star' && (
-                            <div className="flex flex-col">
-                                <span className="text-white/60 text-sm">Orbital Period</span>
-                                <span className="text-base">Time to complete one solar orbit</span>
-                                <span className="text-3xl font-bold mt-1">{(1 / object.orbitalSpeed * 10).toFixed(2)} years</span>
-                            </div>
-                        )}
-                    </div>
-                </TabsContent>
-            </Tabs>
-        </div>
-
-        <div className="mt-auto flex items-center justify-between">
-            <Button variant="ghost" size="icon"><ChevronLeft className="w-5 h-5" /></Button>
-            <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-white"></span>
-                <span className="w-2 h-2 rounded-full bg-white/40"></span>
-                <span className="w-2 h-2 rounded-full bg-white/40"></span>
-                <span className="w-2 h-2 rounded-full bg-white/40"></span>
-                <span className="w-2 h-2 rounded-full bg-white/40"></span>
+                <Tabs defaultValue="orbital-path" className="w-full mt-6">
+                    <TabsList className="grid w-full grid-cols-2 bg-transparent p-0 mb-4">
+                        <TabsTrigger value="stats" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-white rounded-none text-white/60 data-[state=active]:text-white">
+                            Essential Stats
+                        </TabsTrigger>
+                        <TabsTrigger value="orbital-path" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-white rounded-none text-white/60 data-[state=active]:text-white">
+                            Orbital Path
+                        </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="stats">
+                        <div className="space-y-2 mt-4">
+                            <p className="text-sm text-white/80 leading-relaxed mb-4">
+                                {object.description}
+                            </p>
+                            {object.type && <StatItem label="Type" value={object.type.charAt(0).toUpperCase() + object.type.slice(1)} />}
+                            {object.diameter && <StatItem label="Diameter" value={`${object.diameter.toLocaleString()} km`} />}
+                            {object.mass && <StatItem label="Mass" value={<span>{object.mass} x 10<sup>24</sup> kg</span>} />}
+                            {object.dayLength && <StatItem label="Day Length" value={`${object.dayLength} hours`} />}
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="orbital-path">
+                        <div className="space-y-4 mt-6">
+                            {object.orbitalSpeed && object.type !== 'star' && (
+                                <div className="flex flex-col">
+                                    <span className="text-white/60 text-sm">Orbital Period</span>
+                                    <span className="text-base">Time to complete one solar orbit</span>
+                                    <span className="text-3xl font-bold mt-1">{(1 / object.orbitalSpeed * 10).toFixed(2)} years</span>
+                                </div>
+                            )}
+                        </div>
+                    </TabsContent>
+                </Tabs>
             </div>
-            <Button variant="ghost" size="icon"><ChevronRight className="w-5 h-5" /></Button>
+          </ScrollArea>
         </div>
     </div>
   );
