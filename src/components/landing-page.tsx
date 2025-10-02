@@ -4,13 +4,26 @@ import { ChevronDown } from 'lucide-react';
 
 const MeteorLogo = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
-        viewBox="0 0 100 100"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        {...props}
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
     >
-        <circle cx="50" cy="50" r="48" stroke="white" strokeWidth="4"/>
-        <path d="M30 70 L40 50 L50 70 L60 50 L70 70" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="50" cy="50" r="48" stroke="white" strokeWidth="4" />
+      <path
+        d="M30 70C35 50, 45 50, 50 70"
+        stroke="white"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M50 70C55 50, 65 50, 70 70"
+        stroke="white"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
 );
 
@@ -36,7 +49,7 @@ export function LandingPage({ isExiting }: LandingPageProps) {
             <h1 className="text-3xl font-light tracking-[0.3em] text-white/70">EYES</h1>
             <h2 className="mt-1 text-md font-light tracking-[0.4em] text-white/50">ON</h2>
         </div>
-         <h1 className="mt-2 text-5xl font-medium tracking-[0.8em] text-white">METEORS</h1>
+         <h1 className="mt-2 text-5xl font-medium tracking-[1em] text-white">METEORS</h1>
       </div>
 
       <div className="absolute bottom-10 flex flex-col items-center space-y-2 z-10">
