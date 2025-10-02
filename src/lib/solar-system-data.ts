@@ -36,7 +36,7 @@ export const solarSystemData: CelestialObject[] = [
     id: 'sun',
     name: 'Sun',
     type: 'star',
-    size: 14,
+    size: 8,
     distance: 0,
     color: '#FFFF8F',
     orbitalSpeed: 0,
@@ -167,3 +167,5 @@ export const solarSystemData: CelestialObject[] = [
     dayLength: 16.1
   },
 ];
+
+    

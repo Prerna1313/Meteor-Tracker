@@ -40,7 +40,7 @@ const createAsteroidDust = () => {
 
     const material = new THREE.PointsMaterial({
         color: 0x00bfff,
-        size: 1.5,
+        size: 0.5,
         map: texture,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
@@ -99,7 +99,7 @@ const createMeteors = () => {
   const mainBeltOuter = jupiterOrbit - 15;
 
   for (let i = 0; i < meteorCount; i++) {
-    const size = THREE.MathUtils.randFloat(0.1, 0.5);
+    const size = THREE.MathUtils.randFloat(0.05, 0.2);
     const meteorGeometry = new THREE.IcosahedronGeometry(size, 0);
     const meteor = new THREE.Mesh(meteorGeometry, meteorMaterial);
 
@@ -318,6 +318,7 @@ export function SolarSystem({
         const starGeometry = new THREE.SphereGeometry(objData.size, 32, 32);
         const starMaterial = new THREE.MeshBasicMaterial({ color: 0xFFD700, toneMapped: false });
         const starMesh = new THREE.Mesh(starGeometry, starMaterial);
+        starMesh.userData.isPlanetBody = true; // For rotation
         starGroup.add(starMesh);
 
         const pointLight = new THREE.PointLight(0xffd886, 50, 5000);
@@ -492,3 +493,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
