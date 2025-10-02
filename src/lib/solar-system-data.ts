@@ -411,7 +411,7 @@ export const solarSystemData: CelestialObject[] = [
     type: 'planet',
     size: 3,
     distance: 15 * AU_SCALE,
-    color: '#AFDBF5',
+    color: '#7FFFD4',
     orbitalSpeed: 84.02,
     rotationSpeed: 0.6,
     description: 'Uranus is the seventh planet from the Sun. It has the third-largest planetary radius and fourth-largest planetary mass in the Solar System. Uranus is similar in composition to Neptune, and both have bulk chemical compositions which differ from that of the larger gas giants Jupiter and Saturn.',
