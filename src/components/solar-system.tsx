@@ -528,3 +528,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
