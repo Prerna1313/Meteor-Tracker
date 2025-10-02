@@ -10,8 +10,7 @@ const MeteorLogo = (props: React.SVGProps<SVGSVGElement>) => (
         {...props}
     >
         <circle cx="50" cy="50" r="48" stroke="white" strokeWidth="4"/>
-        <path d="M25 50 H75" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-        <path d="M35 40 L25 50 L35 60" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M30 70 L40 50 L50 70 L60 50 L70 70" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
 );
 
