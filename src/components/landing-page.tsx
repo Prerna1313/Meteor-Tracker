@@ -24,7 +24,7 @@ type LandingPageProps = {
 export function LandingPage({ isExiting }: LandingPageProps) {
   return (
     <div
-      className={`absolute inset-0 z-50 flex flex-col items-center justify-center bg-black text-white transition-opacity duration-1000 ${
+      className={`absolute inset-0 z-50 flex flex-col items-center justify-center bg-black text-white transition-opacity duration-1000 overflow-hidden ${
         isExiting ? 'opacity-0' : 'opacity-100'
       }`}
     >
@@ -43,8 +43,11 @@ export function LandingPage({ isExiting }: LandingPageProps) {
         />
         <h1 className="text-5xl font-light tracking-[0.4em] text-white/80">EYES</h1>
         <h2 className="mt-2 text-lg font-light tracking-[0.7em] text-white/60">ON</h2>
-        <h1 className="mt-2 text-6xl font-medium tracking-[0.2em] text-white">ASTEROIDS</h1>
+        <h1 className="mt-2 text-6xl font-medium tracking-[0.2em] text-white">METEORS</h1>
       </div>
+      
+      <div className="absolute bottom-[-150px] left-0 right-0 h-[250px] bg-gradient-to-t from-gray-900/50 to-transparent rounded-[100%] blur-xl" />
+
 
       <div className="absolute bottom-10 flex flex-col items-center space-y-2">
         <span className="text-sm font-light tracking-widest text-white/50">Scroll to enter</span>
