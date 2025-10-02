@@ -55,7 +55,7 @@ const createAsteroidDust = () => {
         } else if (zone < 0.98) { // 93% in Main Belt (more dense)
             const innerBias = Math.pow(Math.random(), 0.5); // More concentrated towards the inside
             dist = mainBeltInner + innerBias * (mainBeltOuter - mainBeltInner);
-            y = THREE.MathUtils.randFloatSpread(10); 
+            y = THREE.MathUtils.randFloatSpread(40); 
         } else { // 2% in Kuiper Belt region (up to Neptune)
             dist = THREE.MathUtils.randFloat(jupiterOrbit, neptuneOrbit);
             y = THREE.MathUtils.randFloatSpread(40);
@@ -95,7 +95,7 @@ const createMeteors = () => {
 
     const dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
     const angle = Math.random() * Math.PI * 2;
-    const y = THREE.MathUtils.randFloatSpread(20); // Increased vertical spread
+    const y = THREE.MathUtils.randFloatSpread(40); // Increased vertical spread
 
     meteor.position.set(
       Math.cos(angle) * dist,
@@ -443,7 +443,7 @@ export function SolarSystem({
         
         if(line.material instanceof THREE.LineBasicMaterial) {
             let baseOpacity = 0.4;
-            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.6;
+            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.7;
             if (id === 'earth') baseOpacity = 0.9;
             line.material.opacity = isHovered || isSelected ? 1.0 : baseOpacity;
             line.material.needsUpdate = true;
