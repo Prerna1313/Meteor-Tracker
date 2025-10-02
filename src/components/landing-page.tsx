@@ -1,7 +1,6 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
-import Image from 'next/image';
 
 const NasaLogo = (props: React.SVGProps<SVGSVGElement>) => (
     <svg 
@@ -32,25 +31,14 @@ export function LandingPage({ isExiting }: LandingPageProps) {
          <NasaLogo className="h-20 w-20 opacity-80" />
       </div>
 
-      <div className="relative text-center -mt-16">
-        <div className="relative w-48 h-48 mx-auto mb-[-80px] z-10">
-          <Image 
-            src="https://picsum.photos/seed/asteroid1/200/200" 
-            alt="Asteroid" 
-            width={192}
-            height={192}
-            className="rounded-full object-cover grayscale brightness-50"
-            data-ai-hint="asteroid"
-          />
-        </div>
+      <div className="relative text-center">
         <div className="relative z-20 pt-4">
             <h1 className="text-3xl font-light tracking-[0.3em] text-white/70">EYES</h1>
             <h2 className="mt-1 text-md font-light tracking-[0.4em] text-white/50">ON</h2>
         </div>
+         <h1 className="mt-4 text-5xl font-medium tracking-[0.4em] text-white">METEORS</h1>
       </div>
       
-      <h1 className="mt-4 text-5xl font-medium tracking-[0.4em] text-white">METEORS</h1>
-
       <div 
         className="absolute bottom-[-250px] left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[radial-gradient(ellipse_at_top,_rgba(100,100,100,0.2)_0%,_transparent_70%)]"
       />
