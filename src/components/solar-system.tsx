@@ -162,7 +162,7 @@ export function SolarSystem({
 
       camera.aspect =
         mountRef.current.clientWidth / mountRef.current.clientHeight;
-      camera.position.set(0, 150, 400);
+      camera.position.set(0, 0, 500);
       camera.lookAt(0, 0, 0);
       camera.updateProjectionMatrix();
 
@@ -171,7 +171,7 @@ export function SolarSystem({
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
       controls.minDistance = 10;
-      controls.maxDistance = 4000;
+      controls.maxDistance = 10000;
       stateRef.controls = controls;
 
       scene.add(new THREE.AmbientLight(0xffffff, 0.3));
