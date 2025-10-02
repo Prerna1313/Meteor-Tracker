@@ -448,8 +448,9 @@ export function SolarSystem({
         const curvePoints: THREE.Vector3[] = [];
         const argOfPeri = varpi - Omega;
         
-        const pointCount = isComet ? 100 : 200;
-        for (let j = 0; j <= pointCount; j++) {
+        const pointCount = 200;
+        const orbitSections = isComet ? pointCount / 2 : pointCount;
+        for (let j = 0; j <= orbitSections; j++) {
             const M = (j / pointCount) * 2 * Math.PI;
             let E = M;
             for (let k = 0; k < 5; k++) {
