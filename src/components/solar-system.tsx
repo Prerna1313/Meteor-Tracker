@@ -383,10 +383,18 @@ export function SolarSystem({
 
         const points = ellipse.getPoints(200);
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
+        
+        let opacity = 0.5;
+        if (objData.id === 'earth') {
+            opacity = 0.9;
+        } else if (ASTEROID_IDS.includes(objData.id)) {
+            opacity = 0.5;
+        }
+
         const orbitMaterial = new THREE.LineBasicMaterial({
           color: ASTEROID_IDS.includes(objData.id) ? new THREE.Color(0xffffff) : new THREE.Color(objData.color),
           transparent: true,
-          opacity: 0.5,
+          opacity: opacity,
         });
         const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
         orbit.rotation.x = Math.PI / 2;
@@ -419,7 +427,11 @@ export function SolarSystem({
         const isHovered = id === hoveredObjectId;
         const isSelected = id === selectedObjectId;
         if(line.material instanceof THREE.LineBasicMaterial) {
-            line.material.opacity = isHovered || isSelected ? 0.9 : 0.5;
+            let baseOpacity = 0.5;
+            if (id === 'earth') {
+                baseOpacity = 0.9;
+            }
+            line.material.opacity = isHovered || isSelected ? 0.9 : baseOpacity;
             line.material.needsUpdate = true;
         }
     });
@@ -510,3 +522,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
