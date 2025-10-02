@@ -88,35 +88,55 @@ const createGalaxy = () => {
   const colors = new Float32Array(particles * 3);
   const color = new THREE.Color();
   const radius = 50000;
-  const thickness = 500;
-  const bulgeFactor = 5;
+  
+  const parameters = {
+      radius: 50000,
+      branches: 4,
+      spin: 1,
+      randomness: 0.5,
+      randomnessPower: 3,
+      insideColor: '#ff6030',
+      outsideColor: '#1b3984'
+  };
+
+  const insideColor = new THREE.Color(parameters.insideColor);
+  const outsideColor = new THREE.Color(parameters.outsideColor);
+
 
   for (let i = 0; i < particles; i++) {
-    const r = Math.random() * radius;
-    const theta = Math.random() * Math.PI * 2;
-    const d =
-      Math.pow(Math.random(), bulgeFactor) * (Math.random() < 0.5 ? 1 : -1);
+    const i3 = i * 3;
 
-    const x = r * Math.cos(theta);
-    const y = d * thickness * (1 - r / radius);
-    const z = r * Math.sin(theta);
+    // Position
+    const r = Math.random() * parameters.radius;
+    const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2;
 
-    positions.set([x, y, z], i * 3);
+    const randomX = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * r;
+    const randomY = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * r * 0.1;
+    const randomZ = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * r;
 
-    color.setHSL(0.55 + Math.random() * 0.1, 0.8, 0.5 + Math.random() * 0.2);
-    colors.set([color.r, color.g, color.b], i * 3);
+
+    positions[i3    ] = Math.cos(branchAngle + r * 0.0001) * r + randomX;
+    positions[i3 + 1] = randomY;
+    positions[i3 + 2] = Math.sin(branchAngle + r * 0.0001) * r + randomZ;
+    
+    // Color
+    const mixedColor = insideColor.clone();
+    mixedColor.lerp(outsideColor, r / parameters.radius);
+
+    colors[i3    ] = mixedColor.r;
+    colors[i3 + 1] = mixedColor.g;
+    colors[i3 + 2] = mixedColor.b;
   }
 
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
   const material = new THREE.PointsMaterial({
-    size: 5,
-    vertexColors: true,
-    blending: THREE.AdditiveBlending,
-    transparent: true,
-    opacity: 0.7,
+    size: 20,
+    sizeAttenuation: true,
     depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    vertexColors: true
   });
 
   const galaxy = new THREE.Points(geometry, material);
@@ -197,7 +217,8 @@ const createAsteroidBelt = (count: number) => {
       Math.random() * Math.PI * 2,
       Math.random() * Math.PI * 2
     );
-    dummy.scale.setScalar(THREE.MathUtils.randFloat(0.5, 1.5));
+    const scale = THREE.MathUtils.randFloat(0.5, 1.5)
+    dummy.scale.set(scale, scale, scale);
     dummy.updateMatrix();
 
     instancedMesh.setMatrixAt(i, dummy.matrix);
@@ -490,7 +511,7 @@ export function SolarSystem({
       });
 
       if (stateRef.galaxy) {
-        stateRef.galaxy.rotation.y = elapsedTime * 0.005;
+        stateRef.galaxy.rotation.y = elapsedTime * 0.05;
       }
 
       setLabels(newLabels);
@@ -507,7 +528,7 @@ export function SolarSystem({
       }
       controls?.dispose();
     };
-  }, [stateRef, onSelectObject]);
+  }, [stateRef, onSelectObject, comets, onCometsChange]);
 
   useEffect(() => {
     const { scene, clickableObjects, celestialObjects } = stateRef;
@@ -638,7 +659,7 @@ export function SolarSystem({
     comets.forEach(cometData => {
         const cometGroup = new THREE.Group();
         const headGeometry = new THREE.IcosahedronGeometry(cometData.size, 1);
-        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 });
+        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, emissive: 0x66ddff, emissiveIntensity: 0 });
         const head = new THREE.Mesh(headGeometry, headMaterial);
         cometGroup.add(head);
 
@@ -770,5 +791,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    
