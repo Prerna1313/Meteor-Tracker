@@ -4,7 +4,6 @@ import { ChevronLeft, Info } from 'lucide-react';
 import type { CelestialObject } from '@/lib/solar-system-data';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 type InfoPanelProps = {
   object: CelestialObject;
@@ -44,7 +43,6 @@ export function InfoPanel({ object, onClose }: InfoPanelProps) {
         </Button>
 
         <div className="flex-1 mt-10 overflow-hidden">
-          <ScrollArea className="h-full w-full">
             <div className="flex flex-col h-full pr-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -92,7 +90,6 @@ export function InfoPanel({ object, onClose }: InfoPanelProps) {
                     </TabsContent>
                 </Tabs>
             </div>
-          </ScrollArea>
         </div>
     </div>
   );
