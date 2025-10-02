@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { CelestialObject } from '@/lib/solar-system-data';
@@ -16,6 +16,12 @@ type SolarSystemProps = {
   selectedObjectId: string | null;
   onSelectObject: (id: string | null) => void;
 };
+
+type Stardust = {
+  points: THREE.Points;
+  velocities: THREE.Vector3[];
+};
+
 
 const createSunGlow = () => {
   const canvas = document.createElement('canvas');
@@ -51,11 +57,12 @@ const createSunGlow = () => {
   return sprite;
 };
 
-const createStardust = (count: number, size: number, spread: number, opacity: number) => {
+const createStardust = (count: number, size: number, spread: number, opacity: number): Stardust => {
   const particles = new THREE.BufferGeometry();
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
   const sizes = new Float32Array(count);
+  const velocities: THREE.Vector3[] = [];
 
   const color = new THREE.Color();
 
@@ -65,10 +72,18 @@ const createStardust = (count: number, size: number, spread: number, opacity: nu
     const z = THREE.MathUtils.randFloatSpread(spread);
     positions.set([x, y, z], i * 3);
 
-    color.setHSL(Math.random(), Math.random() * 0.2 + 0.3, Math.random() * 0.5 + 0.3);
+    color.setHSL(Math.random(), 0.1, Math.random() * 0.4 + 0.3);
     colors.set([color.r, color.g, color.b], i * 3);
 
     sizes[i] = Math.random() * size;
+
+    velocities.push(
+      new THREE.Vector3(
+        THREE.MathUtils.randFloat(-0.05, 0.05),
+        THREE.MathUtils.randFloat(-0.05, 0.05),
+        THREE.MathUtils.randFloat(-0.05, 0.05)
+      )
+    );
   }
 
   particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -84,7 +99,8 @@ const createStardust = (count: number, size: number, spread: number, opacity: nu
     sizeAttenuation: true
   });
 
-  return new THREE.Points(particles, particleMaterial);
+  const points = new THREE.Points(particles, particleMaterial);
+  return { points, velocities };
 };
 
 
@@ -101,14 +117,14 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
     textureLoader: new THREE.TextureLoader(),
     clickableObjects: [] as THREE.Object3D[],
     celestialObjects: new Map<string, THREE.Object3D>(),
+    stardustSystems: [] as Stardust[],
   }).current;
 
   useEffect(() => {
-    if (!mountRef.current || stateRef.renderer) return; // Initialize once
+    if (!mountRef.current || stateRef.renderer) return;
 
     const { scene, camera } = stateRef;
 
-    // --- Renderer and Controls Setup ---
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -127,13 +143,14 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
     controls.maxDistance = 10000;
     stateRef.controls = controls;
 
-    // --- Scene Lighting and Background ---
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-    scene.add(createStardust(20000, 1.0, 10000, 0.5)); // Distant stars
-    scene.add(createStardust(5000, 2.0, 10000, 0.8)); // Closer stars
+    
+    const stardust1 = createStardust(20000, 1.0, 10000, 0.5);
+    const stardust2 = createStardust(5000, 2.0, 10000, 0.8);
+    scene.add(stardust1.points, stardust2.points);
+    stateRef.stardustSystems.push(stardust1, stardust2);
 
 
-    // --- Object Creation ---
     const textures = new Map<string, THREE.Texture>();
 
     data.forEach(objData => {
@@ -211,7 +228,6 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
     });
 
 
-    // --- Event Listeners ---
     const handleClick = (event: MouseEvent) => {
         if (!mountRef.current) return;
         const mouse = new THREE.Vector2();
@@ -242,7 +258,6 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
     };
     window.addEventListener('resize', handleResize);
 
-    // --- Animation Loop ---
     const clock = new THREE.Clock();
     const animate = () => {
       if (!stateRef.renderer) return;
@@ -277,12 +292,35 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
         obj.getWorldPosition(vector);
         const labelPos = vector.clone();
         
-        // Adjust label position to be above the object
         const objSize = obj.userData.size || 0;
         labelPos.y += objSize;
 
         newLabels.push({ id: obj.userData.id, name: obj.userData.name, position: labelPos });
       });
+
+      // Animate stardust
+      stateRef.stardustSystems.forEach(system => {
+          const positions = system.points.geometry.attributes.position as THREE.BufferAttribute;
+          const spread = 10000;
+          for (let i = 0; i < positions.count; i++) {
+              const velocity = system.velocities[i];
+              positions.setXYZ(
+                  i,
+                  positions.getX(i) + velocity.x,
+                  positions.getY(i) + velocity.y,
+                  positions.getZ(i) + velocity.z
+              );
+
+              if (positions.getX(i) < -spread / 2) positions.setX(i, spread / 2);
+              if (positions.getX(i) > spread / 2) positions.setX(i, -spread / 2);
+              if (positions.getY(i) < -spread / 2) positions.setY(i, spread / 2);
+              if (positions.getY(i) > spread / 2) positions.setY(i, -spread / 2);
+              if (positions.getZ(i) < -spread / 2) positions.setZ(i, spread / 2);
+              if (positions.getZ(i) > spread / 2) positions.setZ(i, -spread / 2);
+          }
+          positions.needsUpdate = true;
+      });
+
 
       setLabels(newLabels);
       controls.update();
@@ -290,7 +328,6 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
     };
     animate();
 
-    // --- Cleanup ---
     return () => {
       window.removeEventListener('resize', handleResize);
       renderer.domElement.removeEventListener('click', handleClick);
@@ -303,7 +340,6 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
     };
   }, [data, onSelectObject, stateRef]);
 
-  // --- Highlight Effect ---
   useEffect(() => {
     stateRef.celestialObjects.forEach((obj, id) => {
         const isSelected = id === selectedObjectId;
@@ -332,7 +368,7 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
           if (!mountRef.current || !stateRef.camera) return null;
           
           const vector = label.position.clone().project(stateRef.camera);
-          if (vector.z > 1) return null; // Hide if behind camera
+          if (vector.z > 1) return null; 
 
           const screenX = (vector.x + 1) / 2 * mountRef.current.clientWidth;
           const screenY = (-vector.y + 1) / 2 * mountRef.current.clientHeight;
@@ -361,5 +397,3 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
     </div>
   );
 }
-
-    
