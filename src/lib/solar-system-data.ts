@@ -17,6 +17,20 @@ export type CelestialObject = {
   dayLength?: number; // in hours
 };
 
+export type CometData = {
+  id: string;
+  name: string;
+  description: string;
+  size: number;
+  type: 'comet';
+  orbital: {
+    perihelion: number; // closest point to sun
+    aphelion: number;   // farthest point from sun
+    inclination: number; // angle of orbit relative to solar system plane
+    orbitalPeriod: number; // in Earth years
+  }
+};
+
 export const solarSystemData: CelestialObject[] = [
   {
     id: 'sun',
@@ -161,3 +175,5 @@ export const solarSystemData: CelestialObject[] = [
     dayLength: 16.1
   },
 ];
+
+    
