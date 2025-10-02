@@ -358,10 +358,9 @@ export function SolarSystem({
           body.add(rings);
         }
         celestialObj = objectGroup;
-
       }
 
-      if (objData.type === 'planet') {
+      if (celestialObj && objData.type === 'planet') {
         const semiMajorAxis = objData.distance;
         const eccentricity = objData.eccentricity ?? 0;
         const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
@@ -378,10 +377,8 @@ export function SolarSystem({
 
         const t = (objData.orbitalOffset || 0) % 1;
         const point = ellipse.getPointAt(t);
-        if (celestialObj) {
-            celestialObj.position.set(point.x, celestialObj.position.y, point.y);
-        }
-
+        celestialObj.position.set(point.x, celestialObj.position.y, point.y);
+        
         const points = ellipse.getPoints(200);
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
         
@@ -400,28 +397,24 @@ export function SolarSystem({
 
         const inclination = THREE.MathUtils.degToRad(objData.orbitalInclination || 0);
         const orbitGroup = new THREE.Group();
-        orbitGroup.add(orbit);
-
-        if (celestialObj) {
-            orbitGroup.add(celestialObj);
-        }
         orbitGroup.rotation.z = inclination;
+        
+        orbitGroup.add(orbit);
+        orbitGroup.add(celestialObj);
 
         scene.add(orbitGroup);
         orbitLines.set(objData.id, orbit);
-      }
+        
+        celestialObj.userData = { ...objData };
+        celestialObjects.set(objData.id, celestialObj);
+        clickableObjects.push(celestialObj);
 
-
-      if (celestialObj && !celestialObj.parent) {
+      } else if (celestialObj) {
         if(objData.id === 'sun') {
             celestialObj.position.set(0, 0, 0);
         }
         celestialObj.userData = { ...objData };
         scene.add(celestialObj);
-        celestialObjects.set(objData.id, celestialObj);
-        clickableObjects.push(celestialObj);
-      } else if (celestialObj) {
-        celestialObj.userData = { ...objData };
         celestialObjects.set(objData.id, celestialObj);
         clickableObjects.push(celestialObj);
       }
@@ -436,9 +429,6 @@ export function SolarSystem({
             let baseOpacity = 0.5;
             if (ASTEROID_IDS.includes(id)) {
                 baseOpacity = 0.2;
-            }
-            if (id === 'earth') {
-                baseOpacity = 0.5; 
             }
             line.material.opacity = isHovered || isSelected ? 0.9 : baseOpacity;
             line.material.needsUpdate = true;
@@ -531,5 +521,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    
