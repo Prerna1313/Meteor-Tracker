@@ -33,9 +33,9 @@ const createSunGlow = () => {
     canvas.height / 2,
     canvas.width / 2
   );
-  gradient.addColorStop(0.1, 'rgba(255, 255, 255, 1)');
-  gradient.addColorStop(0.4, 'rgba(255, 255, 143, 0.5)');
-  gradient.addColorStop(1, 'rgba(255, 255, 143, 0)');
+  gradient.addColorStop(0.1, 'rgba(255, 255, 220, 1)');
+  gradient.addColorStop(0.4, 'rgba(255, 220, 180, 0.5)');
+  gradient.addColorStop(1, 'rgba(255, 180, 100, 0)');
 
   context.fillStyle = gradient;
   context.fillRect(0, 0, canvas.width, canvas.height);
@@ -51,35 +51,6 @@ const createSunGlow = () => {
   sprite.scale.set(120, 120, 1);
   return sprite;
 };
-
-const createSaturnRings = (innerRadius: number, outerRadius: number) => {
-    const segments = 64;
-    const geometry = new THREE.RingGeometry(innerRadius, outerRadius, segments);
-    const pos = geometry.attributes.position as THREE.BufferAttribute;
-    const v3 = new THREE.Vector3();
-    for (let i = 0; i < pos.count; i++){
-      v3.fromBufferAttribute(pos, i);
-      (geometry.attributes.uv as THREE.BufferAttribute).setXY(i, v3.length() < innerRadius + 1 ? 0 : 1, 1);
-    }
-
-    const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/saturn_ring.png');
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(2, 2);
-
-    const material = new THREE.MeshBasicMaterial({
-      map: texture,
-      side: THREE.DoubleSide,
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.6,
-    });
-    
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.rotation.x = Math.PI / 2;
-    return mesh;
-};
-
 
 // Function to create the Asteroid Belt
 const createAsteroidBelt = (scene: THREE.Scene, asteroids: any[]) => {
@@ -140,14 +111,14 @@ const createAsteroidBelt = (scene: THREE.Scene, asteroids: any[]) => {
 
 // Function to create the stardust background
 const createStardust = (scene: THREE.Scene) => {
-  const starCount = 20000;
+  const starCount = 50000;
   const particles = new THREE.BufferGeometry();
   const positions = new Float32Array(starCount * 3);
 
   for (let i = 0; i < starCount; i++) {
-    const x = THREE.MathUtils.randFloatSpread(10000);
-    const y = THREE.MathUtils.randFloatSpread(10000);
-    const z = THREE.MathUtils.randFloatSpread(10000);
+    const x = THREE.MathUtils.randFloatSpread(20000);
+    const y = THREE.MathUtils.randFloatSpread(20000);
+    const z = THREE.MathUtils.randFloatSpread(20000);
     positions[i * 3] = x;
     positions[i * 3 + 1] = y;
     positions[i * 3 + 2] = z;
@@ -344,8 +315,8 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         mars: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/mars_1k_color.jpg',
         jupiter: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/jupiter.jpg',
         saturn: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/saturn.jpg',
-        neptune: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/neptune.jpg',
         uranus: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/uranus.jpg',
+        neptune: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/neptune.jpg',
         saturn_ring: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/saturn_ring.png',
     };
 
