@@ -320,7 +320,7 @@ export function SolarSystem({
         const starMesh = new THREE.Mesh(starGeometry, starMaterial);
         starGroup.add(starMesh);
 
-        const pointLight = new THREE.PointLight(0xffd886, 5, 5000);
+        const pointLight = new THREE.PointLight(0xffd886, 50, 5000);
         starGroup.add(pointLight);
         celestialObj = starGroup;
 
@@ -496,5 +496,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    
