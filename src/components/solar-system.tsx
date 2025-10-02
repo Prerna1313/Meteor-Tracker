@@ -57,6 +57,50 @@ const createSunGlow = () => {
   return sprite;
 };
 
+const createGalaxy = () => {
+  const particles = 100000;
+  const geometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(particles * 3);
+  const colors = new Float32Array(particles * 3);
+  const color = new THREE.Color();
+  const radius = 50000;
+  const thickness = 500;
+  const bulgeFactor = 5;
+
+  for (let i = 0; i < particles; i++) {
+    const r = Math.random() * radius;
+    const theta = Math.random() * Math.PI * 2;
+    const d = Math.pow(Math.random(), bulgeFactor) * (Math.random() < 0.5 ? 1 : -1);
+
+    const x = r * Math.cos(theta);
+    const y = d * thickness * (1 - r / radius);
+    const z = r * Math.sin(theta);
+    
+    positions.set([x, y, z], i * 3);
+
+    color.setHSL(0.55 + Math.random() * 0.1, 0.8, 0.5 + Math.random() * 0.2);
+    colors.set([color.r, color.g, color.b], i * 3);
+  }
+
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+  const material = new THREE.PointsMaterial({
+    size: 5,
+    vertexColors: true,
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    opacity: 0.7,
+    depthWrite: false,
+  });
+
+  const galaxy = new THREE.Points(geometry, material);
+  galaxy.rotation.x = -0.2;
+  galaxy.rotation.y = -0.4;
+  return galaxy;
+};
+
+
 const createStardust = (count: number, size: number, spread: number, opacity: number): Stardust => {
   const particles = new THREE.BufferGeometry();
   const positions = new Float32Array(count * 3);
@@ -111,13 +155,14 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
   const stateRef = useRef({
     renderer: null as THREE.WebGLRenderer | null,
     scene: new THREE.Scene(),
-    camera: new THREE.PerspectiveCamera(75, 1, 0.1, 20000),
+    camera: new THREE.PerspectiveCamera(75, 1, 0.1, 100000),
     controls: null as OrbitControls | null,
     raycaster: new THREE.Raycaster(),
     textureLoader: new THREE.TextureLoader(),
     clickableObjects: [] as THREE.Object3D[],
     celestialObjects: new Map<string, THREE.Object3D>(),
     stardustSystems: [] as Stardust[],
+    galaxy: null as THREE.Points | null,
   }).current;
 
   useEffect(() => {
@@ -147,7 +192,10 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
     
     const stardust1 = createStardust(20000, 1.0, 10000, 0.5);
     const stardust2 = createStardust(5000, 2.0, 10000, 0.8);
-    scene.add(stardust1.points, stardust2.points);
+    const galaxy = createGalaxy();
+    stateRef.galaxy = galaxy;
+    
+    scene.add(stardust1.points, stardust2.points, galaxy);
     stateRef.stardustSystems.push(stardust1, stardust2);
 
 
@@ -269,7 +317,9 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
         const { id, type, orbitalSpeed, rotationSpeed, distance, eccentricity = 0 } = obj.userData;
         const planetBody = obj.children.find(c => c.userData.isPlanetBody);
 
-        if (id !== 'sun' && type === 'planet' && orbitalSpeed > 0) {
+        if (id === 'sun') {
+          obj.position.set(0,0,0);
+        } else if (type === 'planet' && orbitalSpeed > 0) {
             const semiMajorAxis = distance;
             const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
             const angle = elapsedTime * (orbitalSpeed / 50);
@@ -278,10 +328,6 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
             const x = Math.cos(angle) * semiMajorAxis - focusOffset;
             const z = Math.sin(angle) * semiMinorAxis;
             obj.position.set(x, 0, z);
-        }
-        
-        if (id === 'sun') {
-          obj.position.set(0,0,0);
         }
             
         if (rotationSpeed > 0 && planetBody) {
@@ -320,6 +366,10 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
           }
           positions.needsUpdate = true;
       });
+
+      if (stateRef.galaxy) {
+        stateRef.galaxy.rotation.y = elapsedTime * 0.005;
+      }
 
 
       setLabels(newLabels);
