@@ -82,7 +82,6 @@ const createAsteroidDust = () => {
         sizeAttenuation: true,
     });
     
-    // Define orbital distances for positioning
     const marsOrbit = 90;
     const jupiterOrbit = 145;
     const neptuneOrbit = 290;
@@ -365,13 +364,13 @@ export function SolarSystem({
       const child = scene.children[0];
       scene.remove(child);
       if (child instanceof THREE.Mesh || child instanceof THREE.Points || child instanceof THREE.Line) {
-          child.geometry.dispose();
-          const material = child.material;
+          const material = (child as any).material;
           if (Array.isArray(material)) {
               material.forEach(m => m.dispose());
           } else if (material) {
               material.dispose();
           }
+          (child as any).geometry?.dispose();
       }
     }
     celestialObjects.clear();
