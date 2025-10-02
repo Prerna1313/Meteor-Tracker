@@ -487,6 +487,7 @@ export function SolarSystem({
             (body.material as THREE.MeshStandardMaterial).emissive.set(emissiveColor);
             (body.material as THREE.MeshStandardMaterial).emissiveIntensity = ASTEROID_IDS.includes(obj.userData.id) ? 0 : 0.6;
         }
+        body.material.needsUpdate = true;
       }
 
       if (obj.userData.type === 'star') {
@@ -590,7 +591,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    
-
-    
