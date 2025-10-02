@@ -343,8 +343,8 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
         mars: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/mars_1k_color.jpg',
         jupiter: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/jupiter.jpg',
         saturn: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/saturn.jpg',
-        uranus: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/uranus.jpg',
         neptune: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/neptune.jpg',
+        uranus: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/uranus.jpg',
         saturn_ring: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/saturn_ring.png',
     };
 
@@ -589,3 +589,5 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     </div>
   );
 }
+
+    
