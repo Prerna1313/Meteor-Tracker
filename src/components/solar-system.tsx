@@ -34,7 +34,6 @@ const createAsteroidDust = () => {
         depthWrite: false,
         transparent: true,
         opacity: 0.45,
-        blending: THREE.AdditiveBlending,
         alphaTest: 0.02,
     });
     
