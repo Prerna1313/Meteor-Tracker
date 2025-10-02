@@ -413,7 +413,7 @@ export function SolarSystem({
         if (objData.id === 'earth') opacity = 0.9;
 
         const orbitMaterial = new THREE.LineBasicMaterial({
-          color: ASTEROID_IDS.includes(objData.id) ? new THREE.Color(0xffffff) : new THREE.Color(objData.color),
+          color: ASTEROID_IDS.includes(objData.id) ? new THREE.Color(0x888888) : new THREE.Color(objData.color),
           transparent: true,
           opacity: opacity,
         });
