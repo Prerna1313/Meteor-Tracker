@@ -10,7 +10,6 @@ import {
 import { InfoPanel } from '@/components/info-panel';
 import { LandingPage } from '@/components/landing-page';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Gem } from 'lucide-react';
 
 export default function Home() {
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
@@ -46,47 +45,36 @@ export default function Home() {
       {showLanding && <LandingPage isExiting={isExiting} />}
 
       <div
-        className={`transition-opacity duration-1000 ${
+        className={`w-full h-full transition-opacity duration-1000 ${
           showLanding ? 'opacity-0' : 'opacity-100'
         }`}
       >
         <Header />
-        <div className="w-full h-full">
-          <AnimatePresence>
-            {selectedObjectId && selectedObjectData && (
-              <motion.div
-                initial={{ opacity: 0, x: -100 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ duration: 0.5, ease: 'easeInOut' }}
-                className="absolute top-0 left-0 z-20 h-full"
-              >
-                <InfoPanel
-                  object={selectedObjectData as CelestialObject}
-                  onClose={() => setSelectedObjectId(null)}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+        
+        <SolarSystem
+          data={solarSystemData}
+          onSelectObject={setSelectedObjectId}
+          selectedObjectId={selectedObjectId}
+          onHoverObject={setHoveredObjectId}
+          hoveredObjectId={hoveredObjectId}
+        />
 
-          <div className="absolute top-0 right-0 w-full h-full">
+        <AnimatePresence>
+          {selectedObjectId && selectedObjectData && (
             <motion.div
-              animate={{
-                opacity: selectedObjectId ? 0.3 : 1,
-                transition: { duration: 0.5 },
-              }}
-              className="w-full h-full"
+              initial={{ opacity: 0, x: -100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
+              className="absolute top-20 left-4 z-20"
             >
-              <SolarSystem
-                data={solarSystemData}
-                onSelectObject={setSelectedObjectId}
-                selectedObjectId={selectedObjectId}
-                onHoverObject={setHoveredObjectId}
-                hoveredObjectId={hoveredObjectId}
+              <InfoPanel
+                object={selectedObjectData as CelestialObject}
+                onClose={() => setSelectedObjectId(null)}
               />
             </motion.div>
-          </div>
-        </div>
+          )}
+        </AnimatePresence>
       </div>
     </main>
   );

@@ -38,17 +38,15 @@ const AsteroidIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 export function InfoPanel({ object, onClose }: InfoPanelProps) {
-  const [activeTab, setActiveTab] = useState('stats');
-  
   return (
-    <div className="relative h-full w-full max-w-xs bg-black/50 text-white shadow-2xl flex flex-col p-6 backdrop-blur-md">
+    <div className="relative h-full w-[350px] bg-zinc-950/90 text-white rounded-lg shadow-2xl flex flex-col p-6 backdrop-blur-sm">
         <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-4 left-4 h-10 w-10 text-white/60 hover:text-white">
             <ChevronLeft className="w-5 h-5" />
             <span className="sr-only">Close</span>
         </Button>
 
-        <div className="flex-1 mt-20 overflow-y-auto">
-          <ScrollArea className="h-full">
+        <div className="flex-1 mt-10 overflow-y-auto">
+          <ScrollArea className="h-[400px]">
             <div className="flex flex-col">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
