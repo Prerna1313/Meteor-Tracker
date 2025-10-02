@@ -32,15 +32,7 @@ export function LandingPage({ isExiting }: LandingPageProps) {
          <NasaLogo className="h-20 w-20 opacity-80" />
       </div>
 
-      <div className="text-center">
-        <Image 
-            src="https://picsum.photos/seed/asteroid1/200/200" 
-            alt="Asteroid" 
-            width={150}
-            height={150}
-            className="mx-auto rounded-full object-cover opacity-60 mb-8"
-            data-ai-hint="asteroid"
-        />
+      <div className="text-center my-16">
         <h1 className="text-5xl font-light tracking-[0.4em] text-white/80">EYES</h1>
         <h2 className="mt-2 text-lg font-light tracking-[0.7em] text-white/60">ON</h2>
         <h1 className="mt-2 text-6xl font-medium tracking-[0.2em] text-white">METEORS</h1>
