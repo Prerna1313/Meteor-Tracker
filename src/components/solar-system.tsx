@@ -309,7 +309,7 @@ export function SolarSystem({
         starMesh.userData.isPlanetBody = true;
         starGroup.add(starMesh);
 
-        const pointLight = new THREE.PointLight(0xffd886, 50, 5000);
+        const pointLight = new THREE.PointLight(0xffd886, 500, 5000);
         starGroup.add(pointLight);
         celestialObj = starGroup;
 
