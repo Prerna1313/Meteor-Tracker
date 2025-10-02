@@ -82,17 +82,32 @@ const createAsteroidDust = () => {
         sizeAttenuation: true,
     });
     
-    // Position all particles within a single, uniform ring for the main asteroid belt
+    // Define orbital distances for positioning
     const marsOrbit = 125;
     const jupiterOrbit = 200;
+    const neptuneOrbit = 180 + 180; // From solar-system-data
+
     const mainBeltInner = marsOrbit + 15;
     const mainBeltOuter = jupiterOrbit - 25;
 
     for (let i = 0; i < particles; i++) {
-        const dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
-        const angle = Math.random() * Math.PI * 2;
-        const y = THREE.MathUtils.randFloatSpread(8); 
+        const zone = Math.random();
+        let dist = 0;
+        let y = 0;
 
+        if (zone < 0.7) { // 70% in Main Belt
+            dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
+            y = THREE.MathUtils.randFloatSpread(8); 
+        } else if (zone < 0.8) { // 10% in Inner System
+            dist = THREE.MathUtils.randFloat(0, mainBeltInner);
+            y = THREE.MathUtils.randFloatSpread(4);
+        } else { // 20% in Outer System
+            dist = THREE.MathUtils.randFloat(mainBeltOuter, neptuneOrbit + 50);
+            y = THREE.MathUtils.randFloatSpread(20);
+        }
+
+        const angle = Math.random() * Math.PI * 2;
+        
         positions[i * 3] = Math.cos(angle) * dist;
         positions[i * 3 + 1] = y;
         positions[i * 3 + 2] = Math.sin(angle) * dist;
@@ -470,5 +485,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    
