@@ -38,10 +38,6 @@ export function LandingPage({ isExiting }: LandingPageProps) {
         </div>
          <h1 className="mt-4 text-5xl font-medium tracking-[0.4em] text-white">METEORS</h1>
       </div>
-      
-      <div 
-        className="absolute bottom-[-250px] left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[radial-gradient(ellipse_at_top,_rgba(100,100,100,0.2)_0%,_transparent_70%)]"
-      />
 
       <div className="absolute bottom-10 flex flex-col items-center space-y-2 z-10">
         <span className="text-sm font-light tracking-widest text-white/50">Scroll to enter</span>
