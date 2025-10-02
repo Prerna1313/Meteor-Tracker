@@ -386,7 +386,7 @@ export function SolarSystem({
         
         let opacity = 0.5;
         if (ASTEROID_IDS.includes(objData.id)) {
-            opacity = 0.5;
+            opacity = 0.2;
         }
 
         const orbitMaterial = new THREE.LineBasicMaterial({
@@ -427,7 +427,7 @@ export function SolarSystem({
         if(line.material instanceof THREE.LineBasicMaterial) {
             let baseOpacity = 0.5;
             if (ASTEROID_IDS.includes(id)) {
-                baseOpacity = 0.5;
+                baseOpacity = 0.2;
             }
             line.material.opacity = isHovered || isSelected ? 0.9 : baseOpacity;
             line.material.needsUpdate = true;
