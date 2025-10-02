@@ -52,36 +52,49 @@ const createSunGlow = () => {
   return sprite;
 };
 
-const createAsteroidBelt = (count: number) => {
-  const baseGeometry = new THREE.IcosahedronGeometry(1, 1);
-  const material = new THREE.MeshStandardMaterial({
-    color: 0xaaaaaa, 
-    roughness: 0.8,
-    flatShading: true,
-  });
-  const instancedMesh = new THREE.InstancedMesh(baseGeometry, material, count);
-  instancedMesh.userData = { id: 'asteroid_belt', name: 'Asteroid Belt' };
+const createAsteroidDust = () => {
+    const particles = 10000;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particles * 3);
 
-  const dummy = new THREE.Object3D();
-  for (let i = 0; i < count; i++) {
-    const dist = THREE.MathUtils.randFloat(200, 250);
-    const angle = Math.random() * Math.PI * 2;
-    const y = THREE.MathUtils.randFloatSpread(5);
+    const textureCanvas = document.createElement('canvas');
+    textureCanvas.width = 16;
+    textureCanvas.height = 16;
+    const context = textureCanvas.getContext('2d');
+    if(context) {
+        const gradient = context.createRadialGradient(8, 8, 0, 8, 8, 8);
+        gradient.addColorStop(0, 'rgba(255,255,255,1)');
+        gradient.addColorStop(1, 'rgba(255,255,255,0)');
+        context.fillStyle = gradient;
+        context.fillRect(0,0,16,16);
+    }
+    const texture = new THREE.CanvasTexture(textureCanvas);
 
-    dummy.position.set(Math.cos(angle) * dist, y, Math.sin(angle) * dist);
-    dummy.rotation.set(
-      Math.random() * Math.PI * 2,
-      Math.random() * Math.PI * 2,
-      Math.random() * Math.PI * 2
-    );
-    const scale = THREE.MathUtils.randFloat(0.5, 1.5)
-    dummy.scale.set(scale, scale, scale);
-    dummy.updateMatrix();
 
-    instancedMesh.setMatrixAt(i, dummy.matrix);
-  }
-  instancedMesh.instanceMatrix.needsUpdate = true;
-  return instancedMesh;
+    const material = new THREE.PointsMaterial({
+        color: 0x00bfff,
+        size: 1.5,
+        map: texture,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        transparent: true,
+        sizeAttenuation: true,
+    });
+
+    for (let i = 0; i < particles; i++) {
+        const dist = THREE.MathUtils.randFloat(200, 250);
+        const angle = Math.random() * Math.PI * 2;
+        const y = THREE.MathUtils.randFloatSpread(10);
+
+        positions[i * 3] = Math.cos(angle) * dist;
+        positions[i * 3 + 1] = y;
+        positions[i * 3 + 2] = Math.sin(angle) * dist;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const points = new THREE.Points(geometry, material);
+    points.userData = { id: 'asteroid_belt', name: 'Asteroid Belt' };
+    return points;
 };
 
 
@@ -135,9 +148,9 @@ export function SolarSystem({
 
       scene.add(new THREE.AmbientLight(0xffffff, 0.3));
       
-      const asteroidBelt = createAsteroidBelt(1500);
-      scene.add(asteroidBelt);
-      stateRef.clickableObjects.push(asteroidBelt);
+      const asteroidDust = createAsteroidDust();
+      scene.add(asteroidDust);
+      stateRef.clickableObjects.push(asteroidDust);
     };
 
     if (!stateRef.renderer) {
@@ -377,11 +390,10 @@ export function SolarSystem({
     });
     
     const isBeltSelected = selectedObjectId === 'asteroid_belt';
-
     const belt = stateRef.scene.getObjectsByProperty('userData.id', 'asteroid_belt');
     belt.forEach(obj => {
-        if(obj instanceof THREE.InstancedMesh && obj.material instanceof THREE.MeshStandardMaterial) {
-            obj.material.color.setHex(isBeltSelected ? 0xffffff : 0xaaaaaa);
+        if(obj instanceof THREE.Points && obj.material instanceof THREE.PointsMaterial) {
+             obj.material.color.setHex(isBeltSelected ? 0xffffff : 0x00bfff);
         }
     });
 
