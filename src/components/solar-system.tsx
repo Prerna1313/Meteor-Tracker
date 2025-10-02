@@ -243,18 +243,13 @@ export function SolarSystem({
           const r = a * (1 - e * Math.cos(E));
 
           const x_plane = r * Math.cos(nu);
-          const y_plane = r * Math.sin(nu);
+          const z_plane = r * Math.sin(nu);
 
           const argOfPeri = varpi - Omega;
 
-          const x_3d = x_plane * (Math.cos(argOfPeri) * Math.cos(Omega) - Math.sin(argOfPeri) * Math.sin(Omega) * Math.cos(i)) -
-                       y_plane * (Math.sin(argOfPeri) * Math.cos(Omega) + Math.cos(argOfPeri) * Math.sin(Omega) * Math.cos(i));
-          
-          const z_3d = x_plane * (Math.cos(argOfPeri) * Math.sin(Omega) + Math.sin(argOfPeri) * Math.cos(Omega) * Math.cos(i)) +
-                       y_plane * (Math.sin(argOfPeri) * Math.sin(Omega) - Math.cos(argOfPeri) * Math.cos(Omega) * Math.cos(i));
-                       
-          const y_3d = x_plane * (Math.sin(argOfPeri) * Math.sin(i)) + y_plane * (Math.cos(argOfPeri) * Math.sin(i));
-
+          const x_3d = r * ( Math.cos(Omega) * Math.cos(nu + argOfPeri) - Math.sin(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i) );
+          const z_3d = r * ( Math.sin(Omega) * Math.cos(nu + argOfPeri) + Math.cos(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i) );
+          const y_3d = r * Math.sin(nu + argOfPeri) * Math.sin(i);
 
           objGroup.position.set(
             x_3d * AU_SCALE, 
@@ -402,18 +397,11 @@ export function SolarSystem({
             const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
             const r = a * (1 - e * Math.cos(E));
 
-            const x_plane = r * Math.cos(nu);
-            const y_plane = r * Math.sin(nu);
-            
             const argOfPeri = varpi - Omega;
 
-            const x_3d = x_plane * (Math.cos(argOfPeri) * Math.cos(Omega) - Math.sin(argOfPeri) * Math.sin(Omega) * Math.cos(i)) -
-                         y_plane * (Math.sin(argOfPeri) * Math.cos(Omega) + Math.cos(argOfPeri) * Math.sin(Omega) * Math.cos(i));
-            
-            const z_3d = x_plane * (Math.cos(argOfPeri) * Math.sin(Omega) + Math.sin(argOfPeri) * Math.cos(Omega) * Math.cos(i)) +
-                         y_plane * (Math.sin(argOfPeri) * Math.sin(Omega) - Math.cos(argOfPeri) * Math.cos(Omega) * Math.cos(i));
-            
-            const y_3d = x_plane * (Math.sin(argOfPeri) * Math.sin(i)) + y_plane * (Math.cos(argOfPeri) * Math.sin(i));
+            const x_3d = r * ( Math.cos(Omega) * Math.cos(nu + argOfPeri) - Math.sin(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i) );
+            const z_3d = r * ( Math.sin(Omega) * Math.cos(nu + argOfPeri) + Math.cos(Omega) * Math.sin(nu + argOfPeri) * Math.cos(i) );
+            const y_3d = r * Math.sin(nu + argOfPeri) * Math.sin(i);
 
             curvePoints.push(new THREE.Vector3(x_3d * AU_SCALE, y_3d * AU_SCALE, z_3d * AU_SCALE));
         }
