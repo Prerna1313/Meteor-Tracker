@@ -16,14 +16,9 @@ export default function Home() {
 
   const selectedObjectData = (() => {
     if (!selectedObjectId) return null;
-    
+
     if (selectedObjectId === 'asteroid_belt') {
-        return {
-            id: 'asteroid_belt',
-            name: 'Asteroid Belt',
-            type: 'region',
-            description: 'The asteroid belt is a torus-shaped region in the Solar System, located roughly between the orbits of the planets Jupiter and Mars. It contains a great many solid, irregularly shaped bodies, of many sizes but much smaller than planets, called asteroids or minor planets.'
-        };
+        return null;
     }
 
     return solarSystemData.find((obj) => obj.id === selectedObjectId) ?? null;
