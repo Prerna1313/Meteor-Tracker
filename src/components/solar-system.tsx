@@ -81,13 +81,16 @@ const createAsteroidDust = () => {
         sizeAttenuation: true,
     });
     
-    for (let i = 0; i < particles; i++) {
-        // Concentrate most particles in the main belt region
-        const isMainBelt = Math.random() > 0.1;
-        const dist = isMainBelt 
-            ? THREE.MathUtils.randFloat(160, 280) // Between Mars and Jupiter
-            : THREE.MathUtils.randFloat(50, 280);
+    // Position particles between Mars and Jupiter's new scaled orbits
+    // These values are based on the new logarithmic scale in solar-system-data.ts
+    const marsOrbit = 125;
+    const jupiterOrbit = 200;
+    const beltInnerRadius = marsOrbit + 10;
+    const beltOuterRadius = jupiterOrbit - 20;
 
+
+    for (let i = 0; i < particles; i++) {
+        const dist = THREE.MathUtils.randFloat(beltInnerRadius, beltOuterRadius);
         const angle = Math.random() * Math.PI * 2;
         // Keep it relatively flat
         const y = THREE.MathUtils.randFloatSpread(5); 

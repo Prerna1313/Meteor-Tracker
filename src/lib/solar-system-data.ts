@@ -19,6 +19,17 @@ export type CelestialObject = {
   orbitCurve?: THREE.EllipseCurve;
 };
 
+// Using a logarithmic scale for distance for better visualization
+// New distance = 50 * log(real_distance_in_au) + 50
+// This compresses the vast distances of outer planets
+const scaleFactor = 60;
+const offset = 40;
+
+const logScale = (au: number) => {
+    if (au <= 0) return offset;
+    return scaleFactor * Math.log(au) + offset;
+}
+
 export const solarSystemData: CelestialObject[] = [
   {
     id: 'sun',
@@ -37,8 +48,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'mercury',
     name: 'Mercury',
     type: 'planet',
-    size: 2,
-    distance: 60,
+    size: 0.5,
+    distance: logScale(0.39) + 30, // AU: 0.39
     color: '#9C27B0', // Purple
     orbitalSpeed: 1.6,
     rotationSpeed: 0.1,
@@ -52,8 +63,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'venus',
     name: 'Venus',
     type: 'planet',
-    size: 4,
-    distance: 90,
+    size: 1,
+    distance: logScale(0.72) + 40, // AU: 0.72
     color: '#FFC107', // Dark Yellow
     orbitalSpeed: 1.2,
     rotationSpeed: 0.08,
@@ -67,8 +78,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'earth',
     name: 'Earth',
     type: 'planet',
-    size: 4,
-    distance: 120,
+    size: 1,
+    distance: logScale(1) + 50, // AU: 1
     color: '#2196F3', // Shiny Blue
     orbitalSpeed: 1,
     rotationSpeed: 0.5,
@@ -82,8 +93,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'mars',
     name: 'Mars',
     type: 'planet',
-    size: 3,
-    distance: 150,
+    size: 0.7,
+    distance: logScale(1.52) + 60, // AU: 1.52
     color: '#FF9800', // Light Orange
     orbitalSpeed: 0.8,
     rotationSpeed: 0.45,
@@ -97,8 +108,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'jupiter',
     name: 'Jupiter',
     type: 'planet',
-    size: 12,
-    distance: 320,
+    size: 5,
+    distance: logScale(5.2) + 90, // AU: 5.2
     color: '#FF5722', // Dark Orange
     orbitalSpeed: 0.4,
     rotationSpeed: 0.8,
@@ -112,12 +123,12 @@ export const solarSystemData: CelestialObject[] = [
     id: 'saturn',
     name: 'Saturn',
     type: 'planet',
-    size: 10,
-    distance: 450,
+    size: 4,
+    distance: logScale(9.58) + 120, // AU: 9.58
     color: '#FFC107', // Dark Yellow
     orbitalSpeed: 0.32,
     rotationSpeed: 0.75,
-    rings: { innerRadius: 12, outerRadius: 20, textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/saturn_ring.png' },
+    rings: { innerRadius: 6, outerRadius: 10, textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/saturn_ring.png' },
     eccentricity: 0.054,
     description: 'Saturn is the sixth planet from the Sun and the second-largest in the Solar System, after Jupiter. It is a gas giant with an average radius of about nine times that of Earth. It only has one-eighth the average density of Earth; however, with its larger volume, Saturn is over 95 times more massive.',
     diameter: 116460,
@@ -128,8 +139,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'uranus',
     name: 'Uranus',
     type: 'planet',
-    size: 7,
-    distance: 600,
+    size: 3,
+    distance: logScale(19.22) + 150, // AU: 19.22
     color: '#009688', // Bluish Green
     orbitalSpeed: 0.22,
     rotationSpeed: 0.6,
@@ -143,8 +154,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'neptune',
     name: 'Neptune',
     type: 'planet',
-    size: 7,
-    distance: 750,
+    size: 3,
+    distance: logScale(30.05) + 180, // AU: 30.05
     color: '#673AB7', // Violet
     orbitalSpeed: 0.18,
     rotationSpeed: 0.55,
