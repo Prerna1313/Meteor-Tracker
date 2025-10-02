@@ -624,7 +624,11 @@ export function SolarSystem({
     const { scene, clickableObjects, cometObjects } = stateRef;
 
     // Clear old comets
-    cometObjects.forEach(obj => scene.remove(obj));
+    cometObjects.forEach(obj => {
+      scene.remove(obj);
+      const orbit = obj.userData.orbitLine;
+      if (orbit) scene.remove(orbit);
+    });
     cometObjects.clear();
     
     // Filter out old comet objects from clickableObjects
@@ -633,8 +637,8 @@ export function SolarSystem({
 
     comets.forEach(cometData => {
         const cometGroup = new THREE.Group();
-        const headGeometry = new THREE.SphereGeometry(cometData.size, 16, 16);
-        const headMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const headGeometry = new THREE.IcosahedronGeometry(cometData.size, 1);
+        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 });
         const head = new THREE.Mesh(headGeometry, headMaterial);
         cometGroup.add(head);
 
@@ -659,7 +663,7 @@ export function SolarSystem({
         orbit.applyAxisAngle(new THREE.Vector3(1, 0, 0), inclination * (Math.PI / 180));
         scene.add(orbit);
 
-        cometGroup.userData = { ...cometData, isComet: true };
+        cometGroup.userData = { ...cometData, isComet: true, orbitLine: orbit };
         scene.add(cometGroup);
         cometObjects.set(cometData.id, cometGroup);
         clickableObjects.push(cometGroup);
@@ -694,8 +698,9 @@ export function SolarSystem({
     stateRef.cometObjects.forEach((obj, id) => {
         const isSelected = id === selectedObjectId;
         const head = obj.children[0] as THREE.Mesh;
-        if (head && head.material instanceof THREE.MeshBasicMaterial) {
-            head.material.color.setHex(isSelected ? 0x66ddff : 0xffffff);
+        if (head && head.material instanceof THREE.MeshStandardMaterial) {
+            head.material.emissive.setHex(isSelected ? 0x66ddff : 0x000000);
+            head.material.emissiveIntensity = isSelected ? 0.8 : 0;
         }
     });
 
@@ -765,3 +770,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
