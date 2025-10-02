@@ -65,7 +65,7 @@ const createStardust = (count: number, size: number, spread: number, opacity: nu
     const z = THREE.MathUtils.randFloatSpread(spread);
     positions.set([x, y, z], i * 3);
 
-    color.setHSL(Math.random(), 0.8, Math.random() * 0.5 + 0.3);
+    color.setHSL(Math.random(), Math.random() * 0.2 + 0.3, Math.random() * 0.5 + 0.3);
     colors.set([color.r, color.g, color.b], i * 3);
 
     sizes[i] = Math.random() * size;
@@ -129,8 +129,8 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
 
     // --- Scene Lighting and Background ---
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-    scene.add(createStardust(20000, 1.5, 10000, 0.7)); // Distant stars
-    scene.add(createStardust(5000, 2.5, 10000, 0.9)); // Closer stars
+    scene.add(createStardust(20000, 1.0, 10000, 0.5)); // Distant stars
+    scene.add(createStardust(5000, 2.0, 10000, 0.8)); // Closer stars
 
 
     // --- Object Creation ---
@@ -238,7 +238,7 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
         if (!mountRef.current || !stateRef.renderer) return;
         camera.aspect = mountRef.current.clientWidth / mountRef.current.clientHeight;
         camera.updateProjectionMatrix();
-        stateRef.renderer.setSize(mountRef.current.clientWidth / mountRef.current.clientHeight);
+        stateRef.renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
     };
     window.addEventListener('resize', handleResize);
 
@@ -263,6 +263,10 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
             const x = Math.cos(angle) * semiMajorAxis - focusOffset;
             const z = Math.sin(angle) * semiMinorAxis;
             obj.position.set(x, 0, z);
+        }
+        
+        if (id === 'sun') {
+          obj.position.set(0,0,0);
         }
             
         if (rotationSpeed > 0 && planetBody) {
