@@ -121,6 +121,7 @@ const createMeteors = () => {
   return meteors;
 }
 
+const ASTEROID_IDS = ['eurybates', 'orus', 'mathilde', 'patroclus', 'ceres', 'annefrank'];
 
 export function SolarSystem({
   data,
@@ -227,11 +228,7 @@ export function SolarSystem({
       const newLabels: LabelData[] = [];
 
       stateRef.celestialObjects.forEach((obj) => {
-        const body = obj.children.find((c) => (c as THREE.Mesh).isMesh);
-        if (body && obj.userData.id === 'sun') {
-          // body.rotation.y += obj.userData.rotationSpeed / 100;
-        }
-
+        // No rotation logic
         const vector = new THREE.Vector3();
         obj.getWorldPosition(vector);
         const labelPos = vector.clone();
@@ -317,15 +314,15 @@ export function SolarSystem({
         const objectGroup = new THREE.Group();
         
         let geometry;
-        if (objData.id === 'eurybates') {
-          geometry = new THREE.IcosahedronGeometry(objData.size, 0); // Hexagon-like
+        if (ASTEROID_IDS.includes(objData.id)) {
+          geometry = new THREE.IcosahedronGeometry(objData.size, 0); 
         } else {
           geometry = new THREE.SphereGeometry(objData.size, 32, 32);
         }
 
         const material = new THREE.MeshStandardMaterial({
           color: new THREE.Color(objData.color),
-          emissive: objData.id === 'eurybates' ? new THREE.Color(0x000000) : new THREE.Color(objData.color),
+          emissive: ASTEROID_IDS.includes(objData.id) ? new THREE.Color(0x000000) : new THREE.Color(objData.color),
           emissiveIntensity: 0.6,
         });
         const body = new THREE.Mesh(geometry, material);
@@ -386,7 +383,7 @@ export function SolarSystem({
         const points = ellipse.getPoints(200);
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
         const orbitMaterial = new THREE.LineBasicMaterial({
-          color: objData.id === 'eurybates' ? new THREE.Color(0xffffff) : new THREE.Color(objData.color),
+          color: ASTEROID_IDS.includes(objData.id) ? new THREE.Color(0xffffff) : new THREE.Color(objData.color),
           transparent: true,
           opacity: 0.3,
         });
@@ -440,7 +437,7 @@ export function SolarSystem({
             (body.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
         } else {
             const originalColor = obj.userData.color || 0xaaaaaa;
-            const emissiveColor = obj.userData.id === 'eurybates' ? 0x000000 : new THREE.Color(originalColor);
+            const emissiveColor = ASTEROID_IDS.includes(obj.userData.id) ? 0x000000 : new THREE.Color(originalColor);
             (body.material as THREE.MeshStandardMaterial).emissive.set(emissiveColor);
             (body.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.6;
         }
