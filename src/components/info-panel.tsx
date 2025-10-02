@@ -50,7 +50,7 @@ export function InfoPanel({ object, onClose }: InfoPanelProps) {
                         <div className="flex items-center gap-3">
                             <AsteroidIcon className="w-7 h-7 opacity-80" />
                             <div>
-                                {object.id.match(/\d+/) && <p className="text-2xl font-semibold text-white/80">{object.id.match(/\d+/)?.[0]}</p>}
+                                {object.type !== 'comet' && object.id.match(/\d+/) && <p className="text-2xl font-semibold text-white/80">{object.id.match(/\d+/)?.[0]}</p>}
                                 <h2 className="text-3xl font-bold">{object.name}</h2>
                             </div>
                         </div>
