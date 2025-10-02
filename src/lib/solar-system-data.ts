@@ -4,7 +4,7 @@ import * as THREE from 'three';
 export type CelestialObject = {
   id: string;
   name: string;
-  type: 'star' | 'planet' | 'region';
+  type: 'star' | 'planet' | 'region' | 'comet';
   size: number;
   distance: number;
   color: string;
@@ -17,6 +17,8 @@ export type CelestialObject = {
   mass?: string; // in 10^24 kg
   dayLength?: number; // in hours
   orbitCurve?: THREE.EllipseCurve;
+  orbitalInclination?: number; // Add inclination for comets
+  orbitalOffset?: number; // to offset position in orbit
 };
 
 // Using a logarithmic scale for distance for better visualization
@@ -49,7 +51,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Mercury',
     type: 'planet',
     size: 0.5,
-    distance: logScale(0.39) + 30, // AU: 0.39
+    distance: logScale(0.39),
     color: '#9C27B0', // Purple
     orbitalSpeed: 1.6,
     rotationSpeed: 0.1,
@@ -64,7 +66,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Venus',
     type: 'planet',
     size: 1,
-    distance: logScale(0.72) + 40, // AU: 0.72
+    distance: logScale(0.72),
     color: '#FFC107', // Dark Yellow
     orbitalSpeed: 1.2,
     rotationSpeed: 0.08,
@@ -79,7 +81,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Earth',
     type: 'planet',
     size: 1,
-    distance: logScale(1) + 50, // AU: 1
+    distance: logScale(1) + 5,
     color: '#2196F3', // Shiny Blue
     orbitalSpeed: 1,
     rotationSpeed: 0.5,
@@ -94,7 +96,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Mars',
     type: 'planet',
     size: 0.7,
-    distance: logScale(1.52) + 60, // AU: 1.52
+    distance: logScale(1.52) + 10,
     color: '#FF9800', // Light Orange
     orbitalSpeed: 0.8,
     rotationSpeed: 0.45,
@@ -109,7 +111,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Jupiter',
     type: 'planet',
     size: 5,
-    distance: logScale(5.2) + 90, // AU: 5.2
+    distance: logScale(5.2),
     color: '#FF5722', // Dark Orange
     orbitalSpeed: 0.4,
     rotationSpeed: 0.8,
@@ -124,7 +126,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Saturn',
     type: 'planet',
     size: 4,
-    distance: logScale(9.58) + 120, // AU: 9.58
+    distance: logScale(9.58),
     color: '#FFC107', // Dark Yellow
     orbitalSpeed: 0.32,
     rotationSpeed: 0.75,
@@ -140,7 +142,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Uranus',
     type: 'planet',
     size: 3,
-    distance: logScale(19.22) + 150, // AU: 19.22
+    distance: logScale(19.22),
     color: '#009688', // Bluish Green
     orbitalSpeed: 0.22,
     rotationSpeed: 0.6,
@@ -155,7 +157,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Neptune',
     type: 'planet',
     size: 3,
-    distance: logScale(30.05) + 180, // AU: 30.05
+    distance: logScale(30.05),
     color: '#673AB7', // Violet
     orbitalSpeed: 0.18,
     rotationSpeed: 0.55,
@@ -164,5 +166,60 @@ export const solarSystemData: CelestialObject[] = [
     diameter: 49244,
     mass: '102',
     dayLength: 16.1
+  },
+  {
+    id: 'polymele',
+    name: 'Polymele',
+    type: 'comet',
+    size: 0.5,
+    distance: logScale(5.2),
+    color: '#E0E0E0',
+    orbitalSpeed: 0.4,
+    rotationSpeed: 0.2,
+    eccentricity: 0.08,
+    orbitalInclination: 2.9,
+    orbitalOffset: 0.16, // To place it ahead of Jupiter
+    description: 'Polymele is a P-type Jupiter trojan asteroid, approximately 21 kilometers in diameter. It is one of the targets of the Lucy mission.'
+  },
+  {
+    id: 'eurybates',
+    name: 'Eurybates',
+    type: 'comet',
+    size: 0.8,
+    distance: logScale(5.2),
+    color: '#E0E0E0',
+    orbitalSpeed: 0.4,
+    rotationSpeed: 0.2,
+    eccentricity: 0.09,
+    orbitalInclination: 5.1,
+    orbitalOffset: 0.17, // Slightly different position from Polymele
+    description: 'Eurybates is a C-type Jupiter trojan and the largest member of the only confirmed disruptive collisional family in the Trojan population. It has a small satellite, Queta. It is a target of the Lucy mission.'
+  },
+  {
+    id: 'leucus',
+    name: 'Leucus',
+    type: 'comet',
+    size: 0.6,
+    distance: logScale(5.2),
+    color: '#E0E0E0',
+    orbitalSpeed: 0.4,
+    rotationSpeed: 0.1,
+    eccentricity: 0.06,
+    orbitalInclination: 11.5,
+    orbitalOffset: 0.18,
+    description: 'Leucus is a D-type Jupiter trojan, a slow rotator, taking approximately 446 hours per revolution. It is a target of the Lucy mission.'
+  },
+  {
+    id: 'hartley2',
+    name: 'Hartley 2',
+    type: 'comet',
+    size: 0.2,
+    distance: logScale(3.46), // Its average distance
+    color: '#E0E0E0',
+    orbitalSpeed: 0.5,
+    rotationSpeed: 0.5,
+    eccentricity: 0.695,
+    orbitalInclination: 13.6,
+    description: '103P/Hartley, also known as Hartley 2, is a small periodic comet with an orbital period of 6.46 years. It was discovered by Malcolm Hartley in 1986.'
   },
 ];

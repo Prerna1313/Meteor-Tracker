@@ -83,12 +83,12 @@ const createAsteroidDust = () => {
     });
     
     // Define orbital distances for positioning
-    const marsOrbit = 125;
-    const jupiterOrbit = 200;
-    const neptuneOrbit = 180 + 180; // From solar-system-data
+    const marsOrbit = 90;
+    const jupiterOrbit = 145;
+    const neptuneOrbit = 290;
 
-    const mainBeltInner = marsOrbit + 15;
-    const mainBeltOuter = jupiterOrbit - 25;
+    const mainBeltInner = marsOrbit + 5;
+    const mainBeltOuter = jupiterOrbit - 15;
 
     for (let i = 0; i < particles; i++) {
         const zone = Math.random();
@@ -128,10 +128,10 @@ const createMeteors = () => {
     metalness: 0.0,
   });
 
-  const marsOrbit = 125;
-  const jupiterOrbit = 200;
-  const mainBeltInner = marsOrbit + 15;
-  const mainBeltOuter = jupiterOrbit - 25;
+  const marsOrbit = 90;
+  const jupiterOrbit = 145;
+  const mainBeltInner = marsOrbit + 5;
+  const mainBeltOuter = jupiterOrbit - 15;
 
   for (let i = 0; i < meteorCount; i++) {
     const size = THREE.MathUtils.randFloat(0.1, 0.5);
@@ -152,6 +152,38 @@ const createMeteors = () => {
   }
   return meteors;
 }
+
+const createComet = (objData: CelestialObject) => {
+    const cometGroup = new THREE.Group();
+
+    // Comet head
+    const headGeometry = new THREE.SphereGeometry(objData.size, 16, 16);
+    const headMaterial = new THREE.MeshStandardMaterial({
+        color: 0xaaaaaa,
+        roughness: 0.8,
+    });
+    const head = new THREE.Mesh(headGeometry, headMaterial);
+    head.userData.isPlanetBody = true; // For highlighting
+    cometGroup.add(head);
+
+    // Comet tail
+    const tailLength = objData.size * 10;
+    const tailGeometry = new THREE.ConeGeometry(objData.size * 0.8, tailLength, 16);
+    const tailMaterial = new THREE.MeshBasicMaterial({
+        color: 0x55aaff,
+        transparent: true,
+        opacity: 0.3,
+        blending: THREE.AdditiveBlending,
+    });
+    const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+    
+    // Position the tail behind the head and rotate it
+    tail.position.set(0, 0, tailLength / 2);
+    tail.rotation.x = Math.PI / 2;
+    head.add(tail); // Attach tail to the head for easier rotation
+
+    return cometGroup;
+};
 
 
 export function SolarSystem({
@@ -264,23 +296,31 @@ export function SolarSystem({
           orbitalSpeed,
           rotationSpeed,
           orbitCurve,
+          orbitalOffset = 0,
         } = obj.userData;
-        const planetBody = obj.children.find((c) => c.userData.isPlanetBody);
+        const body = obj.children.find((c) => c.userData.isPlanetBody);
 
         if (id === 'sun') {
-          // The sun is stationary at the center
           obj.position.set(0, 0, 0);
-        } else if (type === 'planet' && orbitalSpeed > 0 && orbitCurve) {
-          // Use getPointAt for accurate positioning on the elliptical path
-          const t = (elapsedTime * (orbitalSpeed / 50)) % 1;
+        } else if ((type === 'planet' || type === 'comet') && orbitalSpeed > 0 && orbitCurve) {
+          const t = (elapsedTime * (orbitalSpeed / 50) + orbitalOffset) % 1;
           const point = orbitCurve.getPointAt(t);
-          obj.position.set(point.x, 0, point.y);
+          obj.position.set(point.x, obj.position.y, point.y); // Keep y for inclination
         }
         
-        // Planet rotation on its own axis
-        if (rotationSpeed > 0 && planetBody) {
-          planetBody.rotation.y += rotationSpeed / 100;
+        if (rotationSpeed > 0 && body) {
+          body.rotation.y += rotationSpeed / 100;
         }
+
+        if (type === 'comet' && body) {
+            // Point the tail away from the sun
+            const sunPosition = new THREE.Vector3(0, 0, 0);
+            const cometPosition = new THREE.Vector3();
+            obj.getWorldPosition(cometPosition);
+            const direction = cometPosition.clone().sub(sunPosition).normalize();
+            body.children[0].quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+        }
+
 
         // Update label positions
         const vector = new THREE.Vector3();
@@ -321,22 +361,21 @@ export function SolarSystem({
     const { scene, clickableObjects, celestialObjects } = stateRef;
 
     // --- Scene Cleanup ---
-    // Remove all previous objects from the scene to prevent duplicates
     while (scene.children.length > 0) {
       const child = scene.children[0];
       scene.remove(child);
-      if (child instanceof THREE.Mesh || child instanceof THREE.Points) {
+      if (child instanceof THREE.Mesh || child instanceof THREE.Points || child instanceof THREE.Line) {
           child.geometry.dispose();
-          // material can be an array
-          if (Array.isArray(child.material)) {
-              child.material.forEach(m => m.dispose());
-          } else {
-              child.material.dispose();
+          const material = child.material;
+          if (Array.isArray(material)) {
+              material.forEach(m => m.dispose());
+          } else if (material) {
+              material.dispose();
           }
       }
     }
     celestialObjects.clear();
-    clickableObjects.length = 0; // Reset clickable objects array
+    clickableObjects.length = 0;
 
     // --- Scene Rebuilding ---
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
@@ -398,18 +437,23 @@ export function SolarSystem({
           rings.rotation.x = Math.PI / 2;
           body.add(rings);
         }
-        
-        // Correct Elliptical Orbit Calculation
+        celestialObj = objectGroup;
+
+      } else if (objData.type === 'comet') {
+          celestialObj = createComet(objData);
+      }
+
+      if (objData.type === 'planet' || objData.type === 'comet') {
         const semiMajorAxis = objData.distance;
         const eccentricity = objData.eccentricity ?? 0;
         const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
         const focusOffset = eccentricity * semiMajorAxis;
 
         const ellipse = new THREE.EllipseCurve(
-          -focusOffset, 0,            // ax, aY (center of ellipse)
-          semiMajorAxis, semiMinorAxis, // xRadius, yRadius
-          0, 2 * Math.PI,            // aStartAngle, aEndAngle
-          false, 0                     // aClockwise, aRotation
+          -focusOffset, 0,
+          semiMajorAxis, semiMinorAxis,
+          0, 2 * Math.PI,
+          false, 0
         );
 
         objData.orbitCurve = ellipse;
@@ -419,14 +463,20 @@ export function SolarSystem({
         const orbitMaterial = new THREE.LineBasicMaterial({
           color: new THREE.Color(objData.color),
           transparent: true,
-          opacity: 0.5,
+          opacity: 0.3,
         });
         const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
         orbit.rotation.x = Math.PI / 2;
-        scene.add(orbit);
 
-        celestialObj = objectGroup;
+        const inclination = THREE.MathUtils.degToRad(objData.orbitalInclination || 0);
+        orbit.rotation.z = inclination; // Approximation of inclination
+        if (celestialObj) {
+            celestialObj.rotation.z = inclination;
+        }
+
+        scene.add(orbit);
       }
+
 
       if (celestialObj) {
         celestialObj.userData = { ...objData };
@@ -440,10 +490,10 @@ export function SolarSystem({
   useEffect(() => {
     stateRef.celestialObjects.forEach((obj, id) => {
       const isSelected = id === selectedObjectId;
-      const body = obj.children.find((c) => (c as THREE.Mesh).isMesh) as
+      const body = obj.children.find((c) => (c as THREE.Mesh).isMesh && c.userData.isPlanetBody) as
         | THREE.Mesh
         | undefined;
-      let meshToHighlight = obj.userData.type === 'star' ? undefined : body;
+      let meshToHighlight = body;
 
       if (
         meshToHighlight &&
@@ -451,10 +501,11 @@ export function SolarSystem({
       ) {
          if (isSelected) {
             (meshToHighlight.material as THREE.MeshStandardMaterial).emissive.setHex(0xffffff);
-            (meshToHighlight.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
+            (meshToTighlight.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
         } else {
-            (meshToHighlight.material as THREE.MeshStandardMaterial).emissive.set(new THREE.Color(obj.userData.color));
-            (meshToHighlight.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.6;
+            const originalColor = obj.userData.type === 'planet' ? obj.userData.color : 0xaaaaaa;
+            (meshToHighlight.material as THREE.MeshStandardMaterial).emissive.set(new THREE.Color(originalColor));
+            (meshToHighlight.material as THREE.MeshStandardMaterial).emissiveIntensity = obj.userData.type === 'planet' ? 0.6 : 0;
         }
       }
 
