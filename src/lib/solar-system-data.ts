@@ -4,7 +4,7 @@ import * as THREE from 'three';
 export type CelestialObject = {
   id: string;
   name: string;
-  type: 'star' | 'planet' | 'region' | 'comet';
+  type: 'star' | 'planet' | 'region';
   size: number;
   distance: number;
   color: string;
@@ -23,7 +23,6 @@ export type CelestialObject = {
 
 // Using a logarithmic scale for distance for better visualization
 // New distance = 50 * log(real_distance_in_au) + 50
-// This compresses the vast distances of outer planets
 const scaleFactor = 60;
 const offset = 40;
 
@@ -166,60 +165,5 @@ export const solarSystemData: CelestialObject[] = [
     diameter: 49244,
     mass: '102',
     dayLength: 16.1
-  },
-  {
-    id: 'polymele',
-    name: 'Polymele',
-    type: 'comet',
-    size: 0.5,
-    distance: logScale(5.2),
-    color: '#E0E0E0',
-    orbitalSpeed: 0.4,
-    rotationSpeed: 0.2,
-    eccentricity: 0.08,
-    orbitalInclination: 2.9,
-    orbitalOffset: 0.16, // To place it ahead of Jupiter
-    description: 'Polymele is a P-type Jupiter trojan asteroid, approximately 21 kilometers in diameter. It is one of the targets of the Lucy mission.'
-  },
-  {
-    id: 'eurybates',
-    name: 'Eurybates',
-    type: 'comet',
-    size: 0.8,
-    distance: logScale(5.2),
-    color: '#E0E0E0',
-    orbitalSpeed: 0.4,
-    rotationSpeed: 0.2,
-    eccentricity: 0.09,
-    orbitalInclination: 5.1,
-    orbitalOffset: 0.17, // Slightly different position from Polymele
-    description: 'Eurybates is a C-type Jupiter trojan and the largest member of the only confirmed disruptive collisional family in the Trojan population. It has a small satellite, Queta. It is a target of the Lucy mission.'
-  },
-  {
-    id: 'leucus',
-    name: 'Leucus',
-    type: 'comet',
-    size: 0.6,
-    distance: logScale(5.2),
-    color: '#E0E0E0',
-    orbitalSpeed: 0.4,
-    rotationSpeed: 0.1,
-    eccentricity: 0.06,
-    orbitalInclination: 11.5,
-    orbitalOffset: 0.18,
-    description: 'Leucus is a D-type Jupiter trojan, a slow rotator, taking approximately 446 hours per revolution. It is a target of the Lucy mission.'
-  },
-  {
-    id: 'hartley2',
-    name: 'Hartley 2',
-    type: 'comet',
-    size: 0.2,
-    distance: logScale(3.46), // Its average distance
-    color: '#E0E0E0',
-    orbitalSpeed: 0.5,
-    rotationSpeed: 0.5,
-    eccentricity: 0.695,
-    orbitalInclination: 13.6,
-    description: '103P/Hartley, also known as Hartley 2, is a small periodic comet with an orbital period of 6.46 years. It was discovered by Malcolm Hartley in 1986.'
   },
 ];

@@ -97,7 +97,7 @@ const createAsteroidDust = () => {
         if (zone < 0.30) { // 30% in Inner System
             dist = THREE.MathUtils.randFloat(0, mainBeltInner);
             y = THREE.MathUtils.randFloatSpread(4);
-        } else if (zone < 0.95) { // 65% in Main Belt (0.95 - 0.30 = 0.65)
+        } else if (zone < 0.95) { // 65% in Main Belt (0.30 -> 0.95 is 65%)
             dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
             y = THREE.MathUtils.randFloatSpread(8); 
         } else { // 5% in Outer System
@@ -151,38 +151,6 @@ const createMeteors = () => {
   }
   return meteors;
 }
-
-const createComet = (objData: CelestialObject) => {
-    const cometGroup = new THREE.Group();
-
-    // Comet head
-    const headGeometry = new THREE.SphereGeometry(objData.size, 16, 16);
-    const headMaterial = new THREE.MeshStandardMaterial({
-        color: 0xaaaaaa,
-        roughness: 0.8,
-    });
-    const head = new THREE.Mesh(headGeometry, headMaterial);
-    head.userData.isPlanetBody = true; // For highlighting
-    cometGroup.add(head);
-
-    // Comet tail
-    const tailLength = objData.size * 10;
-    const tailGeometry = new THREE.ConeGeometry(objData.size * 0.8, tailLength, 16);
-    const tailMaterial = new THREE.MeshBasicMaterial({
-        color: 0x55aaff,
-        transparent: true,
-        opacity: 0.3,
-        blending: THREE.AdditiveBlending,
-    });
-    const tail = new THREE.Mesh(tailGeometry, tailMaterial);
-    
-    // Position the tail behind the head and rotate it
-    tail.position.set(0, 0, tailLength / 2);
-    tail.rotation.x = Math.PI / 2;
-    head.add(tail); // Attach tail to the head for easier rotation
-
-    return cometGroup;
-};
 
 
 export function SolarSystem({
@@ -301,7 +269,7 @@ export function SolarSystem({
 
         if (id === 'sun') {
           obj.position.set(0, 0, 0);
-        } else if ((type === 'planet' || type === 'comet') && orbitalSpeed > 0 && orbitCurve) {
+        } else if ((type === 'planet') && orbitalSpeed > 0 && orbitCurve) {
           const t = (elapsedTime * (orbitalSpeed / 50) + orbitalOffset) % 1;
           const point = orbitCurve.getPointAt(t);
           obj.position.set(point.x, obj.position.y, point.y); // Keep y for inclination
@@ -310,16 +278,6 @@ export function SolarSystem({
         if (rotationSpeed > 0 && body) {
           body.rotation.y += rotationSpeed / 100;
         }
-
-        if (type === 'comet' && body) {
-            // Point the tail away from the sun
-            const sunPosition = new THREE.Vector3(0, 0, 0);
-            const cometPosition = new THREE.Vector3();
-            obj.getWorldPosition(cometPosition);
-            const direction = cometPosition.clone().sub(sunPosition).normalize();
-            body.children[0].quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
-        }
-
 
         // Update label positions
         const vector = new THREE.Vector3();
@@ -438,11 +396,9 @@ export function SolarSystem({
         }
         celestialObj = objectGroup;
 
-      } else if (objData.type === 'comet') {
-          celestialObj = createComet(objData);
       }
 
-      if (objData.type === 'planet' || objData.type === 'comet') {
+      if (objData.type === 'planet') {
         const semiMajorAxis = objData.distance;
         const eccentricity = objData.eccentricity ?? 0;
         const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
@@ -502,7 +458,7 @@ export function SolarSystem({
             (meshToHighlight.material as THREE.MeshStandardMaterial).emissive.setHex(0xffffff);
             (meshToHighlight.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
         } else {
-            const originalColor = obj.userData.type === 'planet' ? obj.userData.color : 0xaaaaaa;
+            const originalColor = obj.userData.color || 0xaaaaaa;
             (meshToHighlight.material as THREE.MeshStandardMaterial).emissive.set(new THREE.Color(originalColor));
             (meshToHighlight.material as THREE.MeshStandardMaterial).emissiveIntensity = obj.userData.type === 'planet' ? 0.6 : 0;
         }
