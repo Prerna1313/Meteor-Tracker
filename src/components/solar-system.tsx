@@ -308,7 +308,6 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     const { scene, celestialObjects, textureLoader, textures } = stateRef;
 
     const textureUrls: { [key: string]: string } = {
-        sun: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/sun.jpg',
         mercury: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/mercury.jpg',
         venus: 'https://raw.githubusercontent.com/mrdoob/three.js_old/master/examples/textures/planets/venus_surface.jpg',
         earth: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
@@ -381,17 +380,14 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
       let celestialObj: THREE.Object3D | null = null;
       
       if (objData.type === 'star') {
-        const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ map: textures.get(objData.id) });
-        const star = new THREE.Mesh(geometry, material);
-        
+        const starGroup = new THREE.Group();
         const glow = createSunGlow();
-        if (glow) star.add(glow);
+        if (glow) starGroup.add(glow);
         
-        const pointLight = new THREE.PointLight(0xFFFFFF, 300, 4000);
-        star.add(pointLight);
+        const pointLight = new THREE.PointLight(0xFFFFFF, 3, 4000);
+        starGroup.add(pointLight);
 
-        celestialObj = star;
+        celestialObj = starGroup;
       } else if (objData.type === 'planet' || objData.type === 'comet') {
         const objectGroup = new THREE.Group();
         let body: THREE.Mesh;
@@ -502,13 +498,13 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
                     material.emissive?.setHex(0x000000);
                 }
             }
+        }
 
-            // Handle sun glow
-            if (obj.userData.type === 'star') {
-                const glow = obj.children.find(c => c instanceof THREE.Sprite);
-                if (glow) {
-                    (glow as THREE.Sprite).material.opacity = isSelected ? 1 : 0.5;
-                }
+        // Handle sun glow
+        if (obj.userData.type === 'star') {
+            const glow = obj.children.find(c => c instanceof THREE.Sprite);
+            if (glow) {
+                (glow as THREE.Sprite).material.opacity = isSelected ? 1 : 0.5;
             }
         }
     });
@@ -561,5 +557,3 @@ export function SolarSystem({ data, onSelectObject, selectedObjectId }: SolarSys
     </div>
   );
 }
-
-    
