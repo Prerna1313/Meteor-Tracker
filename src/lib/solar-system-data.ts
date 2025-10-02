@@ -106,6 +106,20 @@ export const solarSystemData: CelestialObject[] = [
     dayLength: 24.7
   },
   {
+    id: 'eurybates',
+    name: 'Eurybates',
+    type: 'planet', // Rendered as a planet for simplicity, but treated as an asteroid
+    size: 0.3,
+    distance: logScale(5.2),
+    color: '#888888', // Stoney grey
+    orbitalSpeed: 0.4,
+    rotationSpeed: 0.2,
+    orbitalOffset: -0.1, // Placed ahead of Jupiter
+    eccentricity: 0.048,
+    description: 'Eurybates is a Greek Jupiter Trojan asteroid. It is a C-type asteroid and one of the targets of the Lucy mission. It has a small satellite, named Queta.',
+    diameter: 64,
+  },
+  {
     id: 'jupiter',
     name: 'Jupiter',
     type: 'planet',
@@ -167,5 +181,3 @@ export const solarSystemData: CelestialObject[] = [
     dayLength: 16.1
   },
 ];
-
-    

@@ -332,7 +332,8 @@ export function SolarSystem({
         const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
         const material = new THREE.MeshStandardMaterial({
           color: new THREE.Color(objData.color),
-          emissive: new THREE.Color(objData.color),
+          // For stoney figures like Eurybates, don't make them emissive.
+          emissive: objData.id === 'eurybates' ? new THREE.Color(0x000000) : new THREE.Color(objData.color),
           emissiveIntensity: 0.6,
         });
         const body = new THREE.Mesh(geometry, material);
@@ -426,7 +427,9 @@ export function SolarSystem({
             (body.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
         } else {
             const originalColor = obj.userData.color || 0xaaaaaa;
-            (body.material as THREE.MeshStandardMaterial).emissive.set(new THREE.Color(originalColor));
+            // Eurybates should not be emissive unless selected
+            const emissiveColor = obj.userData.id === 'eurybates' ? 0x000000 : new THREE.Color(originalColor);
+            (body.material as THREE.MeshStandardMaterial).emissive.set(emissiveColor);
             (body.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.6;
         }
       }
@@ -475,7 +478,7 @@ export function SolarSystem({
         {displayedLabels.map((label) => (
           <div
             key={label.id}
-            className={`absolute text-xs p-1 rounded-sm transition-colors duration-300 pointer-events-auto cursor-pointer uppercase tracking-wider ${
+            className={`absolute p-1 rounded-sm transition-colors duration-300 pointer-events-auto cursor-pointer uppercase tracking-wider ${
               selectedObjectId === label.id
                 ? 'text-primary bg-background/50'
                 : 'hover:text-primary'
