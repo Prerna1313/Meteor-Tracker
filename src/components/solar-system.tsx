@@ -487,6 +487,21 @@ export function SolarSystem({
              obj.material.color.setHex(isBeltSelected ? 0xffffff : 0x007BA7);
              obj.material.opacity = isBeltSelected ? 0.7 : 0.45; // Use updated base opacity
         }
+        if (obj instanceof THREE.Group && selectedObjectId === 'asteroid_belt') {
+             obj.children.forEach(child => {
+                if(child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+                     child.material.emissive.setHex(0xffffff);
+                     child.material.emissiveIntensity = 0.5;
+                }
+             })
+        } else if (obj instanceof THREE.Group) {
+            obj.children.forEach(child => {
+                if(child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+                     child.material.emissive.setHex(0x000000);
+                     child.material.emissiveIntensity = 0;
+                }
+             })
+        }
     });
 
   }, [selectedObjectId, stateRef.celestialObjects, stateRef.scene]);
@@ -542,6 +557,15 @@ export function SolarSystem({
     return nonOverlappingLabels;
   }, [labels, stateRef.camera, data]);
 
+  const getLabelColor = (label: LabelData) => {
+    if (selectedObjectId === label.id) {
+      return 'hsl(var(--primary))';
+    }
+    if (ASTEROID_IDS.includes(label.id)) {
+      return '#FFFFFF';
+    }
+    return label.color;
+  };
 
   return (
     <div ref={mountRef} className="absolute top-0 left-0 w-full h-full">
@@ -554,7 +578,7 @@ export function SolarSystem({
             }`}
             style={{
               transform: `translate(10px, -50%) translate(${label.screenX}px, ${label.screenY}px)`,
-              color: selectedObjectId === label.id ? 'hsl(var(--primary))' : label.color,
+              color: getLabelColor(label),
               opacity: (selectedObjectId && selectedObjectId !== label.id) ? 0.5 : 1,
             }}
             onClick={(e) => {
@@ -571,5 +595,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    
