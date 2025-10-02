@@ -43,23 +43,21 @@ const createAsteroidDust = () => {
     
     const mainBeltInner = marsOrbit + 0.5 * AU_SCALE;
     const mainBeltOuter = jupiterOrbit - 0.5 * AU_SCALE;
-    const kuiperBeltInner = neptuneOrbit - 5 * AU_SCALE;
-    const kuiperBeltOuter = neptuneOrbit + 10 * AU_SCALE;
-
+    
     for (let i = 0; i < particles; i++) {
         const zone = Math.random();
         let dist = 0;
         let y = 0;
 
-        if (zone < 0.10) { // 10% in Inner System
+        if (zone < 0.05) { // 5% in Inner System
             dist = THREE.MathUtils.randFloat(0, mainBeltInner);
             y = THREE.MathUtils.randFloatSpread(2);
-        } else if (zone < 0.95) { // 85% in Main Belt (more dense)
+        } else if (zone < 0.98) { // 93% in Main Belt (more dense)
             const innerBias = Math.pow(Math.random(), 2);
             dist = mainBeltInner + innerBias * (mainBeltOuter - mainBeltInner);
             y = THREE.MathUtils.randFloatSpread(10); 
-        } else { // 5% in Kuiper Belt region
-            dist = THREE.MathUtils.randFloat(kuiperBeltInner, kuiperBeltOuter);
+        } else { // 2% in Kuiper Belt region (up to Neptune)
+            dist = THREE.MathUtils.randFloat(jupiterOrbit, neptuneOrbit);
             y = THREE.MathUtils.randFloatSpread(40);
         }
 
