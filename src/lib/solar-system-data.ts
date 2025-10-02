@@ -19,6 +19,10 @@ export type CelestialObject = {
   orbitCurve?: THREE.EllipseCurve;
   orbitalInclination?: number;
   orbitalOffset?: number; // Initial position offset, will be replaced by time-based calculation
+  discoveryYear?: number;
+  perihelion?: number; // in AU
+  aphelion?: number; // in AU
+
 
   // Keplerian Elements for accurate orbit calculation
   semiMajorAxis: number; // a, in AU
@@ -69,6 +73,8 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 77.46,
     longitudeOfAscendingNode: 48.33,
+    perihelion: 0.31,
+    aphelion: 0.47,
   },
   {
     id: 'venus',
@@ -89,6 +95,8 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 131.53,
     longitudeOfAscendingNode: 76.68,
+    perihelion: 0.72,
+    aphelion: 0.73,
   },
   {
     id: 'earth',
@@ -109,6 +117,8 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 102.95,
     longitudeOfAscendingNode: -11.26,
+    perihelion: 0.98,
+    aphelion: 1.02,
   },
   {
     id: 'mars',
@@ -129,6 +139,8 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: -23.92,
     longitudeOfAscendingNode: 49.58,
+    perihelion: 1.38,
+    aphelion: 1.67,
   },
   {
     id: 'itokawa',
@@ -147,6 +159,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 162.8,
     longitudeOfAscendingNode: 69.08,
+    discoveryYear: 1998,
+    perihelion: 0.95,
+    aphelion: 1.70,
   },
   {
     id: 'eros',
@@ -165,6 +180,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 178.6,
     longitudeOfAscendingNode: 304.3,
+    discoveryYear: 1898,
+    perihelion: 1.13,
+    aphelion: 1.78,
   },
   {
     id: 'bennu',
@@ -183,6 +201,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 66.22,
     longitudeOfAscendingNode: 2.06,
+    discoveryYear: 1999,
+    perihelion: 0.90,
+    aphelion: 1.36,
   },
   {
     id: 'ryugu',
@@ -201,6 +222,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 211.5,
     longitudeOfAscendingNode: 251.6,
+    discoveryYear: 1999,
+    perihelion: 0.96,
+    aphelion: 1.42,
   },
   {
     id: 'donaldjohanson',
@@ -219,6 +243,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 169.5,
     longitudeOfAscendingNode: 172.9,
+    discoveryYear: 1981,
+    perihelion: 1.77,
+    aphelion: 2.61,
   },
   {
     id: 'braille',
@@ -237,6 +264,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 356.6,
     longitudeOfAscendingNode: 331.0,
+    discoveryYear: 1992,
+    perihelion: 1.33,
+    aphelion: 3.35,
   },
   {
     id: 'ceres',
@@ -255,6 +285,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 73.2,
     longitudeOfAscendingNode: 80.4,
+    discoveryYear: 1801,
+    perihelion: 2.55,
+    aphelion: 2.99,
   },
   {
     id: 'annefrank',
@@ -273,6 +306,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 10.0,
     longitudeOfAscendingNode: 121.2,
+    discoveryYear: 1942,
+    perihelion: 2.07,
+    aphelion: 2.35,
   },
   {
     id: 'mathilde',
@@ -291,6 +327,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 181.2,
     longitudeOfAscendingNode: 179.8,
+    discoveryYear: 1885,
+    perihelion: 1.94,
+    aphelion: 3.35,
   },
   {
     id: 'lutetia',
@@ -309,6 +348,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 250.3,
     longitudeOfAscendingNode: 81.0,
+    discoveryYear: 1852,
+    perihelion: 2.04,
+    aphelion: 2.82,
   },
   {
     id: 'jupiter',
@@ -329,6 +371,8 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 14.75,
     longitudeOfAscendingNode: 100.56,
+    perihelion: 4.95,
+    aphelion: 5.46,
   },
   {
     id: 'eurybates',
@@ -347,6 +391,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 27.6,
     longitudeOfAscendingNode: 44.9,
+    discoveryYear: 1990,
+    perihelion: 4.75,
+    aphelion: 5.66,
   },
   {
     id: 'patroclus',
@@ -365,6 +412,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: 303.4,
     longitudeOfPerihelion: -39.1,
     longitudeOfAscendingNode: 43.8,
+    discoveryYear: 1906,
+    perihelion: 4.52,
+    aphelion: 5.97,
   },
   {
     id: 'orus',
@@ -383,6 +433,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 211.7,
     longitudeOfAscendingNode: 236.4,
+    discoveryYear: 1977,
+    perihelion: 4.91,
+    aphelion: 5.43,
   },
   {
     id: 'leucus',
@@ -401,6 +454,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 169.8,
     longitudeOfAscendingNode: 161.4,
+    discoveryYear: 1977,
+    perihelion: 4.85,
+    aphelion: 5.47,
   },
   {
     id: 'polymele',
@@ -419,6 +475,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 187.3,
     longitudeOfAscendingNode: 111.4,
+    discoveryYear: 1973,
+    perihelion: 4.74,
+    aphelion: 5.68,
   },
   {
     id: 'saturn',
@@ -440,6 +499,8 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 92.49,
     longitudeOfAscendingNode: 113.72,
+    perihelion: 9.02,
+    aphelion: 10.05,
   },
   {
     id: 'uranus',
@@ -460,6 +521,8 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 170.96,
     longitudeOfAscendingNode: 74.23,
+    perihelion: 18.28,
+    aphelion: 20.09,
   },
   {
     id: 'neptune',
@@ -480,6 +543,8 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360,
     longitudeOfPerihelion: 44.97,
     longitudeOfAscendingNode: 131.72,
+    perihelion: 29.81,
+    aphelion: 30.33,
   },
   {
     id: 'psyche',
@@ -498,6 +563,9 @@ export const solarSystemData: CelestialObject[] = [
     longitudeOfPerihelion: 226.7,
     longitudeOfAscendingNode: 150.3,
     distance: 8.8 * AU_SCALE,
+    discoveryYear: 1852,
+    perihelion: 2.52,
+    aphelion: 3.32,
   },
   {
     id: 'ida',
@@ -516,6 +584,9 @@ export const solarSystemData: CelestialObject[] = [
     longitudeOfPerihelion: 195.4,
     longitudeOfAscendingNode: 324.4,
     distance: 8.7 * AU_SCALE,
+    discoveryYear: 1884,
+    perihelion: 2.73,
+    aphelion: 2.99,
   },
   {
     id: 'gaspra',
@@ -534,6 +605,9 @@ export const solarSystemData: CelestialObject[] = [
     longitudeOfPerihelion: 129.4,
     longitudeOfAscendingNode: 253.2,
     distance: 8.1 * AU_SCALE,
+    discoveryYear: 1916,
+    perihelion: 1.82,
+    aphelion: 2.59,
   },
   {
     id: 'apophis',
@@ -552,6 +626,9 @@ export const solarSystemData: CelestialObject[] = [
     longitudeOfPerihelion: 126.4,
     longitudeOfAscendingNode: 204.4,
     distance: 5.0 * AU_SCALE,
+    discoveryYear: 2004,
+    perihelion: 0.75,
+    aphelion: 1.1,
   },
   {
     id: 'osiris-apex',
@@ -570,6 +647,9 @@ export const solarSystemData: CelestialObject[] = [
     longitudeOfPerihelion: 126.4,
     longitudeOfAscendingNode: 204.4,
     distance: 5.0 * AU_SCALE,
+    discoveryYear: 2023,
+    perihelion: 0.75,
+    aphelion: 1.1,
   },
   {
     id: 'didymos',
@@ -588,6 +668,9 @@ export const solarSystemData: CelestialObject[] = [
     longitudeOfPerihelion: 319.4,
     longitudeOfAscendingNode: 73.2,
     distance: 6.8 * AU_SCALE,
+    discoveryYear: 1996,
+    perihelion: 1.01,
+    aphelion: 2.27,
   },
   {
     id: 'vesta',
@@ -606,6 +689,9 @@ export const solarSystemData: CelestialObject[] = [
     longitudeOfPerihelion: 151.0,
     longitudeOfAscendingNode: 103.8,
     distance: 8.4 * AU_SCALE,
+    discoveryYear: 1807,
+    perihelion: 2.15,
+    aphelion: 2.57,
   },
   {
     id: 'borrelly',
@@ -623,6 +709,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360, // L (degrees) - randomized
     rotationSpeed: 0.2,
     distance: 9 * AU_SCALE,
+    discoveryYear: 1904,
+    perihelion: 1.36,
+    aphelion: 5.86,
   },
   {
     id: 'hartley2',
@@ -640,6 +729,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360, // L (degrees) - randomized
     rotationSpeed: 0.2,
     distance: 8.9 * AU_SCALE,
+    discoveryYear: 1986,
+    perihelion: 1.06,
+    aphelion: 5.87,
   },
   {
     id: 'tempel1',
@@ -657,6 +749,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360, // L (degrees) - randomized
     rotationSpeed: 0.2,
     distance: 8.8 * AU_SCALE,
+    discoveryYear: 1867,
+    perihelion: 1.5,
+    aphelion: 4.74,
   },
   {
     id: 'wild2',
@@ -674,6 +769,9 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360, // L (degrees) - randomized
     rotationSpeed: 0.2,
     distance: 8.9 * AU_SCALE,
+    discoveryYear: 1978,
+    perihelion: 1.58,
+    aphelion: 5.3,
   },
   {
     id: 'churyumov-gerasimenko',
@@ -691,5 +789,8 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360, // L (degrees) - randomized
     rotationSpeed: 0.2,
     distance: 9.0 * AU_SCALE,
+    discoveryYear: 1969,
+    perihelion: 1.24,
+    aphelion: 5.68,
   },
 ];

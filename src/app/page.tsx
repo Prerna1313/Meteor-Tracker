@@ -63,6 +63,7 @@ export default function Home() {
                 <InfoPanel
                   object={selectedObjectData as CelestialObject}
                   onClose={() => setSelectedObjectId(null)}
+                  solarSystemData={solarSystemData}
                 />
               </motion.div>
             )}
