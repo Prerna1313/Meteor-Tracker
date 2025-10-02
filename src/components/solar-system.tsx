@@ -81,21 +81,15 @@ const createAsteroidDust = () => {
         transparent: true,
         sizeAttenuation: true,
     });
-
-    const marsOrbit = solarSystemData.find(p => p.id === 'mars')?.distance || 150;
-    const jupiterOrbit = solarSystemData.find(p => p.id === 'jupiter')?.distance || 320;
-    
-    const beltInnerRadius = marsOrbit + 10;
-    const beltOuterRadius = jupiterOrbit - 10;
     
     for (let i = 0; i < particles; i++) {
         const isMainBelt = Math.random() > 0.1;
         const dist = isMainBelt 
-            ? THREE.MathUtils.randFloat(beltInnerRadius, beltOuterRadius) 
-            : THREE.MathUtils.randFloat(0, beltInnerRadius);
+            ? THREE.MathUtils.randFloat(150, 250) 
+            : THREE.MathUtils.randFloat(0, 250);
 
         const angle = Math.random() * Math.PI * 2;
-        const y = THREE.MathUtils.randFloatSpread(10); 
+        const y = THREE.MathUtils.randFloatSpread(5); 
 
         positions[i * 3] = Math.cos(angle) * dist;
         positions[i * 3 + 1] = y;
@@ -154,7 +148,7 @@ export function SolarSystem({
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
       controls.minDistance = 10;
-      controls.maxDistance = 40000;
+      controls.maxDistance = 4000;
       stateRef.controls = controls;
 
       scene.add(new THREE.AmbientLight(0xffffff, 0.3));
@@ -221,25 +215,18 @@ export function SolarSystem({
           type,
           orbitalSpeed,
           rotationSpeed,
-          distance,
-          eccentricity = 0,
+          orbitCurve,
         } = obj.userData;
         const planetBody = obj.children.find((c) => c.userData.isPlanetBody);
 
         if (id === 'sun') {
           obj.position.set(0, 0, 0);
-        } else if (type === 'planet' && orbitalSpeed > 0) {
-          const semiMajorAxis = distance;
-          const semiMinorAxis =
-            semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
-          const angle = elapsedTime * (orbitalSpeed / 50);
-          const focusOffset = eccentricity * semiMajorAxis;
-
-          const x = Math.cos(angle) * semiMajorAxis - focusOffset;
-          const z = Math.sin(angle) * semiMinorAxis;
-          obj.position.set(x, 0, z);
+        } else if (type === 'planet' && orbitalSpeed > 0 && orbitCurve) {
+          const t = (elapsedTime * (orbitalSpeed / 50)) % 1;
+          const point = orbitCurve.getPointAt(t);
+          obj.position.set(point.x, 0, point.y);
         }
-
+        
         if (rotationSpeed > 0 && planetBody) {
           planetBody.rotation.y += rotationSpeed / 100;
         }
@@ -335,20 +322,17 @@ export function SolarSystem({
 
         const semiMajorAxis = objData.distance;
         const eccentricity = objData.eccentricity ?? 0;
-        const semiMinorAxis =
-          semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
+        const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
         const focusOffset = eccentricity * semiMajorAxis;
 
         const ellipse = new THREE.EllipseCurve(
-          -focusOffset,
-          0,
-          semiMajorAxis,
-          semiMinorAxis,
-          0,
-          2 * Math.PI,
-          false,
-          0
+          -focusOffset, 0, // ax, aY
+          semiMajorAxis, semiMinorAxis, // xRadius, yRadius
+          0, 2 * Math.PI, // aStartAngle, aEndAngle
+          false, 0 // aClockwise, aRotation
         );
+
+        objData.orbitCurve = ellipse;
 
         const points = ellipse.getPoints(200);
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);

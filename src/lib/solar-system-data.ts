@@ -1,30 +1,32 @@
+import * as THREE from 'three';
 
 export type CelestialObject = {
   id: string;
   name: string;
   type: 'star' | 'planet' | 'region';
-  size?: number;
+  size: number;
   distance: number;
-  color?: string;
-  orbitalSpeed?: number;
-  rotationSpeed?: number;
+  color: string;
+  orbitalSpeed: number;
+  rotationSpeed: number;
   rings?: { innerRadius: number; outerRadius: number; textureUrl: string; };
   eccentricity?: number;
   description?: string;
   diameter?: number; // in km
   mass?: string; // in 10^24 kg
   dayLength?: number; // in hours
+  orbitCurve?: THREE.EllipseCurve;
 };
 
 // Distances are on a logarithmic scale for better visualization
-const scale = (d: number) => 50 * Math.log(d + 1);
+const scale = (d: number) => 50 * Math.log(d + 1.1);
 
 export const solarSystemData: CelestialObject[] = [
   {
     id: 'sun',
     name: 'Sun',
     type: 'star',
-    size: 5, // Reduced size
+    size: 20,
     distance: 0,
     color: '#FFFF8F',
     orbitalSpeed: 0,
@@ -37,8 +39,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'mercury',
     name: 'Mercury',
     type: 'planet',
-    size: 0.8, // Reduced size
-    distance: scale(3.5),
+    size: 2,
+    distance: 80,
     color: '#9C27B0', // Purple
     orbitalSpeed: 1.6,
     rotationSpeed: 0.1,
@@ -52,8 +54,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'venus',
     name: 'Venus',
     type: 'planet',
-    size: 1.5, // Reduced size
-    distance: scale(7),
+    size: 4,
+    distance: 120,
     color: '#FFC107', // Dark Yellow
     orbitalSpeed: 1.2,
     rotationSpeed: 0.08,
@@ -67,8 +69,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'earth',
     name: 'Earth',
     type: 'planet',
-    size: 1.6, // Reduced size
-    distance: scale(10),
+    size: 4,
+    distance: 150,
     color: '#2196F3', // Shiny Blue
     orbitalSpeed: 1,
     rotationSpeed: 0.5,
@@ -82,8 +84,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'mars',
     name: 'Mars',
     type: 'planet',
-    size: 1, // Reduced size
-    distance: scale(15),
+    size: 3,
+    distance: 200,
     color: '#FF9800', // Light Orange
     orbitalSpeed: 0.8,
     rotationSpeed: 0.45,
@@ -97,8 +99,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'jupiter',
     name: 'Jupiter',
     type: 'planet',
-    size: 4, // Reduced size
-    distance: scale(52),
+    size: 12,
+    distance: 320,
     color: '#FF5722', // Dark Orange
     orbitalSpeed: 0.4,
     rotationSpeed: 0.8,
@@ -112,12 +114,12 @@ export const solarSystemData: CelestialObject[] = [
     id: 'saturn',
     name: 'Saturn',
     type: 'planet',
-    size: 3.5, // Reduced size
-    distance: scale(95),
+    size: 10,
+    distance: 450,
     color: '#FFC107', // Dark Yellow
     orbitalSpeed: 0.32,
     rotationSpeed: 0.75,
-    rings: { innerRadius: 5, outerRadius: 8, textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/saturn_ring.png' },
+    rings: { innerRadius: 12, outerRadius: 20, textureUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/saturn_ring.png' },
     eccentricity: 0.054,
     description: 'Saturn is the sixth planet from the Sun and the second-largest in the Solar System, after Jupiter. It is a gas giant with an average radius of about nine times that of Earth. It only has one-eighth the average density of Earth; however, with its larger volume, Saturn is over 95 times more massive.',
     diameter: 116460,
@@ -128,8 +130,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'uranus',
     name: 'Uranus',
     type: 'planet',
-    size: 2.5, // Reduced size
-    distance: scale(192),
+    size: 7,
+    distance: 600,
     color: '#009688', // Bluish Green
     orbitalSpeed: 0.22,
     rotationSpeed: 0.6,
@@ -143,8 +145,8 @@ export const solarSystemData: CelestialObject[] = [
     id: 'neptune',
     name: 'Neptune',
     type: 'planet',
-    size: 2.4, // Reduced size
-    distance: scale(301),
+    size: 7,
+    distance: 750,
     color: '#673AB7', // Violet
     orbitalSpeed: 0.18,
     rotationSpeed: 0.55,
