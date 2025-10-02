@@ -638,7 +638,7 @@ export function SolarSystem({
   };
 
   return (
-    <div ref={mountRef} className="absolute top-0 left-0 w-full h-full">
+    <div ref={mountRef} className="absolute top-0 left-0 w-full h-full z-10">
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         {displayedLabels.map((label) => {
           const isAsteroid = ASTEROID_IDS.includes(label.id);

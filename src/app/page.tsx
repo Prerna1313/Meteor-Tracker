@@ -49,7 +49,25 @@ export default function Home() {
           showLanding ? 'opacity-0' : 'opacity-100'
         }`}
       >
-        <Header />
+        <div className="absolute top-0 left-0 w-full h-full z-30 pointer-events-none">
+          <Header />
+          <AnimatePresence>
+            {selectedObjectId && selectedObjectData && (
+              <motion.div
+                initial={{ opacity: 0, x: -100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ duration: 0.5, ease: 'easeInOut' }}
+                className="absolute top-24 left-4 pointer-events-auto"
+              >
+                <InfoPanel
+                  object={selectedObjectData as CelestialObject}
+                  onClose={() => setSelectedObjectId(null)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         
         <SolarSystem
           data={solarSystemData}
@@ -58,23 +76,6 @@ export default function Home() {
           onHoverObject={setHoveredObjectId}
           hoveredObjectId={hoveredObjectId}
         />
-
-        <AnimatePresence>
-          {selectedObjectId && selectedObjectData && (
-            <motion.div
-              initial={{ opacity: 0, x: -100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
-              transition={{ duration: 0.5, ease: 'easeInOut' }}
-              className="absolute top-24 left-4 z-20"
-            >
-              <InfoPanel
-                object={selectedObjectData as CelestialObject}
-                onClose={() => setSelectedObjectId(null)}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </main>
   );
