@@ -1,3 +1,4 @@
+'use client';
 import * as THREE from 'three';
 
 export type CelestialObject = {
@@ -17,9 +18,6 @@ export type CelestialObject = {
   dayLength?: number; // in hours
   orbitCurve?: THREE.EllipseCurve;
 };
-
-// Distances are on a logarithmic scale for better visualization
-const scale = (d: number) => 50 * Math.log(d + 1.1);
 
 export const solarSystemData: CelestialObject[] = [
   {

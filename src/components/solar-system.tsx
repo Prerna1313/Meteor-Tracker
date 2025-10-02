@@ -5,7 +5,6 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { CelestialObject } from '@/lib/solar-system-data';
-import { solarSystemData } from '@/lib/solar-system-data';
 
 type LabelData = {
   id: string;
@@ -83,12 +82,14 @@ const createAsteroidDust = () => {
     });
     
     for (let i = 0; i < particles; i++) {
+        // Concentrate most particles in the main belt region
         const isMainBelt = Math.random() > 0.1;
         const dist = isMainBelt 
             ? THREE.MathUtils.randFloat(200, 250) 
             : THREE.MathUtils.randFloat(0, 250);
 
         const angle = Math.random() * Math.PI * 2;
+        // Keep it relatively flat
         const y = THREE.MathUtils.randFloatSpread(5); 
 
         positions[i * 3] = Math.cos(angle) * dist;
@@ -120,7 +121,6 @@ export function SolarSystem({
     textureLoader: new THREE.TextureLoader(),
     clickableObjects: [] as THREE.Object3D[],
     celestialObjects: new Map<string, THREE.Object3D>(),
-    orbitLines: [] as THREE.Line[],
   }).current;
 
   useEffect(() => {
@@ -152,10 +152,6 @@ export function SolarSystem({
       stateRef.controls = controls;
 
       scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-      
-      const asteroidDust = createAsteroidDust();
-      scene.add(asteroidDust);
-      stateRef.clickableObjects.push(asteroidDust);
     };
 
     if (!stateRef.renderer) {
@@ -170,6 +166,7 @@ export function SolarSystem({
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
       stateRef.raycaster.setFromCamera(mouse, stateRef.camera);
+      // Increase threshold for points objects (like the asteroid belt)
       stateRef.raycaster.params.Points.threshold = 5;
       const intersects = stateRef.raycaster.intersectObjects(
         stateRef.clickableObjects,
@@ -178,6 +175,7 @@ export function SolarSystem({
 
       if (intersects.length > 0) {
         let currentObject = intersects[0].object;
+        // Traverse up to find the group with the ID
         while (currentObject.parent && !currentObject.userData.id) {
           currentObject = currentObject.parent;
         }
@@ -205,7 +203,7 @@ export function SolarSystem({
     const clock = new THREE.Clock();
     const animate = () => {
       if (!stateRef.renderer) return;
-      requestAnimationFrame(animate);
+      const animationFrameId = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
       const newLabels: LabelData[] = [];
 
@@ -220,23 +218,27 @@ export function SolarSystem({
         const planetBody = obj.children.find((c) => c.userData.isPlanetBody);
 
         if (id === 'sun') {
+          // The sun is stationary at the center
           obj.position.set(0, 0, 0);
         } else if (type === 'planet' && orbitalSpeed > 0 && orbitCurve) {
+          // Use getPointAt for accurate positioning on the elliptical path
           const t = (elapsedTime * (orbitalSpeed / 50)) % 1;
           const point = orbitCurve.getPointAt(t);
           obj.position.set(point.x, 0, point.y);
         }
         
+        // Planet rotation on its own axis
         if (rotationSpeed > 0 && planetBody) {
           planetBody.rotation.y += rotationSpeed / 100;
         }
 
+        // Update label positions
         const vector = new THREE.Vector3();
         obj.getWorldPosition(vector);
         const labelPos = vector.clone();
 
         const objSize = obj.userData.size || 0;
-        labelPos.y += objSize;
+        labelPos.y += objSize; // Offset label above the object
 
         newLabels.push({
           id: obj.userData.id,
@@ -248,11 +250,15 @@ export function SolarSystem({
       setLabels(newLabels);
       controls.update();
       renderer.render(stateRef.scene, stateRef.camera);
+
+      return () => {
+        cancelAnimationFrame(animationFrameId);
+      };
     };
-    const animationFrameId = requestAnimationFrame(animate);
+    const cleanupAnimation = animate();
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      cleanupAnimation();
       window.removeEventListener('resize', handleResize);
       if (stateRef.renderer) {
         stateRef.renderer.domElement.removeEventListener('click', handleClick);
@@ -262,18 +268,32 @@ export function SolarSystem({
   }, [stateRef, onSelectObject, data]);
 
   useEffect(() => {
-    const { scene, clickableObjects, celestialObjects, orbitLines } = stateRef;
+    const { scene, clickableObjects, celestialObjects } = stateRef;
 
-    // Clear previous objects, but keep the asteroid belt
-    celestialObjects.forEach(obj => scene.remove(obj));
+    // --- Scene Cleanup ---
+    // Remove all previous objects from the scene to prevent duplicates
+    while (scene.children.length > 0) {
+      const child = scene.children[0];
+      scene.remove(child);
+      if (child instanceof THREE.Mesh) {
+          child.geometry.dispose();
+          // material can be an array
+          if (Array.isArray(child.material)) {
+              child.material.forEach(m => m.dispose());
+          } else {
+              child.material.dispose();
+          }
+      }
+    }
     celestialObjects.clear();
-    orbitLines.forEach(line => scene.remove(line));
-    orbitLines.length = 0;
+    clickableObjects.length = 0; // Reset clickable objects array
 
-    // Reset clickable objects, preserving the asteroid belt if it exists
-    const asteroidBelt = clickableObjects.find(obj => obj.userData.id === 'asteroid_belt');
-    stateRef.clickableObjects = asteroidBelt ? [asteroidBelt] : [];
+    // --- Scene Rebuilding ---
+    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
+    const asteroidDust = createAsteroidDust();
+    scene.add(asteroidDust);
+    clickableObjects.push(asteroidDust);
 
     data.forEach((objData) => {
       let celestialObj: THREE.Object3D | null = null;
@@ -286,6 +306,7 @@ export function SolarSystem({
         const pointLight = new THREE.PointLight(0xffffff, 3.5, 4000);
         starGroup.add(pointLight);
         celestialObj = starGroup;
+
       } else if (objData.type === 'planet') {
         const objectGroup = new THREE.Group();
         const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
@@ -322,17 +343,18 @@ export function SolarSystem({
           rings.rotation.x = Math.PI / 2;
           body.add(rings);
         }
-
+        
+        // Correct Elliptical Orbit Calculation
         const semiMajorAxis = objData.distance;
         const eccentricity = objData.eccentricity ?? 0;
         const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
         const focusOffset = eccentricity * semiMajorAxis;
 
         const ellipse = new THREE.EllipseCurve(
-          -focusOffset, 0, // ax, aY
+          -focusOffset, 0,            // ax, aY (center of ellipse)
           semiMajorAxis, semiMinorAxis, // xRadius, yRadius
-          0, 2 * Math.PI, // aStartAngle, aEndAngle
-          false, 0 // aClockwise, aRotation
+          0, 2 * Math.PI,            // aStartAngle, aEndAngle
+          false, 0                     // aClockwise, aRotation
         );
 
         objData.orbitCurve = ellipse;
@@ -347,7 +369,6 @@ export function SolarSystem({
         const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
         orbit.rotation.x = Math.PI / 2;
         scene.add(orbit);
-        orbitLines.push(orbit);
 
         celestialObj = objectGroup;
       }
@@ -356,7 +377,7 @@ export function SolarSystem({
         celestialObj.userData = { ...objData };
         scene.add(celestialObj);
         celestialObjects.set(objData.id, celestialObj);
-        celestialObj.traverse((child) => clickableObjects.push(child));
+        clickableObjects.push(celestialObj);
       }
     });
   }, [data, stateRef]);
@@ -376,7 +397,7 @@ export function SolarSystem({
          if (isSelected) {
             (meshToHighlight.material as THREE.MeshBasicMaterial).color.set(0xffffff);
         } else {
-            (meshToHighlight.material as THREE.MeshBasicMaterial).color.set(new THREE.Color(obj.userData.color));
+            (meshToahighlight.material as THREE.MeshBasicMaterial).color.set(new THREE.Color(obj.userData.color));
         }
       }
 
@@ -405,6 +426,7 @@ export function SolarSystem({
     return labels
       .map(label => {
         const vector = label.position.clone().project(stateRef.camera);
+        // Don't display labels that are behind the camera
         if (vector.z > 1) return null;
 
         return {

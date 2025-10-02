@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { SolarSystem } from '@/components/solar-system';
 import { Header } from '@/components/header';
 import {
@@ -12,11 +12,7 @@ import { InfoPanel } from '@/components/info-panel';
 export default function Home() {
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
 
-  const handleSelectObject = (id: string | null) => {
-    setSelectedObjectId(id);
-  };
-
-  const selectedObjectData = useMemo(() => {
+  const selectedObjectData = (() => {
     if (!selectedObjectId) return null;
     
     if (selectedObjectId === 'asteroid_belt') {
@@ -28,9 +24,8 @@ export default function Home() {
         };
     }
 
-    const allObjects: CelestialObject[] = solarSystemData;
-    return allObjects.find((obj) => obj.id === selectedObjectId) ?? null;
-  }, [selectedObjectId]);
+    return solarSystemData.find((obj) => obj.id === selectedObjectId) ?? null;
+  })();
 
 
   return (
@@ -39,14 +34,14 @@ export default function Home() {
       <div className="w-full h-full">
         <SolarSystem
           data={solarSystemData}
-          onSelectObject={handleSelectObject}
+          onSelectObject={setSelectedObjectId}
           selectedObjectId={selectedObjectId}
         />
       </div>
       {selectedObjectData && (
         <InfoPanel
           object={selectedObjectData as CelestialObject}
-          onClose={() => handleSelectObject(null)}
+          onClose={() => setSelectedObjectId(null)}
         />
       )}
     </main>

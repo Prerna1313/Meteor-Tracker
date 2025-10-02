@@ -40,8 +40,6 @@ export function InfoPanel({ object, onClose }: InfoPanelProps) {
                     {object.diameter && <StatItem label="Diameter" value={`${object.diameter.toLocaleString()} km`} />}
                     {object.mass && <StatItem label="Mass" value={<span>{object.mass} x 10<sup>24</sup> kg</span>} />}
                     {object.dayLength && <StatItem label="Day Length" value={`${object.dayLength} hours`} />}
-                    {object.distance && <StatItem label="Distance from Sun" value={`${object.distance.toLocaleString()} units`} />}
-                    {object.orbitalSpeed && <StatItem label="Orbital Speed" value={`${object.orbitalSpeed}x`} />}
                 </div>
             </div>
         </ScrollArea>
