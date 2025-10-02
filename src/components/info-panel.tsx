@@ -21,6 +21,15 @@ const StatItem = ({ label, value, description }: { label: string; value: React.R
     </div>
 );
 
+const DiscoveryItem = ({ title, text }: { title: string; text: string }) => (
+    <div className="flex flex-col py-3">
+        <span className="text-white font-medium text-lg">{title}</span>
+        <p className="text-sm text-white/80 leading-relaxed mt-2">
+            {text}
+        </p>
+    </div>
+);
+
 const CometIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
       viewBox="0 0 48 48"
@@ -87,21 +96,22 @@ export function InfoPanel({ object, onClose, solarSystemData }: InfoPanelProps) 
     const [count, setCount] = useState(0);
 
     const essentialStats = [
-        { label: "Size", description: "Diameter", value: `${object.diameter?.toLocaleString() ?? 'N/A'} km`, condition: object.diameter },
-        { label: "Rotation Period", description: "Length of one day", value: `${object.dayLength?.toLocaleString() ?? 'N/A'} hours`, condition: object.dayLength },
-        { label: "Distance from Earth", description: "Current", value: '2.5 AU', condition: true }, // Placeholder
-        { label: "Discovered", description: "Year", value: object.discoveryYear, condition: object.discoveryYear && (object.type === 'comet' || object.type !== 'planet' )},
+        { type: 'description', label: "Discovery", value: object.description, condition: object.description },
+        { type: 'stat', label: "Size", description: "Diameter", value: `${object.diameter?.toLocaleString() ?? 'N/A'} km`, condition: object.diameter },
+        { type: 'stat', label: "Rotation Period", description: "Length of one day", value: `${object.dayLength?.toLocaleString() ?? 'N/A'} hours`, condition: object.dayLength },
+        { type: 'stat', label: "Distance from Earth", description: "Current", value: '2.5 AU', condition: true }, // Placeholder
+        { type: 'stat', label: "Discovered", description: "Year", value: object.discoveryYear, condition: object.discoveryYear && (object.type === 'comet' || object.type !== 'planet' )},
     ].filter(stat => stat.condition);
     
     const orbitalPathStats = [
-        { label: "Orbital Period", description: "Time to complete one solar orbit", value: `${object.orbitalSpeed.toFixed(2)} years`, condition: object.orbitalSpeed },
-        { label: "Eccentricity", description: "Orbit shape", value: object.eccentricity?.toFixed(3) ?? 'N/A', condition: object.eccentricity !== undefined },
-        { label: "Perihelion", description: "Closest to Sun", value: `${object.perihelion?.toFixed(2) ?? 'N/A'} AU`, condition: object.perihelion !== undefined },
-        { label: "Aphelion", description: "Farthest from Sun", value: `${object.aphelion?.toFixed(2) ?? 'N/A'} AU`, condition: object.aphelion !== undefined },
-        { label: "Inclination", description: "Orbit tilt", value: `${object.orbitalInclination?.toFixed(2) ?? 'N/A'}°`, condition: object.orbitalInclination !== undefined },
+        { type: 'stat', label: "Orbital Period", description: "Time to complete one solar orbit", value: `${object.orbitalSpeed.toFixed(2)} years`, condition: object.orbitalSpeed },
+        { type: 'stat', label: "Eccentricity", description: "Orbit shape", value: object.eccentricity?.toFixed(3) ?? 'N/A', condition: object.eccentricity !== undefined },
+        { type: 'stat', label: "Perihelion", description: "Closest to Sun", value: `${object.perihelion?.toFixed(2) ?? 'N/A'} AU`, condition: object.perihelion !== undefined },
+        { type: 'stat', label: "Aphelion", description: "Farthest from Sun", value: `${object.aphelion?.toFixed(2) ?? 'N/A'} AU`, condition: object.aphelion !== undefined },
+        { type: 'stat', label: "Inclination", description: "Orbit tilt", value: `${object.orbitalInclination?.toFixed(2) ?? 'N/A'}°`, condition: object.orbitalInclination !== undefined },
     ].filter(stat => stat.condition);
 
-    const allStats = [...essentialStats, ...orbitalPathStats];
+    const allSlides = [...essentialStats, ...orbitalPathStats];
     const essentialCount = essentialStats.length;
     const activeTab = current < essentialCount ? 'essential' : 'orbital';
 
@@ -155,11 +165,7 @@ export function InfoPanel({ object, onClose, solarSystemData }: InfoPanelProps) 
                         </div>
                     </div>
 
-                    <p className="text-sm text-white/80 leading-relaxed my-4">
-                        {object.description}
-                    </p>
-
-                    <div className="flex gap-6 border-b border-white/10 mb-2">
+                    <div className="flex gap-6 border-b border-white/10 my-4">
                         <button
                             onClick={() => handleTabClick('essential')}
                             className={cn(
@@ -180,11 +186,15 @@ export function InfoPanel({ object, onClose, solarSystemData }: InfoPanelProps) 
                         </button>
                     </div>
 
-                    <Carousel setApi={setApi} className="w-full mt-2">
+                    <Carousel setApi={setApi} className="w-full">
                          <CarouselContent>
-                            {allStats.map((stat, index) => (
+                            {allSlides.map((slide, index) => (
                                 <CarouselItem key={index}>
-                                    <StatItem label={stat.label} value={stat.value} description={stat.description} />
+                                    {slide.type === 'description' && typeof slide.value === 'string' ? (
+                                        <DiscoveryItem title="Discovery" text={slide.value} />
+                                    ) : (
+                                        <StatItem label={slide.label} value={slide.value} description={slide.description} />
+                                    )}
                                 </CarouselItem>
                             ))}
                         </CarouselContent>
