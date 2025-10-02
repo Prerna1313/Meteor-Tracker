@@ -87,6 +87,7 @@ export function InfoPanel({ object, onClose }: InfoPanelProps) {
                                         <span className="text-base">Time to complete one solar orbit</span>
                                         <span className="text-3xl font-bold mt-1">{(1 / object.orbitalSpeed * 10).toFixed(2)} years</span>
                                     </div>
+
                                 )}
                             </div>
                         </TabsContent>
