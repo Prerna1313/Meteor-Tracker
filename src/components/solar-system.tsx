@@ -53,14 +53,14 @@ const createAsteroidDust = () => {
         if (zone < 0.05) { // 5% in Inner System
             dist = THREE.MathUtils.randFloat(0, mainBeltInner);
             y = (Math.random() - 0.5) * Math.random() * verticalSpread * 0.1;
-        } else if (zone < 0.80) { // 75% in Main Belt (more dense)
+        } else if (zone < 0.70) { // 65% in Main Belt (original density)
             const innerBias = Math.pow(Math.random(), 0.5); 
             dist = mainBeltInner + innerBias * (mainBeltOuter - mainBeltInner);
             y = (Math.random() - 0.5) * Math.pow(Math.random(), 2) * verticalSpread;
-        } else if (zone < 0.90) { // 10% as Jupiter Trojans
+        } else if (zone < 0.95) { // 25% as Jupiter Trojans (thicker concentration)
             dist = THREE.MathUtils.randFloat(jupiterOrbit - 0.5 * AU_SCALE, jupiterOrbit + 0.5 * AU_SCALE);
             y = (Math.random() - 0.5) * Math.random() * verticalSpread * 1.5;
-        } else { // 10% in Kuiper Belt region (up to Neptune)
+        } else { // 5% in Kuiper Belt region (original density)
             dist = THREE.MathUtils.randFloat(jupiterOrbit + 1 * AU_SCALE, neptuneOrbit);
             y = (Math.random() - 0.5) * Math.random() * verticalSpread * 1.2;
         }
