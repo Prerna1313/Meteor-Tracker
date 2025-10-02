@@ -124,8 +124,8 @@ const createMeteors = () => {
   const meteors = new THREE.Group();
   const meteorMaterial = new THREE.MeshStandardMaterial({
     color: 0x888888,
-    roughness: 0.8,
-    metalness: 0.5,
+    roughness: 1.0,
+    metalness: 0.0,
   });
 
   const marsOrbit = 125;
