@@ -84,7 +84,7 @@ const createAsteroidBelt = (count: number) => {
   return instancedMesh;
 };
 
-const createOrbitalDust = (count: number, innerRadius: number, outerRadius: number) => {
+const createAsteroidDust = (count: number, innerRadius: number, outerRadius: number) => {
     const positions = new Float32Array(count * 3);
     const dustGeometry = new THREE.BufferGeometry();
 
@@ -184,10 +184,13 @@ export function SolarSystem({
       scene.add(asteroidBelt);
       stateRef.clickableObjects.push(asteroidBelt);
       
-      const saturnData = data.find(p => p.id === 'saturn');
-      if (saturnData) {
-        const orbitalDust = createOrbitalDust(10000, saturnData.distance - 20, saturnData.distance + 20);
-        scene.add(orbitalDust);
+      const marsData = data.find(p => p.id === 'mars');
+      const jupiterData = data.find(p => p.id === 'jupiter');
+      if (marsData && jupiterData) {
+        const asteroidDust = createAsteroidDust(10000, marsData.distance + 20, jupiterData.distance - 20);
+        if (asteroidDust) {
+            scene.add(asteroidDust);
+        }
       }
     };
 
@@ -483,5 +486,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    
