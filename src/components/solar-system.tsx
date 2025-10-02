@@ -430,6 +430,8 @@ export function SolarSystem({
             let baseOpacity = 0.5;
             if (id === 'earth') {
                 baseOpacity = 0.9;
+            } else if (ASTEROID_IDS.includes(id)) {
+                baseOpacity = 0.5;
             }
             line.material.opacity = isHovered || isSelected ? 0.9 : baseOpacity;
             line.material.needsUpdate = true;
@@ -522,5 +524,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    
