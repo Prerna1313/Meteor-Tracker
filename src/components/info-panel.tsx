@@ -88,7 +88,24 @@ export function InfoPanel({ object, onClose, solarSystemData }: InfoPanelProps) 
     const [current, setCurrent] = useState(0);
     const [count, setCount] = useState(0);
 
-    const earthData = solarSystemData.find(obj => obj.id === 'earth');
+    const essentialStats = [
+        { label: "Size", description: "Diameter", value: `${object.diameter?.toLocaleString() ?? 'N/A'} km`, condition: object.diameter },
+        { label: "Orbital Period", description: "Time to complete one solar orbit", value: `${object.orbitalSpeed.toFixed(2)} years`, condition: object.orbitalSpeed },
+        { label: "Rotation Period", description: "Length of one day", value: `${object.dayLength?.toLocaleString() ?? 'N/A'} hours`, condition: object.dayLength },
+        { label: "Distance from Earth", description: "Current", value: '2.5 AU', condition: true }, // Placeholder
+        { label: "Discovered", description: "Year", value: object.discoveryYear, condition: object.discoveryYear && (object.type === 'comet' || object.type !== 'planet' )},
+    ].filter(stat => stat.condition);
+
+    const orbitalPathStats = [
+        { label: "Eccentricity", description: "Orbit shape", value: object.eccentricity?.toFixed(3) ?? 'N/A', condition: object.eccentricity !== undefined },
+        { label: "Perihelion", description: "Closest to Sun", value: `${object.perihelion?.toFixed(2) ?? 'N/A'} AU`, condition: object.perihelion !== undefined },
+        { label: "Aphelion", description: "Farthest from Sun", value: `${object.aphelion?.toFixed(2) ?? 'N/A'} AU`, condition: object.aphelion !== undefined },
+        { label: "Inclination", description: "Orbit tilt", value: `${object.orbitalInclination?.toFixed(2) ?? 'N/A'}°`, condition: object.orbitalInclination !== undefined },
+    ].filter(stat => stat.condition);
+
+    const allStats = [...essentialStats, ...orbitalPathStats];
+    const essentialCount = essentialStats.length;
+    const activeTab = current < essentialCount ? 'essential' : 'orbital';
 
     useEffect(() => {
         if (!api) {
@@ -111,24 +128,13 @@ export function InfoPanel({ object, onClose, solarSystemData }: InfoPanelProps) 
         api?.scrollNext();
     }, [api]);
 
-
-    const essentialStats = [
-        { label: "Size", description: "Diameter", value: `${object.diameter?.toLocaleString() ?? 'N/A'} km`, condition: object.diameter },
-        { label: "Orbital Period", description: "Time to complete one solar orbit", value: `${object.orbitalSpeed.toFixed(2)} years`, condition: object.orbitalSpeed },
-        { label: "Rotation Period", description: "Length of one day", value: `${object.dayLength?.toLocaleString() ?? 'N/A'} hours`, condition: object.dayLength },
-        { label: "Distance from Earth", description: "Current", value: '2.5 AU', condition: true }, // Placeholder
-        { label: "Discovered", description: "Year", value: object.discoveryYear, condition: object.discoveryYear && (object.type === 'comet' || object.type !== 'planet' )},
-    ].filter(stat => stat.condition);
-
-    const orbitalPathStats = [
-        { label: "Eccentricity", description: "Orbit shape", value: object.eccentricity?.toFixed(3) ?? 'N/A', condition: object.eccentricity !== undefined },
-        { label: "Perihelion", description: "Closest to Sun", value: `${object.perihelion?.toFixed(2) ?? 'N/A'} AU`, condition: object.perihelion !== undefined },
-        { label: "Aphelion", description: "Farthest from Sun", value: `${object.aphelion?.toFixed(2) ?? 'N/A'} AU`, condition: object.aphelion !== undefined },
-        { label: "Inclination", description: "Orbit tilt", value: `${object.orbitalInclination?.toFixed(2) ?? 'N/A'}°`, condition: object.orbitalInclination !== undefined },
-    ].filter(stat => stat.condition);
-
-    const allStats = [...essentialStats, ...orbitalPathStats];
-
+    const handleTabClick = (tab: 'essential' | 'orbital') => {
+        if (tab === 'essential') {
+            api?.scrollTo(0);
+        } else {
+            api?.scrollTo(essentialCount);
+        }
+    }
 
   return (
     <div className="relative h-auto max-h-[calc(100vh-8rem)] w-[350px] bg-zinc-900/80 text-white rounded-lg shadow-2xl flex flex-col p-6 backdrop-blur-md">
@@ -146,7 +152,7 @@ export function InfoPanel({ object, onClose, solarSystemData }: InfoPanelProps) 
                         {object.type !== 'comet' && object.type !== 'planet' && <AsteroidIcon className="w-8 h-8 opacity-80" />}
                         
                         <div className="flex flex-col">
-                            {object.type !== 'comet' && object.id.match(/\d+/) && <p className="text-xl font-medium text-white/80">{object.id.match(/\d+/)?.[0]}</p>}
+                            {object.type !== 'comet' && object.id.match(/\d+/) && <p className="text-xl text-white/80">{object.id.match(/\d+/)?.[0]}</p>}
                             <h2 className="text-2xl">{object.name}</h2>
                         </div>
                     </div>
@@ -154,6 +160,27 @@ export function InfoPanel({ object, onClose, solarSystemData }: InfoPanelProps) 
                     <p className="text-sm text-white/80 leading-relaxed my-4">
                         {object.description}
                     </p>
+
+                    <div className="flex gap-6 border-b border-white/10 mb-2">
+                        <button
+                            onClick={() => handleTabClick('essential')}
+                            className={cn(
+                                "py-2 text-sm",
+                                activeTab === 'essential' ? 'text-white border-b-2 border-white' : 'text-white/60'
+                            )}
+                        >
+                            Essential stats
+                        </button>
+                        <button
+                            onClick={() => handleTabClick('orbital')}
+                            className={cn(
+                                "py-2 text-sm",
+                                activeTab === 'orbital' ? 'text-white border-b-2 border-white' : 'text-white/60'
+                            )}
+                        >
+                            Orbital path
+                        </button>
+                    </div>
 
                     <Carousel setApi={setApi} className="w-full mt-2">
                          <CarouselContent>
@@ -177,7 +204,7 @@ export function InfoPanel({ object, onClose, solarSystemData }: InfoPanelProps) 
                     <button key={i} onClick={() => api?.scrollTo(i)} className={cn("h-2 w-2 rounded-full", current === i ? 'bg-white' : 'bg-white/30')}></button>
                 ))}
             </div>
-            <Button variant="ghost" size="icon" onClick={scrollNext} className="h-8 w-8 rounded-full text-white/60 hover:text-white" disabled={current === count -1 }>
+            <Button variant="ghost" size="icon" onClick={scrollNext} className="h-8 w-8 rounded-full text-white/60 hover:text-white" disabled={current === count - 1}>
                 <ArrowRight className="w-4 h-4" />
                 <span className="sr-only">Next</span>
             </Button>
