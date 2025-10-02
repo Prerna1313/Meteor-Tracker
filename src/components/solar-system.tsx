@@ -231,7 +231,7 @@ export function SolarSystem({
           orbitCurve,
           orbitalOffset = 0,
         } = obj.userData;
-        const body = obj.children.find((c) => c.userData.isPlanetBody);
+        const body = obj.children.find((c) => (c as THREE.Mesh).isMesh);
 
         if (id === 'sun') {
           obj.position.set(0, 0, 0);
@@ -413,22 +413,18 @@ export function SolarSystem({
   useEffect(() => {
     stateRef.celestialObjects.forEach((obj, id) => {
       const isSelected = id === selectedObjectId;
-      const body = obj.children.find((c) => (c as THREE.Mesh).isMesh && c.userData.isPlanetBody) as
+      const body = obj.children.find((c) => (c as THREE.Mesh).isMesh) as
         | THREE.Mesh
         | undefined;
-      let meshToHighlight = body;
 
-      if (
-        meshToHighlight &&
-        meshToHighlight.material instanceof THREE.MeshStandardMaterial
-      ) {
+      if (obj.userData.type === 'planet' && body && body.material instanceof THREE.MeshStandardMaterial) {
          if (isSelected) {
-            (meshToHighlight.material as THREE.MeshStandardMaterial).emissive.setHex(0xffffff);
-            (meshToHighlight.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
+            (body.material as THREE.MeshStandardMaterial).emissive.setHex(0xffffff);
+            (body.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
         } else {
             const originalColor = obj.userData.color || 0xaaaaaa;
-            (meshToHighlight.material as THREE.MeshStandardMaterial).emissive.set(new THREE.Color(originalColor));
-            (meshToHighlight.material as THREE.MeshStandardMaterial).emissiveIntensity = obj.userData.type === 'planet' ? 0.6 : 0;
+            (body.material as THREE.MeshStandardMaterial).emissive.set(new THREE.Color(originalColor));
+            (body.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.6;
         }
       }
 
