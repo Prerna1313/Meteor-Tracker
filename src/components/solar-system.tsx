@@ -242,18 +242,18 @@ export function SolarSystem({
           
           const r = a * (1 - e * Math.cos(E));
 
-          const x = r * Math.cos(nu);
-          const y = r * Math.sin(nu);
+          const x_plane = r * Math.cos(nu);
+          const y_plane = r * Math.sin(nu);
 
           const argOfPeri = varpi - Omega;
 
-          const x_3d = x * (Math.cos(argOfPeri) * Math.cos(Omega) - Math.sin(argOfPeri) * Math.sin(Omega) * Math.cos(i)) -
-                       y * (Math.sin(argOfPeri) * Math.cos(Omega) + Math.cos(argOfPeri) * Math.sin(Omega) * Math.cos(i));
+          const x_3d = x_plane * (Math.cos(argOfPeri) * Math.cos(Omega) - Math.sin(argOfPeri) * Math.sin(Omega) * Math.cos(i)) -
+                       y_plane * (Math.sin(argOfPeri) * Math.cos(Omega) + Math.cos(argOfPeri) * Math.sin(Omega) * Math.cos(i));
           
-          const z_3d = x * (Math.cos(argOfPeri) * Math.sin(Omega) + Math.sin(argOfPeri) * Math.cos(Omega) * Math.cos(i)) -
-                       y * (Math.sin(argOfPeri) * Math.sin(Omega) - Math.cos(argOfPeri) * Math.cos(Omega) * Math.cos(i));
+          const z_3d = x_plane * (Math.cos(argOfPeri) * Math.sin(Omega) + Math.sin(argOfPeri) * Math.cos(Omega) * Math.cos(i)) +
+                       y_plane * (Math.sin(argOfPeri) * Math.sin(Omega) - Math.cos(argOfPeri) * Math.cos(Omega) * Math.cos(i));
                        
-          const y_3d = x * (Math.sin(argOfPeri) * Math.sin(i)) + y * (Math.cos(argOfPeri) * Math.sin(i));
+          const y_3d = x_plane * (Math.sin(argOfPeri) * Math.sin(i)) + y_plane * (Math.cos(argOfPeri) * Math.sin(i));
 
 
           objGroup.position.set(
@@ -402,18 +402,18 @@ export function SolarSystem({
             const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
             const r = a * (1 - e * Math.cos(E));
 
-            const x = r * Math.cos(nu);
-            const y = r * Math.sin(nu);
+            const x_plane = r * Math.cos(nu);
+            const y_plane = r * Math.sin(nu);
             
             const argOfPeri = varpi - Omega;
 
-            const x_3d = x * (Math.cos(argOfPeri) * Math.cos(Omega) - Math.sin(argOfPeri) * Math.sin(Omega) * Math.cos(i)) -
-                         y * (Math.sin(argOfPeri) * Math.cos(Omega) + Math.cos(argOfPeri) * Math.sin(Omega) * Math.cos(i));
+            const x_3d = x_plane * (Math.cos(argOfPeri) * Math.cos(Omega) - Math.sin(argOfPeri) * Math.sin(Omega) * Math.cos(i)) -
+                         y_plane * (Math.sin(argOfPeri) * Math.cos(Omega) + Math.cos(argOfPeri) * Math.sin(Omega) * Math.cos(i));
             
-            const z_3d = x * (Math.cos(argOfPeri) * Math.sin(Omega) + Math.sin(argOfPeri) * Math.cos(Omega) * Math.cos(i)) -
-                         y * (Math.sin(argOfPeri) * Math.sin(Omega) - Math.cos(argOfPeri) * Math.cos(Omega) * Math.cos(i));
+            const z_3d = x_plane * (Math.cos(argOfPeri) * Math.sin(Omega) + Math.sin(argOfPeri) * Math.cos(Omega) * Math.cos(i)) +
+                         y_plane * (Math.sin(argOfPeri) * Math.sin(Omega) - Math.cos(argOfPeri) * Math.cos(Omega) * Math.cos(i));
             
-            const y_3d = x * (Math.sin(argOfPeri) * Math.sin(i)) + y * (Math.cos(argOfPeri) * Math.sin(i));
+            const y_3d = x_plane * (Math.sin(argOfPeri) * Math.sin(i)) + y_plane * (Math.cos(argOfPeri) * Math.sin(i));
 
             curvePoints.push(new THREE.Vector3(x_3d * AU_SCALE, y_3d * AU_SCALE, z_3d * AU_SCALE));
         }
@@ -421,7 +421,7 @@ export function SolarSystem({
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(curvePoints);
         
         let opacity = 0.8; // Bolder orbits for planets
-        if (ASTEROID_IDS.includes(objData.id)) opacity = 0.3;
+        if (ASTEROID_IDS.includes(objData.id)) opacity = 0.6; // Brighter asteroid orbits
         if (objData.id === 'earth') opacity = 1.0;
 
         const orbitMaterial = new THREE.LineBasicMaterial({
@@ -456,7 +456,7 @@ export function SolarSystem({
         
         if(line.material instanceof THREE.LineBasicMaterial) {
             let baseOpacity = 0.4;
-            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.2;
+            if (ASTEROID_IDS.includes(id)) baseOpacity = 0.5;
             if (id === 'earth') baseOpacity = 0.9;
             line.material.opacity = isHovered || isSelected ? 1.0 : baseOpacity;
             line.material.needsUpdate = true;
@@ -587,5 +587,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    
