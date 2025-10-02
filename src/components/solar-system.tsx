@@ -111,7 +111,7 @@ const createMeteors = () => {
   return meteors;
 }
 
-const ASTEROID_IDS = ['eurybates', 'orus', 'mathilde', 'patroclus', 'ceres', 'annefrank', 'leucus', 'itokawa', 'eros', 'bennu', 'ryugu', 'donaldjohanson', 'braille'];
+const ASTEROID_IDS = ['eurybates', 'orus', 'mathilde', 'patroclus', 'ceres', 'annefrank', 'leucus', 'itokawa', 'eros', 'bennu', 'ryugu', 'donaldjohanson', 'braille', 'polymele', 'lutetia'];
 
 export function SolarSystem({
   data,
@@ -216,7 +216,7 @@ export function SolarSystem({
       const animationFrameId = requestAnimationFrame(animate);
       const newLabels: LabelData[] = [];
       
-      const timeSpeed = 100;
+      const timeSpeed = 0.1;
       const d = (Date.now() - stateRef.startTime) / (1000 * 60 * 60 * 24) * timeSpeed;
 
       stateRef.celestialObjects.forEach((objGroup, id) => {
