@@ -1,7 +1,6 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
-import Image from 'next/image';
 
 const NasaLogo = (props: React.SVGProps<SVGSVGElement>) => (
     <svg 
@@ -38,10 +37,12 @@ export function LandingPage({ isExiting }: LandingPageProps) {
         <h1 className="mt-2 text-6xl font-medium tracking-[0.2em] text-white">METEORS</h1>
       </div>
       
-      <div className="absolute bottom-[-150px] left-0 right-0 h-[250px] bg-gradient-to-t from-gray-900/50 to-transparent rounded-[100%] blur-xl" />
+      <div 
+        className="absolute -bottom-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,_#4a4a4a_0%,_#3a3a3a_30%,_#1a1a1a_60%,_black_80%)] rounded-full blur-2xl"
+      />
 
 
-      <div className="absolute bottom-10 flex flex-col items-center space-y-2">
+      <div className="absolute bottom-10 flex flex-col items-center space-y-2 z-10">
         <span className="text-sm font-light tracking-widest text-white/50">Scroll to enter</span>
         <ChevronDown className="h-6 w-6 text-white/50 animate-chevron" />
       </div>
