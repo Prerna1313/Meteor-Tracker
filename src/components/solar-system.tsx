@@ -9,6 +9,7 @@ import type { CelestialObject } from '@/lib/solar-system-data';
 type LabelData = {
   id: string;
   name: string;
+  color: string;
   position: THREE.Vector3;
 };
 
@@ -256,6 +257,7 @@ export function SolarSystem({
         newLabels.push({
           id: obj.userData.id,
           name: obj.userData.name,
+          color: obj.userData.color,
           position: labelPos,
         });
       });
@@ -473,13 +475,14 @@ export function SolarSystem({
         {displayedLabels.map((label) => (
           <div
             key={label.id}
-            className={`absolute text-xs p-1 rounded-sm transition-colors duration-300 pointer-events-auto cursor-pointer uppercase font-bold tracking-wider ${
+            className={`absolute text-xs p-1 rounded-sm transition-colors duration-300 pointer-events-auto cursor-pointer uppercase tracking-wider ${
               selectedObjectId === label.id
                 ? 'text-primary bg-background/50'
-                : 'text-white/80 hover:text-primary'
+                : 'hover:text-primary'
             }`}
             style={{
               transform: `translate(10px, -50%) translate(${label.screenX}px, ${label.screenY}px)`,
+              color: selectedObjectId === label.id ? 'hsl(var(--primary))' : label.color,
             }}
             onClick={(e) => {
               e.stopPropagation();
@@ -493,5 +496,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    
