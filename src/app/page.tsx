@@ -72,7 +72,7 @@ export default function Home() {
           <div className="absolute top-0 right-0 w-full h-full">
             <motion.div
               animate={{
-                opacity: selectedObjectId ? 0 : 1,
+                opacity: selectedObjectId ? 0.3 : 1,
                 transition: { duration: 0.5 },
               }}
               className="w-full h-full"
@@ -85,22 +85,6 @@ export default function Home() {
                 hoveredObjectId={hoveredObjectId}
               />
             </motion.div>
-            <AnimatePresence>
-              {selectedObjectId && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="absolute inset-0 flex items-center justify-center"
-                >
-                  <div className="w-1/2 h-1/2 rounded-lg bg-black/30 flex items-center justify-center flex-col gap-4 text-white/40">
-                    <Gem className="w-16 h-16" />
-                    <p>3D Model Placeholder</p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         </div>
       </div>
