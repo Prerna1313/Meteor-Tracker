@@ -34,7 +34,7 @@ const createAsteroidDust = () => {
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         transparent: true,
-        opacity: 0.45, // Increased opacity for brightness
+        opacity: 0.55, // Increased opacity for brightness
     });
     
     const marsOrbit = 1.524 * AU_SCALE;
@@ -565,3 +565,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
