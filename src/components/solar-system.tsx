@@ -57,10 +57,10 @@ const createAsteroidDust = () => {
             const innerBias = Math.pow(Math.random(), 0.5); 
             dist = mainBeltInner + innerBias * (mainBeltOuter - mainBeltInner);
             y = (Math.random() - 0.5) * Math.pow(Math.random(), 2) * verticalSpread;
-        } else if (zone < 0.95) { // 25% as Jupiter Trojans (thicker concentration)
+        } else if (zone < 0.995) { // ~29.5% as Jupiter Trojans (thicker concentration)
             dist = THREE.MathUtils.randFloat(jupiterOrbit - 0.5 * AU_SCALE, jupiterOrbit + 0.5 * AU_SCALE);
             y = (Math.random() - 0.5) * Math.random() * verticalSpread * 1.5;
-        } else { // 5% in Kuiper Belt region (original density)
+        } else { // 0.5% in Kuiper Belt region
             dist = THREE.MathUtils.randFloat(jupiterOrbit + 1 * AU_SCALE, neptuneOrbit);
             y = (Math.random() - 0.5) * Math.random() * verticalSpread * 1.2;
         }
@@ -112,6 +112,44 @@ const createMeteors = () => {
   }
   return meteors;
 }
+
+const createKuiperMeteors = () => {
+  const meteorCount = 200;
+  const meteors = new THREE.Group();
+  meteors.userData = { id: 'asteroid_belt', name: 'Outer Belt' };
+  const meteorMaterial = new THREE.MeshStandardMaterial({
+    color: 0xcccccc, 
+    emissive: 0x333333,
+    roughness: 0.8,
+    metalness: 0.1,
+  });
+
+  const jupiterOrbit = 5.203 * AU_SCALE;
+  const neptuneOrbit = 30.07 * AU_SCALE;
+  const kuiperInner = jupiterOrbit + 2 * AU_SCALE;
+  const kuiperOuter = neptuneOrbit + 5 * AU_SCALE;
+
+
+  for (let i = 0; i < meteorCount; i++) {
+    const size = THREE.MathUtils.randFloat(0.2, 0.5);
+    const meteorGeometry = new THREE.IcosahedronGeometry(size, 0);
+    const meteor = new THREE.Mesh(meteorGeometry, meteorMaterial);
+
+    const dist = THREE.MathUtils.randFloat(kuiperInner, kuiperOuter);
+    const angle = Math.random() * Math.PI * 2;
+    const y = THREE.MathUtils.randFloatSpread(80);
+
+    meteor.position.set(
+      Math.cos(angle) * dist,
+      y,
+      Math.sin(angle) * dist
+    );
+    
+    meteors.add(meteor);
+  }
+  return meteors;
+}
+
 
 const ASTEROID_IDS = ['eurybates', 'orus', 'mathilde', 'patroclus', 'ceres', 'annefrank', 'leucus', 'itokawa', 'eros', 'bennu', 'ryugu', 'donaldjohanson', 'braille', 'polymele', 'lutetia'];
 
@@ -325,6 +363,10 @@ export function SolarSystem({
     const meteors = createMeteors();
     scene.add(meteors);
     clickableObjects.push(meteors);
+
+    const kuiperMeteors = createKuiperMeteors();
+    scene.add(kuiperMeteors);
+    clickableObjects.push(kuiperMeteors);
 
     data.forEach((objData) => {
       let celestialObj: THREE.Object3D | null = null;
