@@ -98,3 +98,12 @@ body {
     radial-gradient(1px 1px at 55% 45%, white, transparent);
   animation: stars 120s linear infinite;
 }
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

@@ -66,7 +66,7 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
               transition={{ duration: 0.5, ease: 'easeInOut' }}
-              className="absolute top-20 left-4 z-20"
+              className="absolute top-24 left-4 z-20"
             >
               <InfoPanel
                 object={selectedObjectData as CelestialObject}
