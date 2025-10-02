@@ -23,8 +23,8 @@ export function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center h-16 px-4 md:px-6 bg-transparent">
       <div className="flex items-center gap-3">
-        <MeteorLogo className="w-10 h-10" />
-        <h1 className="text-xl font-bold text-foreground tracking-wider">
+        <MeteorLogo className="w-8 h-8" />
+        <h1 className="text-lg font-bold text-muted-foreground tracking-wider">
           EYES ON METEORS
         </h1>
       </div>
