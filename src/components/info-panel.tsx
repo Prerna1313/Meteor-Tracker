@@ -45,7 +45,7 @@ export function InfoPanel({ object, onClose }: InfoPanelProps) {
         </Button>
 
         <div className="flex-1 mt-10 overflow-y-auto">
-          <ScrollArea className="h-full pr-4 -mr-4 [&>div>div[style*='position:absolute']]:w-0">
+          <ScrollArea className="h-full pr-4 -mr-4">
             <div className="flex flex-col">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
