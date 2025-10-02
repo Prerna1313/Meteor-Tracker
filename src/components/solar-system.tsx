@@ -162,7 +162,7 @@ export function SolarSystem({
 
       camera.aspect =
         mountRef.current.clientWidth / mountRef.current.clientHeight;
-      camera.position.set(0, 0, 500);
+      camera.position.set(0, 120, 500);
       camera.lookAt(0, 0, 0);
       camera.updateProjectionMatrix();
 
@@ -425,10 +425,14 @@ export function SolarSystem({
     stateRef.orbitLines.forEach((line, id) => {
         const isHovered = id === hoveredObjectId;
         const isSelected = id === selectedObjectId;
+        
         if(line.material instanceof THREE.LineBasicMaterial) {
             let baseOpacity = 0.5;
             if (ASTEROID_IDS.includes(id)) {
                 baseOpacity = 0.2;
+            }
+            if (id === 'earth') {
+                baseOpacity = 0.9;
             }
             line.material.opacity = isHovered || isSelected ? 0.9 : baseOpacity;
             line.material.needsUpdate = true;
