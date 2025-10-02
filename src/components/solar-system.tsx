@@ -29,11 +29,11 @@ const createAsteroidDust = () => {
     const positions = new Float32Array(particles * 3);
 
     const material = new THREE.PointsMaterial({
-        color: 0x00bfff,
+        color: 0x4A90E2, // Muted Blue from NASA reference
         size: 0.07,
         depthWrite: false,
         transparent: true,
-        opacity: 0.8,
+        opacity: 0.45,
     });
     
     const marsOrbit = 1.524 * AU_SCALE;
@@ -482,7 +482,7 @@ export function SolarSystem({
     const belt = stateRef.scene.getObjectsByProperty('userData.id', 'asteroid_belt');
     belt.forEach(obj => {
         if(obj instanceof THREE.Points && obj.material instanceof THREE.PointsMaterial) {
-             obj.material.color.setHex(isBeltSelected ? 0xffffff : 0x00bfff);
+             obj.material.color.setHex(isBeltSelected ? 0xffffff : 0x4A90E2);
              obj.material.opacity = isBeltSelected ? 0.7 : 0.45; // Use updated base opacity
         }
     });
