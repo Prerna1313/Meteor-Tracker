@@ -85,6 +85,16 @@ body {
     radial-gradient(1px 1px at 65% 15%, white, transparent),
     radial-gradient(1px 1px at 95% 80%, white, transparent),
     radial-gradient(1px 1px at 25% 45%, white, transparent),
-    radial-gradient(1px 1px at 75% 95%, white, transparent);
+    radial-gradient(1px 1px at 75% 95%, white, transparent),
+    radial-gradient(1px 1px at 5% 25%, white, transparent),
+    radial-gradient(1px 1px at 95% 5%, white, transparent),
+    radial-gradient(1px 1px at 35% 55%, white, transparent),
+    radial-gradient(1px 1px at 65% 75%, white, transparent),
+    radial-gradient(1px 1px at 25% 95%, white, transparent),
+    radial-gradient(1px 1px at 75% 25%, white, transparent),
+    radial-gradient(1px 1px at 15% 65%, white, transparent),
+    radial-gradient(1px 1px at 85% 55%, white, transparent),
+    radial-gradient(1px 1px at 45% 15%, white, transparent),
+    radial-gradient(1px 1px at 55% 45%, white, transparent);
   animation: stars 120s linear infinite;
 }
