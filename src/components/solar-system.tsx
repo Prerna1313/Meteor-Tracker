@@ -44,7 +44,6 @@ type SolarSystemProps = {
 
 type Stardust = {
   points: THREE.Points;
-  velocities: THREE.Vector3[];
 };
 
 const createSunGlow = () => {
@@ -81,121 +80,47 @@ const createSunGlow = () => {
   return sprite;
 };
 
-const createGalaxy = () => {
-  const parameters = {
-      count: 100000,
-      size: 20,
-      radius: 50000,
-      branches: 4,
-      spin: 1,
-      randomness: 0.5,
-      randomnessPower: 3,
-      insideColor: '#ff6030',
-      outsideColor: '#1b3984'
-  };
-
-  const geometry = new THREE.BufferGeometry();
-  const positions = new Float32Array(parameters.count * 3);
-  const colors = new Float32Array(parameters.count * 3);
-
-  const colorInside = new THREE.Color(parameters.insideColor);
-  const colorOutside = new THREE.Color(parameters.outsideColor);
-
-  for(let i = 0; i < parameters.count; i++) {
-      const i3 = i * 3;
-
-      // Position
-      const radius = Math.random() * parameters.radius;
-      const spinAngle = radius * 0.0001; // This should be small to make arms visible
-      const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2;
-      
-      const randomX = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius;
-      const randomY = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius * 0.1;
-      const randomZ = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius;
-
-      positions[i3    ] = Math.cos(branchAngle + spinAngle) * radius + randomX;
-      positions[i3 + 1] = randomY;
-      positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
-
-      // Color
-      const mixedColor = colorInside.clone();
-      mixedColor.lerp(colorOutside, radius / parameters.radius);
-
-      colors[i3    ] = mixedColor.r;
-      colors[i3 + 1] = mixedColor.g;
-      colors[i3 + 2] = mixedColor.b;
-  }
-
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-  const material = new THREE.PointsMaterial({
-      size: parameters.size,
-      sizeAttenuation: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-      vertexColors: true
-  });
-
-  const galaxy = new THREE.Points(geometry, material);
-  galaxy.rotation.x = -0.2;
-  galaxy.rotation.y = -0.4;
-  return galaxy;
-};
-
-const createStardust = (
-  count: number,
-  size: number,
-  spread: number,
-  opacity: number
-): Stardust => {
+const createStardust = (count: number): Stardust => {
   const particles = new THREE.BufferGeometry();
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
-  const sizes = new Float32Array(count);
-  const velocities: THREE.Vector3[] = [];
 
-  const color = new THREE.Color();
+  const color = new THREE.Color('#1b3984');
 
   for (let i = 0; i < count; i++) {
-    const x = THREE.MathUtils.randFloatSpread(spread);
-    const y = THREE.MathUtils.randFloatSpread(spread);
-    const z = THREE.MathUtils.randFloatSpread(spread);
-    positions.set([x, y, z], i * 3);
+    const i3 = i * 3;
+    const radius = THREE.MathUtils.randFloat(50, 50000);
+    const angle = Math.random() * Math.PI * 2;
+    
+    positions[i3] = Math.cos(angle) * radius;
+    positions[i3 + 1] = THREE.MathUtils.randFloatSpread(5000);
+    positions[i3 + 2] = Math.sin(angle) * radius;
 
-    color.setHSL(Math.random(), 0.1, Math.random() * 0.4 + 0.3);
-    colors.set([color.r, color.g, color.b], i * 3);
-
-    sizes[i] = Math.random() * size;
-
-    velocities.push(
-      new THREE.Vector3(
-        THREE.MathUtils.randFloat(-0.05, 0.05),
-        THREE.MathUtils.randFloat(-0.05, 0.05),
-        THREE.MathUtils.randFloat(-0.05, 0.05)
-      )
-    );
+    colors[i3] = color.r;
+    colors[i3 + 1] = color.g;
+    colors[i3 + 2] = color.b;
   }
 
   particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  particles.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
   const particleMaterial = new THREE.PointsMaterial({
-    size: size,
+    size: 20,
+    sizeAttenuation: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
     vertexColors: true,
     transparent: true,
-    opacity: opacity,
-    depthWrite: false,
-    sizeAttenuation: true,
+    opacity: 0.8,
   });
 
   const points = new THREE.Points(particles, particleMaterial);
-  return { points, velocities };
+  return { points };
 };
 
+
 const createAsteroidBelt = (count: number) => {
-  const baseGeometry = new THREE.IcosahedronGeometry(0.5, 1);
+  const baseGeometry = new THREE.IcosahedronGeometry(0.5, 0);
   const material = new THREE.MeshStandardMaterial({
     color: 0xaaaaaa,
     roughness: 0.8,
@@ -317,8 +242,7 @@ export function SolarSystem({
     textureLoader: new THREE.TextureLoader(),
     clickableObjects: [] as THREE.Object3D[],
     celestialObjects: new Map<string, THREE.Object3D>(),
-    stardustSystems: [] as Stardust[],
-    galaxy: null as THREE.Points | null,
+    stardustSystem: null as Stardust | null,
     cometObjects: new Map<string, THREE.Object3D>(),
   }).current;
 
@@ -358,15 +282,13 @@ export function SolarSystem({
       stateRef.controls = controls;
 
       scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-
-      const stardust1 = createStardust(20000, 1.0, 10000, 0.5);
-      const stardust2 = createStardust(5000, 2.0, 10000, 0.8);
-      const galaxy = createGalaxy();
-      stateRef.galaxy = galaxy;
+      
+      const stardust = createStardust(100000);
+      scene.add(stardust.points);
+      stateRef.stardustSystem = stardust;
+      
       const asteroidBelt = createAsteroidBelt(1500);
-
-      scene.add(stardust1.points, stardust2.points, galaxy, asteroidBelt);
-      stateRef.stardustSystems.push(stardust1, stardust2);
+      scene.add(asteroidBelt);
       stateRef.clickableObjects.push(asteroidBelt);
     };
 
@@ -484,33 +406,6 @@ export function SolarSystem({
         
         newLabels.push({ id: cometObj.userData.id, name: cometObj.userData.name, position: labelPos });
       });
-
-      stateRef.stardustSystems.forEach((system) => {
-        const positions = system.points.geometry.attributes
-          .position as THREE.BufferAttribute;
-        const spread = 10000;
-        for (let i = 0; i < positions.count; i++) {
-          const velocity = system.velocities[i];
-          positions.setXYZ(
-            i,
-            positions.getX(i) + velocity.x,
-            positions.getY(i) + velocity.y,
-            positions.getZ(i) + velocity.z
-          );
-
-          if (positions.getX(i) < -spread / 2) positions.setX(i, spread / 2);
-          if (positions.getX(i) > spread / 2) positions.setX(i, -spread / 2);
-          if (positions.getY(i) < -spread / 2) positions.setY(i, spread / 2);
-          if (positions.getY(i) > spread / 2) positions.setY(i, -spread / 2);
-          if (positions.getZ(i) < -spread / 2) positions.setZ(i, spread / 2);
-          if (positions.getZ(i) > spread / 2) positions.setZ(i, -spread / 2);
-        }
-        positions.needsUpdate = true;
-      });
-
-      if (stateRef.galaxy) {
-        stateRef.galaxy.rotation.y = elapsedTime * 0.05;
-      }
 
       setLabels(newLabels);
       controls.update();
@@ -656,8 +551,8 @@ export function SolarSystem({
 
     comets.forEach(cometData => {
         const cometGroup = new THREE.Group();
-        const headGeometry = new THREE.IcosahedronGeometry(cometData.size, 1);
-        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 });
+        const headGeometry = new THREE.IcosahedronGeometry(cometData.size, 0);
+        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, flatShading: true });
         const head = new THREE.Mesh(headGeometry, headMaterial);
         cometGroup.add(head);
 
@@ -789,5 +684,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    
