@@ -468,7 +468,7 @@ export function SolarSystem({
         {displayedLabels.map((label) => (
           <div
             key={label.id}
-            className={`absolute p-1 rounded-sm transition-colors duration-300 pointer-events-auto cursor-pointer uppercase tracking-wider ${
+            className={`absolute p-1 rounded-sm transition-colors duration-300 pointer-events-auto cursor-pointer uppercase tracking-wider text-xs ${
               selectedObjectId === label.id
                 ? 'text-primary bg-background/50'
                 : 'hover:text-primary'
