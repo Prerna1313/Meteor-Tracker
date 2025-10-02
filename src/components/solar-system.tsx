@@ -509,12 +509,13 @@ export function SolarSystem({
 
   const displayedLabels = useMemo(() => {
     if (!mountRef.current || !stateRef.camera) return [];
-    
-    return labels
+  
+    const screenLabels = labels
       .map(label => {
         const vector = label.position.clone().project(stateRef.camera);
+        // Don't display labels that are behind the camera
         if (vector.z > 1) return null;
-
+  
         return {
           ...label,
           screenX: (vector.x + 1) / 2 * mountRef.current!.clientWidth,
@@ -522,6 +523,30 @@ export function SolarSystem({
         };
       })
       .filter(Boolean) as (LabelData & { screenX: number; screenY: number })[];
+  
+    // Filter out overlapping labels
+    const nonOverlappingLabels: (LabelData & { screenX: number; screenY: number })[] = [];
+    const labelSpacing = 40; // Minimum pixel distance between labels
+  
+    for (const label of screenLabels) {
+      let overlaps = false;
+      for (const existingLabel of nonOverlappingLabels) {
+        const dx = label.screenX - existingLabel.screenX;
+        const dy = label.screenY - existingLabel.screenY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+  
+        if (distance < labelSpacing) {
+          overlaps = true;
+          break;
+        }
+      }
+  
+      if (!overlaps) {
+        nonOverlappingLabels.push(label);
+      }
+    }
+  
+    return nonOverlappingLabels;
   }, [labels, stateRef.camera]);
 
 
