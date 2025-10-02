@@ -24,17 +24,16 @@ type SolarSystemProps = {
 const AU_SCALE = 15;
 
 const createAsteroidDust = () => {
-    const particles = 25000;
+    const particles = 75000;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particles * 3);
 
     const material = new THREE.PointsMaterial({
         color: 0x00bfff,
-        size: 0.08, // Slightly larger for more brightness
-        blending: THREE.AdditiveBlending,
+        size: 0.07,
         depthWrite: false,
         transparent: true,
-        opacity: 0.7, // Brighter
+        opacity: 0.8,
     });
     
     const marsOrbit = 1.524 * AU_SCALE;
@@ -51,14 +50,14 @@ const createAsteroidDust = () => {
 
         if (zone < 0.05) { // 5% in Inner System
             dist = THREE.MathUtils.randFloat(0, mainBeltInner);
-            y = THREE.MathUtils.randFloatSpread(2);
+            y = THREE.MathUtils.randFloatSpread(5);
         } else if (zone < 0.98) { // 93% in Main Belt (more dense)
-            const innerBias = Math.pow(Math.random(), 0.5); // More concentrated towards the inside
+            const innerBias = Math.pow(Math.random(), 0.5); 
             dist = mainBeltInner + innerBias * (mainBeltOuter - mainBeltInner);
-            y = THREE.MathUtils.randFloatSpread(40); 
+            y = THREE.MathUtils.randFloatSpread(50); 
         } else { // 2% in Kuiper Belt region (up to Neptune)
             dist = THREE.MathUtils.randFloat(jupiterOrbit, neptuneOrbit);
-            y = THREE.MathUtils.randFloatSpread(40);
+            y = THREE.MathUtils.randFloatSpread(60);
         }
 
         const angle = Math.random() * Math.PI * 2;
@@ -95,7 +94,7 @@ const createMeteors = () => {
 
     const dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
     const angle = Math.random() * Math.PI * 2;
-    const y = THREE.MathUtils.randFloatSpread(40); // Increased vertical spread
+    const y = THREE.MathUtils.randFloatSpread(60); // Increased vertical spread
 
     meteor.position.set(
       Math.cos(angle) * dist,
@@ -407,7 +406,7 @@ export function SolarSystem({
         
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(curvePoints);
         
-        let opacity = 0.8; // Bolder orbits for planets
+        let opacity = 0.8;
         if (ASTEROID_IDS.includes(objData.id)) opacity = 0.7;
         if (objData.id === 'earth') opacity = 1.0;
 
