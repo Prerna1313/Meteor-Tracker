@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { CelestialObject } from '@/lib/solar-system-data';
+import { solarSystemData } from '@/lib/solar-system-data';
 
 type LabelData = {
   id: string;
@@ -81,15 +82,19 @@ const createAsteroidDust = () => {
         sizeAttenuation: true,
     });
 
+    const marsOrbit = solarSystemData.find(p => p.id === 'mars')?.distance || 150;
+    const jupiterOrbit = solarSystemData.find(p => p.id === 'jupiter')?.distance || 320;
+    
+    const beltInnerRadius = marsOrbit + 10;
+    const beltOuterRadius = jupiterOrbit - 10;
+    
     for (let i = 0; i < particles; i++) {
-        // Most particles in the main belt, some spread inside
         const isMainBelt = Math.random() > 0.1;
         const dist = isMainBelt 
-            ? THREE.MathUtils.randFloat(200, 250)
-            : THREE.MathUtils.randFloat(0, 200);
+            ? THREE.MathUtils.randFloat(beltInnerRadius, beltOuterRadius) 
+            : THREE.MathUtils.randFloat(0, beltInnerRadius);
 
         const angle = Math.random() * Math.PI * 2;
-        // Keep it relatively flat, but give it some 3D volume
         const y = THREE.MathUtils.randFloatSpread(10); 
 
         positions[i * 3] = Math.cos(angle) * dist;
@@ -149,7 +154,7 @@ export function SolarSystem({
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
       controls.minDistance = 10;
-      controls.maxDistance = 20000;
+      controls.maxDistance = 40000;
       stateRef.controls = controls;
 
       scene.add(new THREE.AmbientLight(0xffffff, 0.3));
@@ -171,7 +176,6 @@ export function SolarSystem({
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
       stateRef.raycaster.setFromCamera(mouse, stateRef.camera);
-      // Ensure raycaster checks points correctly
       stateRef.raycaster.params.Points.threshold = 5;
       const intersects = stateRef.raycaster.intersectObjects(
         stateRef.clickableObjects,
@@ -273,12 +277,11 @@ export function SolarSystem({
   useEffect(() => {
     const { scene, clickableObjects, celestialObjects, orbitLines } = stateRef;
     
-    // Clear old objects
     celestialObjects.forEach(obj => scene.remove(obj));
     celestialObjects.clear();
     orbitLines.forEach(line => scene.remove(line));
     orbitLines.length = 0;
-    // Keep the asteroid dust when clearing objects
+    
     stateRef.clickableObjects = stateRef.clickableObjects.filter(obj => obj.userData.id === 'asteroid_belt');
 
 
@@ -453,5 +456,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    

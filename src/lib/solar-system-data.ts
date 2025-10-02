@@ -16,6 +16,9 @@ export type CelestialObject = {
   dayLength?: number; // in hours
 };
 
+// Distances are on a logarithmic scale for better visualization
+const scale = (d: number) => 50 * Math.log(d + 1);
+
 export const solarSystemData: CelestialObject[] = [
   {
     id: 'sun',
@@ -35,7 +38,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Mercury',
     type: 'planet',
     size: 2,
-    distance: 40,
+    distance: scale(3.5),
     color: '#9C27B0', // Purple
     orbitalSpeed: 1.6,
     rotationSpeed: 0.1,
@@ -50,7 +53,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Venus',
     type: 'planet',
     size: 4,
-    distance: 70,
+    distance: scale(7),
     color: '#FFC107', // Dark Yellow
     orbitalSpeed: 1.2,
     rotationSpeed: 0.08,
@@ -65,7 +68,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Earth',
     type: 'planet',
     size: 5,
-    distance: 100,
+    distance: scale(10),
     color: '#2196F3', // Shiny Blue
     orbitalSpeed: 1,
     rotationSpeed: 0.5,
@@ -80,7 +83,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Mars',
     type: 'planet',
     size: 3,
-    distance: 150,
+    distance: scale(15),
     color: '#FF9800', // Light Orange
     orbitalSpeed: 0.8,
     rotationSpeed: 0.45,
@@ -95,7 +98,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Jupiter',
     type: 'planet',
     size: 10,
-    distance: 320,
+    distance: scale(52),
     color: '#FF5722', // Dark Orange
     orbitalSpeed: 0.4,
     rotationSpeed: 0.8,
@@ -110,7 +113,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Saturn',
     type: 'planet',
     size: 9,
-    distance: 450,
+    distance: scale(95),
     color: '#FFC107', // Dark Yellow
     orbitalSpeed: 0.32,
     rotationSpeed: 0.75,
@@ -126,7 +129,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Uranus',
     type: 'planet',
     size: 7,
-    distance: 600,
+    distance: scale(192),
     color: '#009688', // Bluish Green
     orbitalSpeed: 0.22,
     rotationSpeed: 0.6,
@@ -141,7 +144,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Neptune',
     type: 'planet',
     size: 7,
-    distance: 750,
+    distance: scale(301),
     color: '#673AB7', // Violet
     orbitalSpeed: 0.18,
     rotationSpeed: 0.55,
