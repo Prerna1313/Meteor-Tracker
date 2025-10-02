@@ -167,6 +167,7 @@ export function SolarSystem({
       camera.updateProjectionMatrix();
 
       controls = new OrbitControls(camera, renderer.domElement);
+      controls.domElement.style.touchAction = 'none';
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
       controls.minDistance = 10;
