@@ -51,32 +51,40 @@ const createSunGlow = () => {
   return sprite;
 };
 
-const createStardust = (scene: THREE.Scene) => {
-  const starCount = 50000;
+const createStardust = (count: number, size: number, spread: number, opacity: number) => {
   const particles = new THREE.BufferGeometry();
-  const positions = new Float32Array(starCount * 3);
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const sizes = new Float32Array(count);
 
-  for (let i = 0; i < starCount; i++) {
-    const x = THREE.MathUtils.randFloatSpread(20000);
-    const y = THREE.MathUtils.randFloatSpread(20000);
-    const z = THREE.MathUtils.randFloatSpread(20000);
-    positions[i * 3] = x;
-    positions[i * 3 + 1] = y;
-    positions[i * 3 + 2] = z;
+  const color = new THREE.Color();
+
+  for (let i = 0; i < count; i++) {
+    const x = THREE.MathUtils.randFloatSpread(spread);
+    const y = THREE.MathUtils.randFloatSpread(spread);
+    const z = THREE.MathUtils.randFloatSpread(spread);
+    positions.set([x, y, z], i * 3);
+
+    color.setHSL(Math.random(), 0.8, Math.random() * 0.5 + 0.3);
+    colors.set([color.r, color.g, color.b], i * 3);
+
+    sizes[i] = Math.random() * size;
   }
 
   particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  particles.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
   
   const particleMaterial = new THREE.PointsMaterial({
-    color: 0xffffff,
-    size: 1.5,
+    size: size,
+    vertexColors: true,
     transparent: true,
-    opacity: 0.7,
+    opacity: opacity,
+    depthWrite: false,
+    sizeAttenuation: true
   });
 
-  const stardust = new THREE.Points(particles, particleMaterial);
-  scene.add(stardust);
-  return stardust;
+  return new THREE.Points(particles, particleMaterial);
 };
 
 
@@ -121,7 +129,9 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
 
     // --- Scene Lighting and Background ---
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-    createStardust(scene);
+    scene.add(createStardust(20000, 1.5, 10000, 0.7)); // Distant stars
+    scene.add(createStardust(5000, 2.5, 10000, 0.9)); // Closer stars
+
 
     // --- Object Creation ---
     const textures = new Map<string, THREE.Texture>();
@@ -228,7 +238,7 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
         if (!mountRef.current || !stateRef.renderer) return;
         camera.aspect = mountRef.current.clientWidth / mountRef.current.clientHeight;
         camera.updateProjectionMatrix();
-        stateRef.renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
+        stateRef.renderer.setSize(mountRef.current.clientWidth / mountRef.current.clientHeight);
     };
     window.addEventListener('resize', handleResize);
 
@@ -347,3 +357,5 @@ export function SolarSystem({ data, selectedObjectId, onSelectObject }: SolarSys
     </div>
   );
 }
+
+    
