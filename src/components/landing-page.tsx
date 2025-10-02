@@ -9,15 +9,8 @@ const MeteorLogo = (props: React.SVGProps<SVGSVGElement>) => (
         xmlns="http://www.w3.org/2000/svg"
         {...props}
     >
-        <g clipPath="url(#clip0_303_2)">
-            <path d="M50 0C22.3858 0 0 22.3858 0 50C0 77.6142 22.3858 100 50 100C77.6142 100 100 77.6142 100 50C100 22.3858 77.6142 0 50 0ZM50 90C27.9086 90 10 72.0914 10 50C10 27.9086 27.9086 10 50 10C72.0914 10 90 27.9086 90 50C90 72.0914 72.0914 90 50 90Z" fill="white"/>
-            <path d="M69.9727 34.0254L34.0254 69.9727C35.918 71.8652 38.1348 73.4473 40.5859 74.6465L75.5332 38.6992C73.4473 36.6133 71.6797 35.0312 69.9727 34.0254Z" fill="white"/>
-        </g>
-        <defs>
-            <clipPath id="clip0_303_2">
-                <rect width="100" height="100" fill="white"/>
-            </clipPath>
-        </defs>
+        <circle cx="50" cy="50" r="48" stroke="white" strokeWidth="4"/>
+        <path d="M30 70 L40 50 L50 70 L60 50 L70 70" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
 );
 
