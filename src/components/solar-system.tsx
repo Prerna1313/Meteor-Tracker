@@ -53,7 +53,7 @@ const createSunGlow = () => {
 };
 
 const createAsteroidDust = () => {
-    const particles = 50000;
+    const particles = 15000;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particles * 3);
 
