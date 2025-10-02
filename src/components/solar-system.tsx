@@ -55,7 +55,7 @@ const createSunGlow = () => {
 const createAsteroidBelt = (count: number) => {
   const baseGeometry = new THREE.IcosahedronGeometry(0.5, 0);
   const material = new THREE.MeshStandardMaterial({
-    color: 0xaaaaaa,
+    color: 0x66c2ff,
     roughness: 0.8,
   });
   const instancedMesh = new THREE.InstancedMesh(baseGeometry, material, count);
@@ -100,6 +100,7 @@ export function SolarSystem({
     textureLoader: new THREE.TextureLoader(),
     clickableObjects: [] as THREE.Object3D[],
     celestialObjects: new Map<string, THREE.Object3D>(),
+    orbitLines: [] as THREE.Line[],
   }).current;
 
   useEffect(() => {
@@ -247,11 +248,13 @@ export function SolarSystem({
   }, [stateRef, onSelectObject]);
 
   useEffect(() => {
-    const { scene, clickableObjects, celestialObjects } = stateRef;
+    const { scene, clickableObjects, celestialObjects, orbitLines } = stateRef;
     
     // Clear old objects
     celestialObjects.forEach(obj => scene.remove(obj));
     celestialObjects.clear();
+    orbitLines.forEach(line => scene.remove(line));
+    orbitLines.length = 0;
     stateRef.clickableObjects = stateRef.clickableObjects.filter(obj => obj.userData.id === 'asteroid_belt');
 
 
@@ -282,9 +285,8 @@ export function SolarSystem({
       } else if (objData.type === 'planet') {
         const objectGroup = new THREE.Group();
         const geometry = new THREE.SphereGeometry(objData.size, 32, 32);
-        const material = new THREE.MeshStandardMaterial({
-          map: textures.get(objData.id),
-          roughness: 0.9,
+        const material = new THREE.MeshBasicMaterial({
+          color: objData.color,
         });
         const body = new THREE.Mesh(geometry, material);
         body.userData.isPlanetBody = true;
@@ -337,13 +339,14 @@ export function SolarSystem({
         const points = ellipse.getPoints(200);
         const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
         const orbitMaterial = new THREE.LineBasicMaterial({
-          color: 0xeeeeee,
+          color: objData.color,
           transparent: true,
-          opacity: 0.3,
+          opacity: 0.5,
         });
         const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
         orbit.rotation.x = Math.PI / 2;
         scene.add(orbit);
+        orbitLines.push(orbit);
 
         celestialObj = objectGroup;
       }
@@ -367,10 +370,13 @@ export function SolarSystem({
 
       if (
         meshToHighlight &&
-        meshToHighlight.material instanceof THREE.MeshStandardMaterial
+        meshToHighlight.material instanceof THREE.MeshBasicMaterial
       ) {
-        meshToHighlight.material.emissive.setHex(isSelected ? 0x7dffff : 0x000000);
-        meshToHighlight.material.emissiveIntensity = isSelected ? 0.6 : 0;
+         if (isSelected) {
+            (meshToHighlight.material as THREE.MeshBasicMaterial).color.set(0xffffff);
+        } else {
+            (meshToHighlight.material as THREE.MeshBasicMaterial).color.set(obj.userData.color);
+        }
       }
 
       if (obj.userData.type === 'star') {
@@ -383,7 +389,7 @@ export function SolarSystem({
 
     const belt = stateRef.scene.getObjectByProperty('userData.id', 'asteroid_belt') as THREE.InstancedMesh;
     if (belt && belt.material instanceof THREE.MeshStandardMaterial) {
-        belt.material.color.setHex(selectedObjectId === 'asteroid_belt' ? 0x66ddff : 0xaaaaaa);
+        belt.material.color.setHex(selectedObjectId === 'asteroid_belt' ? 0xffffff : 0x66c2ff);
     }
 
   }, [selectedObjectId, stateRef.celestialObjects, stateRef.scene]);
