@@ -18,10 +18,6 @@ type SolarSystemProps = {
   onSelectObject: (id: string | null) => void;
 };
 
-type Stardust = {
-  points: THREE.Points;
-};
-
 const createSunGlow = () => {
   const canvas = document.createElement('canvas');
   canvas.width = 128;
@@ -55,53 +51,6 @@ const createSunGlow = () => {
   sprite.scale.set(150, 150, 1);
   return sprite;
 };
-
-const createStardust = (count: number): Stardust => {
-    const particles = new THREE.BufferGeometry();
-    const positions = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
-
-    const realisticStarColors = [
-        new THREE.Color('#FFFFFF'),
-        new THREE.Color('#FFF8E7'),
-        new THREE.Color('#D4E5FF'),
-    ];
-
-    for (let i = 0; i < count; i++) {
-        const i3 = i * 3;
-        const radius = THREE.MathUtils.randFloat(50, 50000);
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos((Math.random() * 2) - 1);
-        
-        positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
-        positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-        positions[i3 + 2] = radius * Math.cos(phi);
-
-        const baseColor = realisticStarColors[Math.floor(Math.random() * realisticStarColors.length)];
-        const finalColor = baseColor.clone().multiplyScalar(THREE.MathUtils.randFloat(0.6, 1.0));
-        
-        colors[i3] = finalColor.r;
-        colors[i3 + 1] = finalColor.g;
-        colors[i3 + 2] = finalColor.b;
-    }
-
-    particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-    const particleMaterial = new THREE.PointsMaterial({
-        size: THREE.MathUtils.randFloat(15, 25),
-        sizeAttenuation: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.9,
-    });
-
-    const points = new THREE.Points(particles, particleMaterial);
-    return { points };
-};
-
 
 const createAsteroidBelt = (count: number) => {
   const baseGeometry = new THREE.IcosahedronGeometry(0.5, 0);
@@ -151,7 +100,6 @@ export function SolarSystem({
     textureLoader: new THREE.TextureLoader(),
     clickableObjects: [] as THREE.Object3D[],
     celestialObjects: new Map<string, THREE.Object3D>(),
-    stardustSystem: null as Stardust | null,
   }).current;
 
   useEffect(() => {
@@ -183,10 +131,6 @@ export function SolarSystem({
       stateRef.controls = controls;
 
       scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-      
-      const stardust = createStardust(100000);
-      scene.add(stardust.points);
-      stateRef.stardustSystem = stardust;
       
       const asteroidBelt = createAsteroidBelt(1500);
       scene.add(asteroidBelt);
