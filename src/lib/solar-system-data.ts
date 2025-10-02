@@ -207,7 +207,7 @@ export const solarSystemData: CelestialObject[] = [
     name: 'Leucus',
     type: 'planet',
     size: 0.2,
-    distance: 10.2 * AU,
+    distance: 11 * AU,
     color: '#888888',
     orbitalSpeed: 0.4,
     rotationSpeed: 0.2,
