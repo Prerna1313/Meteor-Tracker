@@ -397,7 +397,7 @@ export function SolarSystem({
          if (isSelected) {
             (meshToHighlight.material as THREE.MeshBasicMaterial).color.set(0xffffff);
         } else {
-            (meshToahighlight.material as THREE.MeshBasicMaterial).color.set(new THREE.Color(obj.userData.color));
+            (meshToHighlight.material as THREE.MeshBasicMaterial).color.set(new THREE.Color(obj.userData.color));
         }
       }
 
