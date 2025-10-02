@@ -82,9 +82,15 @@ const createAsteroidDust = () => {
     });
 
     for (let i = 0; i < particles; i++) {
-        const dist = THREE.MathUtils.randFloat(200, 250);
+        // Most particles in the main belt, some spread inside
+        const isMainBelt = Math.random() > 0.1;
+        const dist = isMainBelt 
+            ? THREE.MathUtils.randFloat(200, 250)
+            : THREE.MathUtils.randFloat(0, 200);
+
         const angle = Math.random() * Math.PI * 2;
-        const y = THREE.MathUtils.randFloatSpread(10);
+        // Keep it relatively flat, but give it some 3D volume
+        const y = THREE.MathUtils.randFloatSpread(10); 
 
         positions[i * 3] = Math.cos(angle) * dist;
         positions[i * 3 + 1] = y;
@@ -165,6 +171,8 @@ export function SolarSystem({
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
       stateRef.raycaster.setFromCamera(mouse, stateRef.camera);
+      // Ensure raycaster checks points correctly
+      stateRef.raycaster.params.Points.threshold = 5;
       const intersects = stateRef.raycaster.intersectObjects(
         stateRef.clickableObjects,
         true
@@ -270,7 +278,8 @@ export function SolarSystem({
     celestialObjects.clear();
     orbitLines.forEach(line => scene.remove(line));
     orbitLines.length = 0;
-    stateRef.clickableObjects = stateRef.clickableObjects.filter(obj => obj.userData.id === 'asteroid_belt' || (obj instanceof THREE.Points));
+    // Keep the asteroid dust when clearing objects
+    stateRef.clickableObjects = stateRef.clickableObjects.filter(obj => obj.userData.id === 'asteroid_belt');
 
 
     data.forEach((objData) => {
@@ -444,3 +453,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
