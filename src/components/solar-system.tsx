@@ -18,40 +18,6 @@ type SolarSystemProps = {
   onSelectObject: (id: string | null) => void;
 };
 
-const createSunGlow = () => {
-  const canvas = document.createElement('canvas');
-  canvas.width = 128;
-  canvas.height = 128;
-  const context = canvas.getContext('2d');
-  if (!context) return null;
-
-  const gradient = context.createRadialGradient(
-    canvas.width / 2,
-    canvas.height / 2,
-    0,
-    canvas.width / 2,
-    canvas.height / 2,
-    canvas.width / 2
-  );
-  gradient.addColorStop(0.1, 'rgba(255, 255, 220, 1)');
-  gradient.addColorStop(0.4, 'rgba(255, 220, 180, 0.5)');
-  gradient.addColorStop(1, 'rgba(255, 180, 100, 0)');
-
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, canvas.width, canvas.height);
-
-  const texture = new THREE.CanvasTexture(canvas);
-  const material = new THREE.SpriteMaterial({
-    map: texture,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    transparent: true,
-  });
-  const sprite = new THREE.Sprite(material);
-  sprite.scale.set(150, 150, 1);
-  return sprite;
-};
-
 const createAsteroidDust = () => {
     const particles = 15000;
     const geometry = new THREE.BufferGeometry();
@@ -269,7 +235,7 @@ export function SolarSystem({
 
         if (id === 'sun') {
           obj.position.set(0, 0, 0);
-        } else if ((type === 'planet') && orbitalSpeed > 0 && orbitCurve) {
+        } else if ((type === 'planet' || type === 'comet') && orbitalSpeed > 0 && orbitCurve) {
           const t = (elapsedTime * (orbitalSpeed / 50) + orbitalOffset) % 1;
           const point = orbitCurve.getPointAt(t);
           obj.position.set(point.x, obj.position.y, point.y); // Keep y for inclination
@@ -349,10 +315,12 @@ export function SolarSystem({
       
       if (objData.type === 'star') {
         const starGroup = new THREE.Group();
-        const glow = createSunGlow();
-        if (glow) starGroup.add(glow);
+        const starGeometry = new THREE.SphereGeometry(objData.size, 32, 32);
+        const starMaterial = new THREE.MeshBasicMaterial({ color: 0xFFD700, toneMapped: false });
+        const starMesh = new THREE.Mesh(starGeometry, starMaterial);
+        starGroup.add(starMesh);
 
-        const pointLight = new THREE.PointLight(0xffffff, 3.5, 4000);
+        const pointLight = new THREE.PointLight(0xffd886, 5, 5000);
         starGroup.add(pointLight);
         celestialObj = starGroup;
 
@@ -465,9 +433,9 @@ export function SolarSystem({
       }
 
       if (obj.userData.type === 'star') {
-        const glow = obj.children.find((c) => c instanceof THREE.Sprite);
-        if (glow) {
-          (glow as THREE.Sprite).material.opacity = isSelected ? 1 : 0.7;
+        const starMesh = obj.children.find(c => c instanceof THREE.Mesh);
+        if (starMesh && starMesh.material instanceof THREE.MeshBasicMaterial) {
+            starMesh.material.color.set(isSelected ? 0xFFFFFF : 0xFFD700);
         }
       }
     });
