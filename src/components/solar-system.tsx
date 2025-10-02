@@ -53,9 +53,9 @@ const createSunGlow = () => {
 };
 
 const createAsteroidBelt = (count: number) => {
-  const baseGeometry = new THREE.IcosahedronGeometry(0.5, 0);
+  const baseGeometry = new THREE.IcosahedronGeometry(1, 1);
   const material = new THREE.MeshStandardMaterial({
-    color: 0xaaaaaa, // A neutral grey for the rocks
+    color: 0xaaaaaa, 
     roughness: 0.8,
     flatShading: true,
   });
@@ -84,14 +84,14 @@ const createAsteroidBelt = (count: number) => {
   return instancedMesh;
 };
 
-const createRingDust = (count: number, innerRadius: number, outerRadius: number) => {
+const createOrbitalDust = (count: number, innerRadius: number, outerRadius: number) => {
     const positions = new Float32Array(count * 3);
     const dustGeometry = new THREE.BufferGeometry();
 
     for (let i = 0; i < count; i++) {
         const dist = THREE.MathUtils.randFloat(innerRadius, outerRadius);
         const angle = Math.random() * Math.PI * 2;
-        const y = THREE.MathUtils.randFloatSpread(0.5); 
+        const y = THREE.MathUtils.randFloatSpread(1.5); 
 
         positions[i * 3] = Math.cos(angle) * dist;
         positions[i * 3 + 1] = y;
@@ -116,8 +116,8 @@ const createRingDust = (count: number, innerRadius: number, outerRadius: number)
     const texture = new THREE.CanvasTexture(canvas);
 
     const dustMaterial = new THREE.PointsMaterial({
-        color: 0x00bfff, // DeepSkyBlue
-        size: 0.2,
+        color: 0x00bfff,
+        size: 0.8,
         map: texture,
         blending: THREE.AdditiveBlending,
         transparent: true,
@@ -183,6 +183,12 @@ export function SolarSystem({
       const asteroidBelt = createAsteroidBelt(1500);
       scene.add(asteroidBelt);
       stateRef.clickableObjects.push(asteroidBelt);
+      
+      const saturnData = data.find(p => p.id === 'saturn');
+      if (saturnData) {
+        const orbitalDust = createOrbitalDust(10000, saturnData.distance - 20, saturnData.distance + 20);
+        scene.add(orbitalDust);
+      }
     };
 
     if (!stateRef.renderer) {
@@ -292,7 +298,7 @@ export function SolarSystem({
       }
       controls?.dispose();
     };
-  }, [stateRef, onSelectObject]);
+  }, [stateRef, onSelectObject, data]);
 
   useEffect(() => {
     const { scene, clickableObjects, celestialObjects, orbitLines } = stateRef;
@@ -302,7 +308,7 @@ export function SolarSystem({
     celestialObjects.clear();
     orbitLines.forEach(line => scene.remove(line));
     orbitLines.length = 0;
-    stateRef.clickableObjects = stateRef.clickableObjects.filter(obj => obj.userData.id === 'asteroid_belt');
+    stateRef.clickableObjects = stateRef.clickableObjects.filter(obj => obj.userData.id === 'asteroid_belt' || (obj instanceof THREE.Points));
 
 
     data.forEach((objData) => {
@@ -351,12 +357,6 @@ export function SolarSystem({
           const rings = new THREE.Mesh(ringGeometry, ringMaterial);
           rings.rotation.x = Math.PI / 2;
           body.add(rings);
-          
-          const dust = createRingDust(5000, objData.rings.innerRadius, objData.rings.outerRadius);
-          if (dust) {
-            body.add(dust);
-          }
-
         }
 
         const semiMajorAxis = objData.distance;
@@ -483,3 +483,5 @@ export function SolarSystem({
     </div>
   );
 }
+
+    
