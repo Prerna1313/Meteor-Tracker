@@ -24,23 +24,22 @@ type SolarSystemProps = {
 const AU_SCALE = 15;
 
 const createAsteroidDust = () => {
-    const particles = 15000;
+    const particles = 25000; // Increased particle count for density
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particles * 3);
 
     const material = new THREE.PointsMaterial({
         color: 0x00bfff,
-        size: 0.05,
+        size: 0.07, // Increased size for brightness
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         transparent: true,
-        opacity: 0.35,
+        opacity: 0.45, // Increased opacity for brightness
     });
     
     const marsOrbit = 1.524 * AU_SCALE;
     const jupiterOrbit = 5.203 * AU_SCALE;
-    const neptuneOrbit = 30.07 * AU_SCALE;
-
+    
     const mainBeltInner = marsOrbit + 0.5 * AU_SCALE;
     const mainBeltOuter = jupiterOrbit - 0.5 * AU_SCALE;
 
@@ -49,15 +48,18 @@ const createAsteroidDust = () => {
         let dist = 0;
         let y = 0;
 
-        if (zone < 0.30) { // 30% in Inner System
+        // Concentrate more particles in the Main Belt
+        if (zone < 0.10) { // 10% in Inner System (less dense)
             dist = THREE.MathUtils.randFloat(0, mainBeltInner);
-            y = THREE.MathUtils.randFloatSpread(4);
-        } else if (zone < 0.95) { // 65% in Main Belt
-            dist = THREE.MathUtils.randFloat(mainBeltInner, mainBeltOuter);
-            y = THREE.MathUtils.randFloatSpread(8); 
-        } else { // 5% in Outer System
-            dist = THREE.MathUtils.randFloat(mainBeltOuter, neptuneOrbit);
-            y = THREE.MathUtils.randFloatSpread(20);
+            y = THREE.MathUtils.randFloatSpread(2);
+        } else if (zone < 0.98) { // 88% in Main Belt (more dense)
+            // Skew distribution towards the inner part of the belt
+            const innerBias = Math.pow(Math.random(), 2);
+            dist = mainBeltInner + innerBias * (mainBeltOuter - mainBeltInner);
+            y = THREE.MathUtils.randFloatSpread(10); 
+        } else { // 2% in Outer System (sparse)
+            dist = THREE.MathUtils.randFloat(mainBeltOuter, mainBeltOuter + 20 * AU_SCALE);
+            y = THREE.MathUtils.randFloatSpread(25);
         }
 
         const angle = Math.random() * Math.PI * 2;
@@ -473,7 +475,7 @@ export function SolarSystem({
     belt.forEach(obj => {
         if(obj instanceof THREE.Points && obj.material instanceof THREE.PointsMaterial) {
              obj.material.color.setHex(isBeltSelected ? 0xffffff : 0x00bfff);
-             obj.material.opacity = isBeltSelected ? 0.7 : 0.35;
+             obj.material.opacity = isBeltSelected ? 0.7 : 0.45; // Use updated base opacity
         }
     });
 
@@ -563,5 +565,3 @@ export function SolarSystem({
     </div>
   );
 }
-
-    
