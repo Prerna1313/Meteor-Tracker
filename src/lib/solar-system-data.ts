@@ -554,6 +554,24 @@ export const solarSystemData: CelestialObject[] = [
     distance: 5.0 * AU_SCALE,
   },
   {
+    id: 'osiris-apex',
+    name: 'OSIRIS-APEX',
+    type: 'planet', // Rendered as an asteroid, but representing a mission
+    size: 0.1,
+    color: '#AAAAAA',
+    description: 'The OSIRIS-APEX mission, formerly OSIRIS-REx, is now on an extended mission to study the near-Earth asteroid Apophis.',
+    diameter: 0.37,
+    semiMajorAxis: 0.922,
+    eccentricity: 0.191,
+    orbitalInclination: 3.33,
+    orbitalSpeed: 0.89,
+    rotationSpeed: 0.2,
+    meanLongitude: Math.random() * 360, // Same orbit as Apophis
+    longitudeOfPerihelion: 126.4,
+    longitudeOfAscendingNode: 204.4,
+    distance: 5.0 * AU_SCALE,
+  },
+  {
     id: 'didymos',
     name: 'Didymos',
     type: 'planet',
@@ -656,5 +674,22 @@ export const solarSystemData: CelestialObject[] = [
     meanLongitude: Math.random() * 360, // L (degrees) - randomized
     rotationSpeed: 0.2,
     distance: 8.9 * AU_SCALE,
+  },
+  {
+    id: 'churyumov-gerasimenko',
+    name: '67P/C-G',
+    type: 'comet',
+    size: 0.1,
+    color: '#AAAAAA',
+    description: '67P/Churyumov–Gerasimenko is a Jupiter-family comet, originally from the Kuiper belt, with a current orbital period of 6.45 years. It was the destination of the European Space Agency\'s Rosetta mission.',
+    semiMajorAxis: 3.46, // a (AU)
+    eccentricity: 0.641, // e
+    orbitalInclination: 7.04, // i (degrees)
+    longitudeOfAscendingNode: 55.19, // Ω (degrees)
+    longitudeOfPerihelion: 12.78, // Argument of Perihelion ϖ (degrees)
+    orbitalSpeed: 6.45, // Period (years)
+    meanLongitude: Math.random() * 360, // L (degrees) - randomized
+    rotationSpeed: 0.2,
+    distance: 9.0 * AU_SCALE,
   },
 ];

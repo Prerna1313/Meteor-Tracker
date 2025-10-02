@@ -152,8 +152,8 @@ const createKuiperMeteors = () => {
 }
 
 
-const ASTEROID_IDS = ['eurybates', 'orus', 'mathilde', 'patroclus', 'ceres', 'annefrank', 'leucus', 'itokawa', 'eros', 'bennu', 'ryugu', 'donaldjohanson', 'braille', 'polymele', 'lutetia', 'psyche', 'ida', 'gaspra', 'apophis', 'didymos', 'vesta'];
-const COMET_IDS = ['borrelly', 'hartley2', 'tempel1', 'wild2'];
+const ASTEROID_IDS = ['osiris-apex', 'eurybates', 'orus', 'mathilde', 'patroclus', 'ceres', 'annefrank', 'leucus', 'itokawa', 'eros', 'bennu', 'ryugu', 'donaldjohanson', 'braille', 'polymele', 'lutetia', 'psyche', 'ida', 'gaspra', 'apophis', 'didymos', 'vesta'];
+const COMET_IDS = ['churyumov-gerasimenko', 'borrelly', 'hartley2', 'tempel1', 'wild2'];
 
 const CometIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
