@@ -240,10 +240,6 @@ export function SolarSystem({
           const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
           const r = a * (1 - e * Math.cos(E));
 
-          // Position in orbital plane
-          const x_orb = r * Math.cos(nu);
-          const z_orb = r * Math.sin(nu);
-
           const argOfPeri = varpi - Omega;
 
           const x_3d = (Math.cos(Omega) * Math.cos(argOfPeri + nu) - Math.sin(Omega) * Math.sin(argOfPeri + nu) * Math.cos(i)) * r;
