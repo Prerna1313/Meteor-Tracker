@@ -27,7 +27,7 @@ export function Header() {
       <nav>
         <button 
           onClick={() => alert("hey")}
-          className="group relative px-6 py-3 bg-gradient-to-r from-amber-600/20 to-orange-600/20 border border-amber-400/30 rounded-lg backdrop-blur-sm transition-all duration-300 hover:from-amber-500/30 hover:to-orange-500/30 hover:border-amber-300/50 hover:shadow-lg hover:shadow-amber-500/20 hover:scale-105 active:scale-95"
+          className="group relative px-6 py-3 bg-gradient-to-r from-black-600/20 to-purple-600/20 border border-amber-400/30 rounded-lg backdrop-blur-sm transition-all duration-300 hover:from-amber-500/30 hover:to-orange-500/30 hover:border-amber-300/50 hover:shadow-lg hover:shadow-amber-500/20 hover:scale-105 active:scale-95"
         >
           <span className="relative z-10 text-amber-200 font-bold tracking-widest text-sm uppercase">
             HIGH
