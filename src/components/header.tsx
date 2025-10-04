@@ -25,9 +25,16 @@ export function Header() {
         </h1>
       </div>
       <nav>
-        <Link href="/heatmap" className="text-base font-bold text-white/40 tracking-wider hover:text-white">
-          <Button onClick={()=>alert("hey")}>HIGH</Button>
-        </Link>
+        <button 
+          onClick={() => alert("hey")}
+          className="group relative px-6 py-3 bg-gradient-to-r from-amber-600/20 to-orange-600/20 border border-amber-400/30 rounded-lg backdrop-blur-sm transition-all duration-300 hover:from-amber-500/30 hover:to-orange-500/30 hover:border-amber-300/50 hover:shadow-lg hover:shadow-amber-500/20 hover:scale-105 active:scale-95"
+        >
+          <span className="relative z-10 text-amber-200 font-bold tracking-widest text-sm uppercase">
+            HIGH
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-amber-400/10 to-orange-400/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        </button>
       </nav>
     </header>
   );
