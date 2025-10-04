@@ -50,7 +50,9 @@ export default function Home() {
         }`}
       >
         <div className="absolute top-0 left-0 w-full h-full z-30 pointer-events-none">
-          <Header />
+          <div className="pointer-events-auto">
+            <Header />
+          </div>
           <AnimatePresence>
             {selectedObjectId && selectedObjectData && (
               <motion.div
