@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>3D Earth with Asteroid Info</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      font-family: sans-serif;
+      background: #000;
+      color: #fff;
+    }
+    #particle-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+    #earth-container {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 2;
+    }
+    #info-panel {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      width: 300px;
+      max-width: 90%;
+      background: rgba(0, 0, 0, 0.85);
+      border-left: 1px solid #444;
+      padding: 20px;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.7);
+      overflow-y: auto;
+      display: none;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      opacity: 0;
+      z-index: 3;
+    }
+    #info-panel.show {
+      display: block;
+      transform: translateY(-50%) translateX(0);
+      opacity: 1;
+    }
+    #info-panel.hide {
+      opacity: 0;
+      transform: translateY(-50%) translateX(100%);
+    }
+    #map-container-2d {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #fff;
+      display: none;
+      z-index: 4;
+    }
+    #close-map {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #fff;
+      color: #000;
+      padding: 10px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    #info-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+    #info-panel::-webkit-scrollbar-thumb {
+      background: #555;
+      border-radius: 3px;
+    }
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+</head>
+<body>
+  <canvas id="particle-canvas"></canvas>
+  <div id="earth-container"></div>
+  <div id="info-panel"></div>
+  <div id="map-container-2d">
+    <div id="close-map">Close Map</div>
+    <div id="mapid" style="height: 100%;"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+  <script>
+  (function() {
+    const container = document.getElementById("earth-container");
+    const infoDiv = document.getElementById("info-panel");
+    const mapContainer2D = document.getElementById("map-container-2d");
+    const closeMapBtn = document.getElementById("close-map");
+    const mapId = document.getElementById("mapid");
+    let map2d = null;
+
+    const NASA_API_KEY = "B5MdNtHy8qdH4hqQvHnV2U9cHXYYaWdgtqoTlV9u"; 
+    const NEO_API_URL = `https://api.nasa.gov/neo/rest/v1/neo/browse?api_key=${NASA_API_KEY}`;
+
+    async function fetchAsteroids() {
+      try {
+        const response = await fetch(NEO_API_URL);
+        const data = await response.json();
+        if (!data || !data.near_earth_objects) return [];
+        return data.near_earth_objects.map(neo => {
+          const approach = neo.close_approach_data.find(ca => ca.orbiting_body === "Earth");
+          return {
+            name: neo.name,
+            velocity: approach ? parseFloat(approach.relative_velocity.kilometers_per_hour).toFixed(2) + " km/h" : "N/A",
+            distance: approach ? parseFloat(approach.miss_distance.lunar).toFixed(2) + " LD" : "N/A",
+            diameter_min: neo.estimated_diameter.meters.estimated_diameter_min.toFixed(2),
+            diameter_max: neo.estimated_diameter.meters.estimated_diameter_max.toFixed(2),
+            hazardous: neo.is_potentially_hazardous_asteroid,
+            approach_date: approach ? approach.close_approach_date_full : "N/A",
+            lat: Math.random() * 180 - 90,
+            lon: Math.random() * 360 - 180
+          };
+        });
+      } catch (err) {
+        console.error("Error fetching asteroids:", err);
+        return [];
+      }
+    }
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 5000);
+    camera.position.set(0, 0, 800);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.enablePan = false;
+    controls.enableZoom = true;
+    controls.enableRotate = true;
+    controls.minDistance = 400;
+    controls.maxDistance = 2000;
+    controls.rotateSpeed = 0.5;
+    controls.zoomSpeed = 1.2;
+    controls.autoRotate = false;
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(500, 300, 500);
+    scene.add(dirLight);
+
+    const loader = new THREE.TextureLoader();
+    const earthTexture = loader.load("https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg");
+    const cloudTexture = loader.load("https://threejs.org/examples/textures/earth_clouds_1024.png");
+
+    const earthGeo = new THREE.SphereGeometry(200, 64, 64);
+    const earthMat = new THREE.MeshPhongMaterial({ map: earthTexture });
+    const earth = new THREE.Mesh(earthGeo, earthMat);
+    scene.add(earth);
+
+    const cloudGeo = new THREE.SphereGeometry(206, 64, 64);
+    const cloudMat = new THREE.MeshPhongMaterial({ map: cloudTexture, transparent: true, opacity: 0.4 });
+    const clouds = new THREE.Mesh(cloudGeo, cloudMat);
+    scene.add(clouds);
+
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 10000;
+    const starPositions = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount * 3; i += 3) {
+      starPositions[i] = (Math.random() - 0.5) * 3000;
+      starPositions[i + 1] = (Math.random() - 0.5) * 3000;
+      starPositions[i + 2] = (Math.random() - 0.5) * 3000;
+    }
+    starGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
+    const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 2, transparent: true });
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
+
+    let asteroids = [];
+    fetchAsteroids().then(data => { asteroids = data; });
+
+    function latLonToVector3(lat, lon, radius) {
+      const phi = (90 - lat) * (Math.PI / 180);
+      const theta = (lon + 180) * (Math.PI / 180);
+      return new THREE.Vector3(
+        -radius * Math.sin(phi) * Math.cos(theta),
+         radius * Math.cos(phi),
+         radius * Math.sin(phi) * Math.sin(theta)
+      );
+    }
+
+    function vector3ToLatLon(vec, radius) {
+      const lat = 90 - (Math.acos(vec.y / radius) * 180 / Math.PI);
+      const lon = ((Math.atan2(vec.z, vec.x) * 180 / Math.PI) - 180) * -1;
+      return { lat, lon };
+    }
+
+    const raycaster = new THREE.Raycaster();
+    const raycasterMouse = new THREE.Vector2();
+    renderer.domElement.addEventListener("mousemove", event => {
+      raycasterMouse.x = (event.clientX / container.clientWidth) * 2 - 1;
+      raycasterMouse.y = -(event.clientY / container.clientHeight) * 2 + 1;
+    });
+
+    renderer.domElement.addEventListener("click", event => {
+      raycasterMouse.x = (event.clientX / container.clientWidth) * 2 - 1;
+      raycasterMouse.y = -(event.clientY / container.clientHeight) * 2 + 1;
+      raycaster.setFromCamera(raycasterMouse, camera);
+      const intersects = raycaster.intersectObject(earth);
+      if (intersects.length > 0) {
+        const point = intersects[0].point;
+        const loc = vector3ToLatLon(point, 200);
+        mapContainer2D.style.display = "block";
+        if(map2d) map2d.remove();
+        map2d = L.map(mapId).setView([loc.lat, loc.lon], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map2d);
+        const marker = L.marker([loc.lat, loc.lon]).addTo(map2d);
+        marker.on("click", () => {
+          map2d.flyTo([loc.lat, loc.lon], 6, { animate: true, duration: 1.5 });
+        });
+      }
+    });
+
+    closeMapBtn.addEventListener("click", () => {
+      mapContainer2D.style.display = "none";
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        mapContainer2D.style.display = "none";
+      }
+    });
+    setInterval(async () => { asteroids = await fetchAsteroids(); }, 60*60*1000);
+
+    async function updateAsteroidInfo() {
+      raycaster.setFromCamera(raycasterMouse, camera);
+      const intersects = raycaster.intersectObject(earth);
+      if (intersects.length > 0) {
+        const point = intersects[0].point;
+        const loc = vector3ToLatLon(point, 200);
+        let placeName = "Unknown location";
+        try {
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${loc.lat}&lon=${loc.lon}&format=json`);
+          const data = await response.json();
+          if (data && data.display_name) placeName = data.display_name;
+        } catch (err) {}
+
+        const nearbyAsteroids = asteroids.filter(asteroid => {
+          const asteroidVec = latLonToVector3(asteroid.lat, asteroid.lon, 200);
+          const dist = point.distanceTo(asteroidVec);
+          return dist < 100;
+        }).sort((a, b) => {
+          const distA = point.distanceTo(latLonToVector3(a.lat, a.lon, 200));
+          const distB = point.distanceTo(latLonToVector3(b.lat, b.lon, 200));
+          return distA - distB;
+        });
+
+        infoDiv.style.display = "block";
+        let htmlContent = `
+          <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #444;">
+            <strong style="color: #4CAF50;">📍 Location Information</strong><br/>
+            <strong>Place:</strong> ${placeName}<br/>
+            <strong>Coordinates:</strong> ${loc.lat.toFixed(4)}°, ${loc.lon.toFixed(4)}°
+          </div>
+        `;
+        if (nearbyAsteroids.length > 0) {
+          htmlContent += `
+            <div style="margin-bottom: 15px;">
+              <strong style="color: #FF9800;">☄️ Nearby Asteroids (${nearbyAsteroids.length})</strong>
+            </div>
+          `;
+          nearbyAsteroids.slice(0, 5).forEach((asteroid, index) => {
+            const distance = point.distanceTo(latLonToVector3(asteroid.lat, asteroid.lon, 200));
+            const hazardColor = asteroid.hazardous ? "#F44336" : "#4CAF50";
+            const hazardIcon = asteroid.hazardous ? "⚠️" : "✅";
+            htmlContent += `
+              <div style="margin-bottom: 12px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 5px;">
+                <strong style="color: #2196F3;">${index + 1}. ${asteroid.name}</strong><br/>
+                <span style="color: ${hazardColor};">${hazardIcon} Hazardous: ${asteroid.hazardous ? "YES" : "NO"}</span><br/>
+                <strong>Velocity:</strong> ${asteroid.velocity}<br/>
+                <strong>Miss Distance:</strong> ${asteroid.distance}<br/>
+                <strong>Size:</strong> ${asteroid.diameter_min}m - ${asteroid.diameter_max}m<br/>
+                <strong>Approach:</strong> ${asteroid.approach_date}<br/>
+                <small style="color: #888;">Distance from cursor: ${distance.toFixed(1)} units</small>
+              </div>
+            `;
+          });
+          if (nearbyAsteroids.length > 5) {
+            htmlContent += `<small style="color: #888;">... and ${nearbyAsteroids.length - 5} more asteroids nearby</small>`;
+          }
+        } else {
+          htmlContent += `
+            <div style="margin-bottom: 15px;">
+              <strong style="color: #9E9E9E;">☄️ No asteroids detected in this area</strong><br/>
+              <small style="color: #888;">Move cursor to areas with asteroid activity</small>
+            </div>
+          `;
+        }
+        const hazardousCount = asteroids.filter(a => a.hazardous).length;
+        const totalCount = asteroids.length;
+        htmlContent += `
+          <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #444;">
+            <strong style="color: #E91E63;">📊 Global Asteroid Summary</strong><br/>
+            <strong>Total Asteroids:</strong> ${totalCount}<br/>
+            <strong>Potentially Hazardous:</strong> ${hazardousCount}<br/>
+            <strong>Safe Asteroids:</strong> ${totalCount - hazardousCount}<br/>
+            <small style="color: #888;">Data from NASA NeoWs API</small>
+          </div>
+        `;
+        infoDiv.innerHTML = htmlContent;
+        infoDiv.classList.add("show");
+      } else {
+        infoDiv.style.display = "none";
+        infoDiv.classList.remove("show");
+      }
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      clouds.rotation.y += 0.0005;
+      controls.update();
+      updateAsteroidInfo();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener("resize", () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+  })();
+  </script>
+</body>
+</html>

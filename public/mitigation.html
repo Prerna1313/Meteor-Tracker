@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eyes on Meteor - Mitigation Strategies</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #000000; /* Black background */
+            --secondary-dark: #121212; /* Slightly off-black for sections */
+            --accent-light: #ffffff; /* Pure white for main text and lines */
+            --text-dim: #a0a9b8; /* Retained a similar dim color */
+            --card-bg: rgba(255, 255, 255, 0.05); /* Transparent white for cards */
+            --alert-red: #ff3b3b;
+            --success-green: #2ecc71;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif; /* A more modern, clean font */
+            background-color: var(--primary-dark);
+            color: var(--accent-light);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px),
+                              radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+        }
+
+        .meteor {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+            animation: meteor 3s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes meteor {
+            0% {
+                transform: translate(0, 0) rotate(215deg);
+                opacity: 1;
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-500px, 500px) rotate(215deg);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        header {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-light) !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand i {
+            margin-right: 10px;
+            color: var(--accent-light);
+        }
+
+        .nav-link {
+            color: var(--text-dim) !important;
+            margin: 0 10px;
+            transition: all 0.3s;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 2px; /* Spaced out letters like in the image */
+        }
+
+        .nav-link:hover {
+            color: var(--accent-light) !important;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-light);
+            transition: width 0.3s;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            padding: 150px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-title {
+            font-family: 'Roboto Mono', monospace; /* Monospaced font for the main title */
+            font-size: 5rem;
+            font-weight: bold;
+            letter-spacing: 12px;
+            margin-bottom: 20px;
+            color: var(--accent-light);
+            animation: none; /* Removed glow effect */
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-dim);
+            max-width: 800px;
+            margin: 0 auto 40px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* All other sections */
+        section {
+            padding: 80px 0;
+        }
+        
+        /* Alert System & Strategy Cards */
+        .alert-system, .strategy-card, .observation-section {
+            background: var(--card-bg);
+            border-radius: 0; /* Changed to sharp corners */
+            padding: 30px;
+            margin-bottom: 50px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: none; /* Removed box shadow */
+            transition: all 0.3s;
+        }
+        
+        .strategy-card::before {
+            content: none; /* Removed colored top border */
+        }
+
+        .strategy-card:hover {
+            transform: none; /* Removed hover effect */
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); /* Added subtle white glow on hover */
+        }
+
+        .strategy-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--accent-light);
+            background: none;
+            -webkit-background-clip: unset;
+            -webkit-text-fill-color: unset;
+        }
+
+        .strategy-title, .observation-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--accent-light);
+            background: none;
+            -webkit-background-clip: unset;
+            -webkit-text-fill-color: unset;
+            letter-spacing: 2px;
+        }
+
+        .strategy-description, .telescope-status, .footer-links a, .observation-header p {
+            color: var(--text-dim);
+        }
+
+        .strategy-btn {
+            background: none;
+            color: var(--accent-light);
+            border: 1px solid var(--accent-light);
+            padding: 10px 20px;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .strategy-btn:hover {
+            background: var(--accent-light);
+            color: var(--primary-dark);
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .telescope-card {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0;
+        }
+        
+        .telescope-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: none;
+        }
+        
+        .telescope-icon {
+            color: var(--accent-light);
+        }
+        
+        .telescope-name {
+            color: var(--accent-light);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-dark);
+            padding: 40px 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-light);
+        }
+        
+        .navbar-toggler-icon {
+            filter: invert(1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+                letter-spacing: 5px;
+            }
+            .strategy-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars-container">
+        <div class="meteor" style="top: 10%; left: 80%;"></div>
+        <div class="meteor" style="top: 30%; left: 60%; animation-delay: 1s;"></div>
+        <div class="meteor" style="top: 50%; left: 40%; animation-delay: 2s;"></div>
+    </div>
+
+    <header>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-meteor"></i>
+                    EYES ON METEORS
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#home">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#strategies">Strategies</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#observations">Observations</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#alerts">Alerts</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#contact">Contact</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero-section" id="home">
+        <div class="container">
+            <h1 class="hero-title">MITIGATION STRATEGIES</h1>
+            <p class="hero-subtitle">Protecting Earth from celestial threats through advanced detection, deflection technologies, and coordinated civil defense systems</p>
+        </div>
+    </section>
+
+    <section class="container" id="alerts">
+        <div class="alert-system">
+            <div class="alert-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h2>Civil Defense Alert System</h2>
+            </div>
+            <div class="alert-status">
+                <div class="status-indicator">
+                    <div class="status-dot status-safe"></div>
+                    <span>Current Status: No Immediate Threats Detected</span>
+                </div>
+                <div>
+                    <span>Last Scan: <span id="lastScan">2 minutes ago</span></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <button class="strategy-btn w-100" onclick="activateSOS()">
+                        <i class="fas fa-satellite-dish me-2"></i>
+                        Activate SOS Alert
+                    </button>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <button class="strategy-btn w-100" onclick="sendSMSAlert()">
+                        <i class="fas fa-sms me-2"></i>
+                        Send SMS Alert
+                    </button>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <button class="strategy-btn w-100" onclick="broadcastEmergency()">
+                        <i class="fas fa-broadcast-tower me-2"></i>
+                        Emergency Broadcast
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container" id="strategies">
+        <h2 class="text-center mb-5" style="font-size: 2.5rem; color: var(--accent-light);">
+            Mitigation Strategies
+        </h2>
+        <div class="strategy-grid">
+            <div class="strategy-card">
+                <i class="fas fa-shield-alt strategy-icon"></i>
+                <h3 class="strategy-title">Deflection Systems</h3>
+                <p class="strategy-description">Advanced gravitational and kinetic deflection technologies to alter asteroid trajectories away from Earth's path.</p>
+                <button class="strategy-btn" onclick="showDeflectionDetails()">Learn More</button>
+            </div>
+            
+            <div class="strategy-card">
+                <i class="fas fa-rocket strategy-icon"></i>
+                <h3 class="strategy-title">Kinetic Impactor</h3>
+                <p class="strategy-description">High-velocity spacecraft designed to collide with threatening objects, changing their course through momentum transfer.</p>
+                <button class="strategy-btn" onclick="showImpactorDetails()">Learn More</button>
+            </div>
+            
+            <div class="strategy-card">
+                <i class="fas fa-satellite strategy-icon"></i>
+                <h3 class="strategy-title">NEO Surveys</h3>
+                <p class="strategy-description">Near-Earth Object detection networks scanning the cosmos for potentially hazardous asteroids and comets.</p>
+                <button class="strategy-btn" onclick="showNEODetails()">Learn More</button>
+            </div>
+            
+            <div class="strategy-card">
+                <i class="fas fa-telescope strategy-icon"></i>
+                <h3 class="strategy-title">Space-Based Observations</h3>
+                <p class="strategy-description">Orbital telescopes and sensors providing continuous monitoring of space objects beyond Earth's atmosphere.</p>
+                <button class="strategy-btn" onclick="showObservationDetails()">Learn More</button>
+            </div>
+            
+            <div class="strategy-card">
+                <i class="fas fa-users strategy-icon"></i>
+                <h3 class="strategy-title">Civil Defense</h3>
+                <p class="strategy-description">Coordinated emergency response systems including evacuation plans and public alert mechanisms.</p>
+                <button class="strategy-btn" onclick="showDefenseDetails()">Learn More</button>
+            </div>
+            
+            <div class="strategy-card">
+                <i class="fas fa-globe strategy-icon"></i>
+                <h3 class="strategy-title">International Cooperation</h3>
+                <p class="strategy-description">Global collaboration between space agencies and governments for unified planetary defense.</p>
+                <button class="strategy-btn" onclick="showCooperationDetails()">Learn More</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="container" id="observations">
+        <div class="observation-section">
+            <div class="observation-header">
+                <h2>Active Observation Systems</h2>
+                <p class="text-dim">Real-time monitoring of near-Earth objects</p>
+            </div>
+            <div class="telescope-grid">
+                <div class="telescope-card">
+                    <i class="fas fa-satellite-dish telescope-icon"></i>
+                    <h4 class="telescope-name">Hubble NEO Tracker</h4>
+                    <p class="telescope-status">Status: Active | Scanning: 150° sector</p>
+                </div>
+                <div class="telescope-card">
+                    <i class="fas fa-satellite telescope-icon"></i>
+                    <h4 class="telescope-name">NEOWISE Observatory</h4>
+                    <p class="telescope-status">Status: Active | Objects Tracked: 247</p>
+                </div>
+                <div class="telescope-card">
+                    <i class="fas fa-broadcast-tower telescope-icon"></i>
+                    <h4 class="telescope-name">Deep Space Radar</h4>
+                    <p class="telescope-status">Status: Active | Range: 0.5 AU</p>
+                </div>
+                <div class="telescope-card">
+                    <i class="fas fa-satellite telescope-icon"></i>
+                    <h4 class="telescope-name">Planetary Defense Array</h4>
+                    <p class="telescope-status">Status: Standby | Last Alert: 72h ago</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-links">
+                <a href="#">About</a>
+                <a href="#">Research</a>
+                <a href="#">Partners</a>
+                <a href="#">Resources</a>
+                <a href="#">Contact</a>
+            </div>
+            <p>&copy; 2024 Eyes on Meteor. Protecting Earth Together.</p>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="deflectionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Deflection Systems Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h4>Gravity Tractor Method</h4>
+                    <p>A spacecraft positioned near an asteroid uses mutual gravitational attraction to slowly alter its trajectory over time.</p>
+                    <h4 class="mt-3">Ion Beam Deflection</h4>
+                    <p>Directed ion thrusters create a continuous push on the asteroid surface, gradually changing its path.</p>
+                    <h4 class="mt-3">Solar Sail Technology</h4>
+                    <p>Large reflective sails harness solar radiation pressure to provide continuous deflection force.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="impactorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Kinetic Impactor Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h4>NASA DART Mission Success</h4>
+                    <p>The Double Asteroid Redirection Test successfully demonstrated kinetic impact technology by altering the orbit of Dimorphos asteroid.</p>
+                    <h4 class="mt-3">Impact Velocity</h4>
+                    <p>Typical impactors travel at 6-10 km/s, delivering sufficient momentum to change asteroid trajectories.</p>
+                    <h4 class="mt-3">Multi-Impactor Strategy</h4>
+                    <p>Multiple smaller impacts can be more effective than a single large impact for certain asteroid types.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="neoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">NEO Survey Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h4>Pan-STARRS Telescope</h4>
+                    <p>Surveying the entire night sky every few days to detect moving objects and potential threats.</p>
+                    <h4 class="mt-3">Catalina Sky Survey</h4>
+                    <p>Discovering more comets and NEOs than any other survey program.</p>
+                    <h4 class="mt-3">ATLAS Project</h4>
+                    <p>Providing one-day warning for 30-meter asteroids and three-week warning for 45-meter asteroids.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="observationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Space-Based Observation Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h4>NEOCam Infrared Telescope</h4>
+                    <p>Space-based infrared telescope capable of detecting dark asteroids that are difficult to see from Earth.</p>
+                    <h4 class="mt-3">Lagrange Point Observatories</h4>
+                    <p>Positioned at stable points in space to provide continuous monitoring without Earth's interference.</p>
+                    <h4 class="mt-3">CubeSat Constellation</h4>
+                    <p>Network of small satellites providing wide-angle coverage of near-Earth space.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="defenseModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Civil Defense Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h4>Emergency Alert System</h4>
+                    <p>Integrated warning system reaching all citizens through multiple channels including mobile, broadcast, and sirens.</p>
+                    <h4 class="mt-3">Evacuation Protocols</h4>
+                    <p>Pre-planned evacuation routes and shelters for impact zones with capacity for millions.</p>
+                    <h4 class="mt-3">Public Education</h4>
+                    <p>Regular drills and educational programs to ensure public awareness and preparedness.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="cooperationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">International Cooperation Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h4>Planetary Defense Coordination Office</h4>
+                    <p>NASA-led international effort coordinating detection, tracking, and mitigation efforts worldwide.</p>
+                    <h4 class="mt-3">Space Mission Planning</h4>
+                    <p>Joint missions between ESA, JAXA, Roscosmos, and other space agencies for planetary defense.</p>
+                    <h4 class="mt-3">Data Sharing Network</h4>
+                    <p>Global network sharing observation data and threat assessments in real-time.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="sosModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">SOS Alert System</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Emergency Protocol Activated
+                    </div>
+                    <p>SOS signals have been broadcast to all emergency response centers. Estimated response time: 3 minutes.</p>
+                    <div class="progress mt-3">
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: 75%"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="smsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">SMS Alert System</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-sms me-2"></i>
+                        Alert Message Prepared
+                    </div>
+                    <p>Emergency SMS will be sent to 2.4 million subscribers in the affected area.</p>
+                    <div class="form-group mt-3">
+                        <label for="messageArea">Message Preview:</label>
+                        <textarea class="form-control" id="messageArea" rows="3" readonly>METEOR ALERT: Seek shelter immediately. Impact expected in 45 minutes. Follow evacuation routes. Stay tuned for updates.</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="confirmSMS()">Send Alert</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Update last scan time
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('lastScan').textContent = 'Just now';
+            setTimeout(() => {
+                document.getElementById('lastScan').textContent = '1 minute ago';
+            }, 60000);
+        }, 120000);
+
+        // Modal functions
+        function showDeflectionDetails() {
+            new bootstrap.Modal(document.getElementById('deflectionModal')).show();
+        }
+
+        function showImpactorDetails() {
+            new bootstrap.Modal(document.getElementById('impactorModal')).show();
+        }
+
+        function showNEODetails() {
+            new bootstrap.Modal(document.getElementById('neoModal')).show();
+        }
+
+        function showObservationDetails() {
+            new bootstrap.Modal(document.getElementById('observationModal')).show();
+        }
+
+        function showDefenseDetails() {
+            new bootstrap.Modal(document.getElementById('defenseModal')).show();
+        }
+
+        function showCooperationDetails() {
+            new bootstrap.Modal(document.getElementById('cooperationModal')).show();
+        }
+
+        function activateSOS() {
+            new bootstrap.Modal(document.getElementById('sosModal')).show();
+        }
+
+        function sendSMSAlert() {
+            new bootstrap.Modal(document.getElementById('smsModal')).show();
+        }
+
+        function confirmSMS() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('smsModal'));
+            modal.hide();
+            
+            // Show success notification
+            const notification = document.createElement('div');
+            notification.className = 'position-fixed top-0 start-50 translate-middle-x mt-3 alert alert-success';
+            notification.style.zIndex = '9999';
+            notification.innerHTML = '<i class="fas fa-check-circle me-2"></i>SMS alerts sent successfully!';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function broadcastEmergency() {
+            const notification = document.createElement('div');
+            notification.className = 'position-fixed top-0 start-50 translate-middle-x mt-3 alert alert-warning';
+            notification.style.zIndex = '9999';
+            notification.innerHTML = '<i class="fas fa-broadcast-tower me-2"></i>Emergency broadcast initiated on all channels!';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Add more meteors dynamically
+        function createMeteor() {
+            const meteor = document.createElement('div');
+            meteor.className = 'meteor';
+            meteor.style.top = Math.random() * 100 + '%';
+            meteor.style.left = Math.random() * 100 + '%';
+            meteor.style.animationDelay = Math.random() * 3 + 's';
+            document.querySelector('.stars-container').appendChild(meteor);
+            
+            setTimeout(() => {
+                meteor.remove();
+            }, 3000);
+        }
+
+        setInterval(createMeteor, 2000);
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

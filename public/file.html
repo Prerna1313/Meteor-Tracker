@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EYES ON METEORS - Past Impacts on Earth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0a0a0f;
+            color: #ffffff;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        #three-js-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 3px;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+            background: linear-gradient(45deg, #4a5eff, #00d4ff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 3s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 40px;
+            text-align: center;
+            max-width: 800px;
+            color: #ffffff;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .nav-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-logo i {
+            animation: rotate 5s linear infinite;
+        }
+
+        .nav-links {
+            display: none; /* Hide the navigation links */
+            list-style: none;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 50px 20px 100px;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        #events {
+            padding-top: 50px; 
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #ffffff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ffffff, transparent);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 60px;
+            color: #ffffff;
+        }
+
+        .timeline {
+            position: relative;
+            margin: 50px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to bottom, #ffffff, #ffffff);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timeline-item:nth-child(odd) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            width: 45%;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate-bg 20s linear infinite;
+        }
+
+        @keyframes rotate-bg {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .timeline-content:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 40px rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .timeline-date {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: #ffffff;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timeline-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            color: #ffffff;
+        }
+
+        .timeline-description {
+            margin-bottom: 20px;
+            color: #ffffff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .impact-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px 18px;
+            flex: 1;
+            min-width: 120px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stat:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: #ffffff;
+        }
+
+        .timeline-icon {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ffffff, #ffffff);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+            animation: pulse-icon 2s infinite;
+        }
+
+        @keyframes pulse-icon {
+            0%, 100% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.8); }
+            50% { box-shadow: 0 0 50px rgba(255, 255, 255, 1); }
+        }
+
+        .timeline-icon i {
+            color: #0a0a0f;
+            font-size: 24px;
+        }
+
+        /* Impact Visualization */
+        .impact-visualization {
+            margin: 100px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .orbit-container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            margin: 50px auto;
+        }
+
+        .orbit {
+            position: absolute;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .orbit-1 { width: 200px; height: 200px; }
+        .orbit-2 { width: 350px; height: 350px; }
+        .orbit-3 { width: 500px; height: 500px; }
+
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .planet-1 {
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ff6b6b, #c92a2a);
+            animation: orbit-rotate 10s linear infinite;
+        }
+
+        .planet-2 {
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #4dabf7, #1864ab);
+            animation: orbit-rotate 20s linear infinite;
+        }
+
+        .planet-3 {
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #69db7c, #2f9e44);
+            animation: orbit-rotate 30s linear infinite;
+        }
+
+        @keyframes orbit-rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg) translateX(100px) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg) translateX(100px) rotate(-360deg); }
+        }
+
+        .impact-comparison {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 40px;
+            margin-top: 80px;
+        }
+
+        .impact-item {
+            flex: 1;
+            min-width: 250px;
+            max-width: 350px;
+            position: relative;
+        }
+
+        .impact-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .impact-circle:hover {
+            transform: scale(1.1);
+        }
+
+        .impact-circle::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3));
+            z-index: -1;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+
+        .impact-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .impact-size {
+            font-size: 1.1rem;
+            color: #ffffff;
+        }
+
+        footer {
+            background: rgba(10, 10, 15, 0.9);
+            padding: 50px 20px 30px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #ffffff, transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(100%); }
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .footer-text {
+            color: #ffffff;
+            margin-bottom: 30px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .social-links a {
+            color: #ffffff;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .social-links a:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 3.5rem;
+            }
+
+            .timeline::before {
+                left: 30px;
+            }
+
+            .timeline-item {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                padding-left: 60px;
+            }
+
+            .timeline-content {
+                width: 100%;
+            }
+
+            .timeline-icon {
+                left: 30px;
+            }
+
+            .orbit-container {
+                width: 400px;
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            nav {
+                padding: 15px 20px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .impact-comparison {
+                flex-direction: column;
+            }
+
+            .orbit-container {
+                width: 300px;
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="three-js-background"></div>
+
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-meteor"></i>
+                EYES ON METEORS
+            </div>
+            <ul class="nav-links">
+                </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section id="events">
+            <h2 class="section-title">Significant Meteor Events</h2>
+            <p class="section-subtitle">Throughout Earth's history, meteor impacts have shaped our planet's evolution. Here are some of the most significant events recorded.</p>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">2.02 BILLION YEARS AGO</div>
+                        <h3 class="timeline-title">Vredefort Impact</h3>
+                        <p class="timeline-description">The largest and one of the oldest confirmed impact structures on Earth, located in what is now South Africa. It has been highly eroded but is a testament to the colossal energies of early planetary impacts.</p>
+                        <div class="impact-stats">
+                            <div class="stat">
+                                <div class="stat-label">Diameter</div>
+                                <div class="stat-value">~10-15 km</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Crater Size</div>
+                                <div class="stat-value">160-300 km</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-icon">
+                        <i class="fas fa-meteor"></i>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">35 MILLION YEARS AGO</div>
+                        <h3 class="timeline-title">Popigai Impact</h3>
+                        <p class="timeline-description">A massive impact in Siberia that created one of the largest craters on Earth. It is famous for creating billions of carats of "impact diamonds" from graphite in the rock at the time of the strike.</p>
+                        <div class="impact-stats">
+                            <div class="stat">
+                                <div class="stat-label">Diameter</div>
+                                <div class="stat-value">~8 km</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Crater Size</div>
+                                <div class="stat-value">100 km</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-icon">
+                        <i class="fas fa-meteor"></i>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">66 MILLION YEARS AGO</div>
+                        <h3 class="timeline-title">Chicxulub Impact</h3>
+                        <p class="timeline-description">The most famous meteor impact that caused the extinction of dinosaurs and marked the end of the Cretaceous period.</p>
+                        <div class="impact-stats">
+                            <div class="stat">
+                                <div class="stat-label">Diameter</div>
+                                <div class="stat-value">10 km</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Impact Energy</div>
+                                <div class="stat-value">100 TT</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Crater Size</div>
+                                <div class="stat-value">180 km</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-icon">
+                        <i class="fas fa-meteor"></i>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">35 MILLION YEARS AGO</div>
+                        <h3 class="timeline-title">Chesapeake Bay Impact</h3>
+                        <p class="timeline-description">This impact created a massive underwater crater off the coast of Virginia. The effects of the impact, including a large earthquake and tsunamis, are still visible in the geological record today.</p>
+                        <div class="impact-stats">
+                            <div class="stat">
+                                <div class="stat-label">Diameter</div>
+                                <div class="stat-value">~3-5 km</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Crater Size</div>
+                                <div class="stat-value">40 km</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-icon">
+                        <i class="fas fa-meteor"></i>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">50,000 YEARS AGO</div>
+                        <h3 class="timeline-title">Barringer Crater</h3>
+                        <p class="timeline-description">One of the best-preserved meteorite craters on Earth, located in Arizona, USA. Formed by an iron meteorite impact.</p>
+                        <div class="impact-stats">
+                            <div class="stat">
+                                <div class="stat-label">Diameter</div>
+                                <div class="stat-value">50 m</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Impact Energy</div>
+                                <div class="stat-value">10 MT</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Crater Size</div>
+                                <div class="stat-value">1.2 km</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-icon">
+                        <i class="fas fa-meteor"></i>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">1908</div>
+                        <h3 class="timeline-title">Tunguska Event</h3>
+                        <p class="timeline-description">The largest impact event in recorded history. The meteor exploded in the atmosphere, flattening 2,000 square kilometers of Siberian forest.</p>
+                        <div class="impact-stats">
+                            <div class="stat">
+                                <div class="stat-label">Diameter</div>
+                                <div class="stat-value">60-190 m</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Impact Energy</div>
+                                <div class="stat-value">15 MT</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Altitude</div>
+                                <div class="stat-value">5-10 km</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-icon">
+                        <i class="fas fa-meteor"></i>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">2013</div>
+                        <h3 class="timeline-title">Chelyabinsk Meteor</h3>
+                        <p class="timeline-description">A superbolide that entered Earth's atmosphere over Russia, creating a bright flash and generating a shock wave that damaged buildings.</p>
+                        <div class="impact-stats">
+                            <div class="stat">
+                                <div class="stat-label">Diameter</div>
+                                <div class="stat-value">20 m</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Impact Energy</div>
+                                <div class="stat-value">400-500 KT</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Altitude</div>
+                                <div class="stat-value">29.7 km</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-icon">
+                        <i class="fas fa-meteor"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impacts" class="impact-visualization">
+            <h2 class="section-title">Impact Size Comparison</h2>
+            <p class="section-subtitle">Visualizing the relative sizes of significant meteor impacts throughout history</p>
+            
+            <div class="orbit-container">
+                <div class="orbit orbit-1"></div>
+                <div class="orbit orbit-2"></div>
+                <div class="orbit orbit-3"></div>
+                <div class="planet planet-1"></div>
+                <div class="planet planet-2"></div>
+                <div class="planet planet-3"></div>
+            </div>
+            
+            <div class="impact-comparison">
+                <div class="impact-item">
+                    <div class="impact-circle" style="width: 60px; height: 60px; background: linear-gradient(135deg, #ff9a00, #ff5e00);">
+                        <span style="color: white; font-weight: bold;">20m</span>
+                    </div>
+                    <h3 class="impact-name">Chelyabinsk</h3>
+                    <p class="impact-size">Damaged 7,200 buildings</p>
+                </div>
+                
+                <div class="impact-item">
+                    <div class="impact-circle" style="width: 120px; height: 120px; background: linear-gradient(135deg, #ff5e00, #ff0000);">
+                        <span style="color: white; font-weight: bold;">100m</span>
+                    </div>
+                    <h3 class="impact-name">Tunguska</h3>
+                    <p class="impact-size">Flattened 2,000 km² of forest</p>
+                </div>
+                
+                <div class="impact-item">
+                    <div class="impact-circle" style="width: 200px; height: 200px; background: linear-gradient(135deg, #ff0000, #8b0000);">
+                        <span style="color: white; font-weight: bold;">10km</span>
+                    </div>
+                    <h3 class="impact-name">Chicxulub</h3>
+                    <p class="impact-size">Caused dinosaur extinction</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer id="about">
+        <div class="footer-content">
+            <div class="footer-logo">EYES ON METEORS</div>
+            <p class="footer-text">Dedicated to studying and understanding meteor impacts on Earth. Through research and education, we aim to increase awareness of these cosmic events and their effects on our planet.</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+            <p class="copyright">© 2023 EYES ON METEORS. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // Three.js Background Animation Script
+        let scene, camera, renderer, stars;
+        let starCount = 10000;
+        let starPositions = new Float32Array(starCount * 3);
+
+        function init() {
+            // Scene setup
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.z = 800;
+
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.domElement.id = 'three-js-canvas';
+            document.getElementById('three-js-background').appendChild(renderer.domElement);
+            
+            // Star geometry
+            let starGeometry = new THREE.BufferGeometry();
+            
+            // Random positions for stars
+            for (let i = 0; i < starCount * 3; i++) {
+                starPositions[i] = (Math.random() - 0.5) * 2000;
+            }
+            starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+
+            // Star material
+            let starMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.5,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            // Create star points
+            stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
+
+            // Animate
+            animateStars();
+            
+            // Handle window resizing
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function animateStars() {
+            requestAnimationFrame(animateStars);
+
+            // Rotate the stars
+            stars.rotation.y += 0.0005;
+            stars.rotation.x += 0.0002;
+
+            // Move the stars to create a flying effect
+            const positions = stars.geometry.attributes.position.array;
+            for (let i = 0; i < starCount; i++) {
+                positions[i * 3 + 1] -= 0.5; // Move along the y-axis
+                
+                // Reset particles when they go out of view
+                if (positions[i * 3 + 1] < -1000) {
+                    positions[i * 3] = (Math.random() - 0.5) * 2000;
+                    positions[i * 3 + 1] = 1000;
+                    positions[i * 3 + 2] = (Math.random() - 0.5) * 2000;
+                }
+            }
+            stars.geometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Initialize Three.js scene on page load
+        window.addEventListener('load', init);
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    // Adjusted scroll offset since the nav is now sticky and its height is part of the offset
+                    window.scrollTo({
+                        top: target.offsetTop - 80, 
+                        behavior: 'smooth'
+                    });
+
+                    
+                }
+            });
+        });
+        
+        // Add animation to timeline items when they come into view
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.timeline-item').forEach(item => {
+            item.style.opacity = 0;
+            item.style.transform = 'translateY(30px)';
+            item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(item);
+        });
+
+    </script>
+</body>
+</html>

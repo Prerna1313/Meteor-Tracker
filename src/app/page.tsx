@@ -9,6 +9,7 @@ import {
 } from '@/lib/solar-system-data';
 import { InfoPanel } from '@/components/info-panel';
 import { LandingPage } from '@/components/landing-page';
+
 import { AnimatePresence, motion } from 'framer-motion';
 
 export default function Home() {
@@ -16,6 +17,20 @@ export default function Home() {
   const [hoveredObjectId, setHoveredObjectId] = useState<string | null>(null);
   const [showLanding, setShowLanding] = useState(true);
   const [isExiting, setIsExiting] = useState(false);
+  const [showMitigation, setShowMitigation] = useState(false);
+
+  const handleNavigateHome = () => {
+    setShowLanding(true);
+    setIsExiting(false);
+    setSelectedObjectId(null);
+    setShowMitigation(false);
+  };
+
+  const handleNavigateMitigation = () => {
+    setShowMitigation(true);
+    setShowLanding(false);
+    setSelectedObjectId(null);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,15 +58,17 @@ export default function Home() {
   return (
     <main className="relative w-screen h-screen overflow-hidden bg-black">
       {showLanding && <LandingPage isExiting={isExiting} />}
+      
+      {showMitigation && <MitigationPage />}
 
       <div
         className={`w-full h-full transition-opacity duration-1000 ${
-          showLanding ? 'opacity-0' : 'opacity-100'
+          showLanding || showMitigation ? 'opacity-0' : 'opacity-100'
         }`}
       >
         <div className="absolute top-0 left-0 w-full h-full z-30 pointer-events-none">
           <div className="pointer-events-auto">
-            <Header />
+            <Header onNavigateHome={handleNavigateHome} onNavigateMitigation={handleNavigateMitigation} />
           </div>
           <AnimatePresence>
             {selectedObjectId && selectedObjectData && (
